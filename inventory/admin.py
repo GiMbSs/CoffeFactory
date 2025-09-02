@@ -28,12 +28,39 @@ class CategoryAdmin(admin.ModelAdmin):
 class UnitOfMeasureAdmin(admin.ModelAdmin):
     """Admin interface for UnitOfMeasure model."""
     
-    list_display = ('name', 'abbreviation', 'is_active')
+    list_display = ('name', 'abbreviation', 'description_short', 'materials_count', 'products_count', 'is_active')
     list_filter = ('is_active', 'created_at')
     search_fields = ('name', 'abbreviation', 'description')
     ordering = ('name',)
     
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'abbreviation', 'description')
+        }),
+        ('System Information', {
+            'fields': ('id', 'is_active', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
     readonly_fields = ('id', 'created_at', 'updated_at')
+    
+    def description_short(self, obj):
+        """Short description for list display."""
+        if obj.description:
+            return obj.description[:50] + '...' if len(obj.description) > 50 else obj.description
+        return '-'
+    description_short.short_description = 'Description'
+    
+    def materials_count(self, obj):
+        """Count of materials using this unit."""
+        return obj.materials.filter(is_active=True).count()
+    materials_count.short_description = 'Materials'
+    
+    def products_count(self, obj):
+        """Count of products using this unit."""
+        return obj.products.filter(is_active=True).count()
+    products_count.short_description = 'Products'
 
 
 @admin.register(Material)

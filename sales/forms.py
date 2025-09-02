@@ -107,19 +107,27 @@ class SalesOrderForm(forms.ModelForm):
     class Meta:
         model = SalesOrder
         fields = [
-            'order_number', 'customer', 'sales_representative', 'status',
+            'order_number', 'customer', 'status',
             'priority', 'delivery_date', 'payment_method', 'payment_terms', 
             'discount_percentage', 'notes'
         ]
+        labels = {
+            'order_number': 'Número do Pedido',
+            'customer': 'Cliente',
+            'status': 'Status',
+            'priority': 'Prioridade',
+            'delivery_date': 'Data de Entrega',
+            'payment_method': 'Forma de Pagamento',
+            'payment_terms': 'Condições de Pagamento',
+            'discount_percentage': 'Desconto (%)',
+            'notes': 'Observações'
+        }
         widgets = {
             'order_number': forms.TextInput(attrs={
                 'class': 'form-input',
                 'placeholder': 'Número do pedido'
             }),
             'customer': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'sales_representative': forms.Select(attrs={
                 'class': 'form-select'
             }),
             'status': forms.Select(attrs={
@@ -132,12 +140,13 @@ class SalesOrderForm(forms.ModelForm):
                 'class': 'form-input',
                 'type': 'date'
             }),
-            'payment_method': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'payment_terms': forms.NumberInput(attrs={
+            'payment_method': forms.TextInput(attrs={
                 'class': 'form-input',
-                'min': '1'
+                'placeholder': 'Ex: PIX, Cartão, Dinheiro'
+            }),
+            'payment_terms': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'Ex: À vista, 30 dias'
             }),
             'discount_percentage': forms.NumberInput(attrs={
                 'class': 'form-input',
@@ -154,14 +163,11 @@ class SalesOrderForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from accounts.models import Employee
         # Filter customers to only active ones
         self.fields['customer'].queryset = Customer.objects.filter(is_active=True)
-        # Filter sales representatives to only active employees in sales
-        self.fields['sales_representative'].queryset = Employee.objects.filter(
-            is_active=True, 
-            department='sales'
-        )
+        
+        # Make discount_percentage optional
+        self.fields['discount_percentage'].required = False
     
     def clean(self):
         cleaned_data = super().clean()

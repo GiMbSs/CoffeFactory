@@ -156,9 +156,9 @@
             <div class="flex items-center space-x-6">
                 <label class="flex items-center">
                     <input type="radio" 
-                           name="{{ form.status.name }}" 
-                           value="active"
-                           {% if form.status.value == 'active' or not form.instance.pk %}checked{% endif %}
+                           name="{{ form.is_active.name }}" 
+                           value="True"
+                           {% if form.is_active.value == True or not form.instance.pk %}checked{% endif %}
                            class="w-4 h-4 text-green-600 border-gray-300 dark:border-gray-600 focus:ring-green-500 dark:focus:ring-green-400 transition-colors">
                     <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                         <i class="fas fa-check-circle text-green-600 mr-2"></i>
@@ -167,9 +167,9 @@
                 </label>
                 <label class="flex items-center">
                     <input type="radio" 
-                           name="{{ form.status.name }}" 
-                           value="inactive"
-                           {% if form.status.value == 'inactive' %}checked{% endif %}
+                           name="{{ form.is_active.name }}" 
+                           value="False"
+                           {% if form.is_active.value == False %}checked{% endif %}
                            class="w-4 h-4 text-red-600 border-gray-300 dark:border-gray-600 focus:ring-red-500 dark:focus:ring-red-400 transition-colors">
                     <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                         <i class="fas fa-times-circle text-red-600 mr-2"></i>
@@ -177,9 +177,9 @@
                     </span>
                 </label>
             </div>
-            {% if form.status.errors %}
+            {% if form.is_active.errors %}
             <div class="mt-2 text-sm text-red-600 dark:text-red-400">
-                {{ form.status.errors.0 }}
+                {{ form.is_active.errors.0 }}
             </div>
             {% endif %}
         </div>

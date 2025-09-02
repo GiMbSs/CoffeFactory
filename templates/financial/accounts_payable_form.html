@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Editar{% else %}Nova{% endif %} Conta a Pagar - Coffee Factory Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    .dark .form-card {
+        background: rgba(31, 41, 55, 0.95);
+        border: 1px solid rgba(75, 85, 99, 0.2);
+    }
+    .gradient-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .required-field::after {
+        content: " *";
+        color: #EF4444;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    <i class="fas fa-file-invoice-dollar text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    {% if form.instance.pk %}Editar Conta a Pagar{% else %}Nova Conta a Pagar{% endif %}
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Preencha os dados da conta a pagar
+                </p>
+            </div>
+            <div>
+                <a href="{% url 'financial:accounts_payable' %}" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" class="space-y-8">
+        {% csrf_token %}
+        
+        <!-- Basic Information -->
+        <div class="form-card rounded-xl p-6 shadow-lg">
+            <div class="gradient-header rounded-lg p-4 text-white mb-6">
+                <h2 class="text-xl font-bold flex items-center">
+                    <i class="fas fa-info-circle mr-3"></i>
+                    Informações Básicas
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Supplier -->
+                <div class="form-group">
+                    <label for="{{ form.supplier.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 required-field">
+                        Fornecedor
+                    </label>
+                    {{ form.supplier }}
+                    {% if form.supplier.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.supplier.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Expense Type -->
+                <div class="form-group">
+                    <label for="{{ form.expense_type.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 required-field">
+                        Tipo de Despesa
+                    </label>
+                    {{ form.expense_type }}
+                    {% if form.expense_type.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.expense_type.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Invoice Number -->
+                <div class="form-group">
+                    <label for="{{ form.invoice_number.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Número da Fatura
+                    </label>
+                    {{ form.invoice_number }}
+                    {% if form.invoice_number.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.invoice_number.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Status -->
+                <div class="form-group">
+                    <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Status
+                    </label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.status.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Information -->
+        <div class="form-card rounded-xl p-6 shadow-lg">
+            <div class="gradient-header rounded-lg p-4 text-white mb-6">
+                <h2 class="text-xl font-bold flex items-center">
+                    <i class="fas fa-dollar-sign mr-3"></i>
+                    Informações Financeiras
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Original Amount -->
+                <div class="form-group">
+                    <label for="{{ form.original_amount.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 required-field">
+                        Valor Original
+                    </label>
+                    {{ form.original_amount }}
+                    {% if form.original_amount.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.original_amount.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Invoice Date -->
+                <div class="form-group">
+                    <label for="{{ form.invoice_date.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Data de Emissão
+                    </label>
+                    {{ form.invoice_date }}
+                    {% if form.invoice_date.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.invoice_date.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Due Date -->
+                <div class="form-group">
+                    <label for="{{ form.due_date.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 required-field">
+                        Data de Vencimento
+                    </label>
+                    {{ form.due_date }}
+                    {% if form.due_date.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.due_date.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Payment Method -->
+                <div class="form-group">
+                    <label for="{{ form.payment_method.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Forma de Pagamento
+                    </label>
+                    {{ form.payment_method }}
+                    {% if form.payment_method.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.payment_method.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="form-card rounded-xl p-6 shadow-lg">
+            <div class="gradient-header rounded-lg p-4 text-white mb-6">
+                <h2 class="text-xl font-bold flex items-center">
+                    <i class="fas fa-file-alt mr-3"></i>
+                    Informações Adicionais
+                </h2>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Descrição
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.description.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Notes -->
+                <div class="form-group">
+                    <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Observações
+                    </label>
+                    {{ form.notes }}
+                    {% if form.notes.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.notes.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-4">
+            <a href="{% url 'financial:accounts_payable' %}" class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200">
+                Cancelar
+            </a>
+            <button type="submit" class="px-6 py-3 bg-coffee-600 hover:bg-coffee-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200">
+                <i class="fas fa-save mr-2"></i>
+                {% if form.instance.pk %}Atualizar{% else %}Criar{% endif %} Conta
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply form styles
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.classList.add('w-full', 'px-3', 'py-2', 'border', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg', 'focus:ring-2', 'focus:ring-coffee-500', 'focus:border-transparent', 'dark:bg-gray-700', 'dark:text-white');
+    });
+});
+</script>
+{% endblock %}

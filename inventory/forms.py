@@ -72,7 +72,7 @@ class MaterialForm(forms.ModelForm):
         fields = [
             'name', 'code', 'description', 'category', 'supplier', 
             'unit_of_measure', 'cost_per_unit', 'minimum_stock', 
-            'maximum_stock', 'notes', 'is_active'
+            'maximum_stock', 'status', 'notes', 'is_active'
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -111,6 +111,9 @@ class MaterialForm(forms.ModelForm):
                 'class': 'form-input',
                 'step': '0.01',
                 'min': '0'
+            }),
+            'status': forms.Select(attrs={
+                'class': 'form-select'
             }),
             'notes': forms.Textarea(attrs={
                 'class': 'form-textarea',
@@ -157,7 +160,7 @@ class ProductForm(forms.ModelForm):
         fields = [
             'name', 'code', 'description', 'category', 'sale_price',
             'minimum_stock', 'maximum_stock', 'weight', 'dimensions',
-            'notes', 'is_active'
+            'status', 'notes', 'is_active'
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -199,6 +202,9 @@ class ProductForm(forms.ModelForm):
             'dimensions': forms.TextInput(attrs={
                 'class': 'form-input',
                 'placeholder': 'Dimensões (LxAxP)'
+            }),
+            'status': forms.Select(attrs={
+                'class': 'form-select'
             }),
             'notes': forms.Textarea(attrs={
                 'class': 'form-textarea',

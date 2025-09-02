@@ -7,6 +7,8 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+.claude/
+.playwright-mcp/
 .github/
 .Python
 build/

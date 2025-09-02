@@ -276,30 +276,6 @@
                 </div>
                 {% endif %}
             </div>
-            
-            <!-- Sales Representative -->
-            <div>
-                <label for="{{ form.sales_representative.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ form.sales_representative.label }}
-                    {% if form.sales_representative.field.required %}<span class="required-asterisk">*</span>{% endif %}
-                </label>
-                <select name="{{ form.sales_representative.name }}" id="{{ form.sales_representative.id_for_label }}" 
-                        class="form-select {% if form.sales_representative.errors %}form-error{% endif %}">
-                    <option value="">---------</option>
-                    {% for choice in form.sales_representative.field.queryset %}
-                        <option value="{{ choice.pk }}" 
-                                {% if form.sales_representative.value == choice.pk %}selected{% endif %}>
-                            {{ choice.first_name }} {{ choice.last_name }}
-                        </option>
-                    {% endfor %}
-                </select>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Representante de vendas</p>
-                {% if form.sales_representative.errors %}
-                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {{ form.sales_representative.errors.0 }}
-                </div>
-                {% endif %}
-            </div>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
@@ -351,7 +327,7 @@
                            class="form-input {% if form.discount_percentage.errors %}form-error{% endif %} pr-8">
                     <span class="absolute right-3 top-3 text-gray-500 dark:text-gray-400">%</span>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Desconto em percentual</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Desconto em percentual (opcional)</p>
                 {% if form.discount_percentage.errors %}
                 <div class="mt-1 text-sm text-red-600 dark:text-red-400">
                     {{ form.discount_percentage.errors.0 }}

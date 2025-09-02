@@ -90,8 +90,11 @@
     </div>
 
     <!-- Form -->
-    <form method="POST" @submit="validateForm" class="space-y-8">
+    <form method="POST" class="space-y-8">
         {% csrf_token %}
+        
+        <!-- Hidden field for country with default value -->
+        <input type="hidden" name="country" value="Brasil">
         
         <!-- Basic Information -->
         <div class="form-card rounded-xl p-6 shadow-lg">
@@ -753,6 +756,8 @@ function supplierForm() {
                 alert('Por favor, preencha todos os campos obrigatórios.');
                 return false;
             }
+            // Se o formulário está válido, submeter normalmente
+            event.target.submit();
         }
     }
 }

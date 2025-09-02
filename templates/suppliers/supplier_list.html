@@ -182,106 +182,88 @@
     </div>
 
     <!-- Suppliers Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    {% if suppliers %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         {% for supplier in suppliers %}
-        <div class="supplier-card rounded-xl p-6 shadow-lg">
-            <div class="flex items-start justify-between mb-4">
-                <div class="flex items-center">
-                    <div class="supplier-avatar w-12 h-12 rounded-full flex items-center justify-center mr-4">
+        <div class="supplier-card bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700 overflow-hidden">
+            <!-- Supplier Header -->
+            <div class="bg-gradient-to-r from-coffee-500 to-coffee-600 p-4">
+                <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0 w-12 h-12 bg-white rounded-full flex items-center justify-center">
                         {% if supplier.supplier_type == 'company' %}
-                            <i class="fas fa-building text-white text-lg"></i>
+                            <i class="fas fa-building text-coffee-600 text-lg"></i>
                         {% else %}
-                            <i class="fas fa-user text-white text-lg"></i>
+                            <i class="fas fa-user text-coffee-600 text-lg"></i>
                         {% endif %}
                     </div>
-                    <div>
-                        <h3 class="font-semibold text-gray-900 dark:text-white text-lg">{{ supplier.get_display_name }}</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ supplier.code }}</p>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-semibold text-white truncate">{{ supplier.get_display_name }}</h3>
+                        <p class="text-coffee-100 text-sm truncate">{{ supplier.code }}</p>
                     </div>
-                </div>
-                <div class="flex space-x-2">
                     {% if supplier.is_active %}
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-                            Ativo
-                        </span>
+                        <span class="inline-flex items-center justify-center w-3 h-3 bg-green-400 rounded-full"></span>
                     {% else %}
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">
-                            Inativo
-                        </span>
+                        <span class="inline-flex items-center justify-center w-3 h-3 bg-red-400 rounded-full"></span>
                     {% endif %}
                 </div>
             </div>
-
-            <div class="space-y-3 mb-4">
-                {% if supplier.cnpj_cpf %}
-                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <i class="fas fa-id-card w-4 h-4 mr-2"></i>
-                    <span>{{ supplier.cnpj_cpf }}</span>
+            
+            <!-- Supplier Details -->
+            <div class="p-4">
+                <div class="space-y-3">
+                    {% if supplier.cnpj_cpf %}
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-id-card text-coffee-500 w-5"></i>
+                        <span class="text-gray-600 dark:text-gray-400 ml-2 truncate">{{ supplier.cnpj_cpf }}</span>
+                    </div>
+                    {% endif %}
+                    {% if supplier.email %}
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-envelope text-coffee-500 w-5"></i>
+                        <span class="text-gray-600 dark:text-gray-400 ml-2 truncate">{{ supplier.email }}</span>
+                    </div>
+                    {% endif %}
+                    {% if supplier.mobile %}
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-mobile-alt text-coffee-500 w-5"></i>
+                        <span class="text-gray-600 dark:text-gray-400 ml-2">{{ supplier.mobile }}</span>
+                    </div>
+                    {% endif %}
+                    {% if supplier.city %}
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-map-marker-alt text-coffee-500 w-5"></i>
+                        <span class="text-gray-600 dark:text-gray-400 ml-2 truncate">{{ supplier.city }}{% if supplier.state %}/{{ supplier.state }}{% endif %}</span>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
-
-                {% if supplier.email %}
-                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <i class="fas fa-envelope w-4 h-4 mr-2"></i>
-                    <span>{{ supplier.email }}</span>
+                
+                <!-- Supplier Type -->
+                <div class="mt-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div class="flex items-center text-xs">
+                        <i class="fas fa-tag text-coffee-500 mr-2"></i>
+                        <span class="text-gray-600 dark:text-gray-400">
+                            {% if supplier.supplier_type == 'company' %}
+                                Pessoa Jurídica
+                            {% else %}
+                                Pessoa Física
+                            {% endif %}
+                        </span>
+                    </div>
                 </div>
-                {% endif %}
-
-                {% if supplier.mobile %}
-                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <i class="fas fa-mobile-alt w-4 h-4 mr-2"></i>
-                    <span>{{ supplier.mobile }}</span>
-                </div>
-                {% endif %}
-
-                {% if supplier.city %}
-                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <i class="fas fa-map-marker-alt w-4 h-4 mr-2"></i>
-                    <span>{{ supplier.city }}{% if supplier.state %}/{{ supplier.state }}{% endif %}</span>
-                </div>
-                {% endif %}
-
-                {% if supplier.contact_person %}
-                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <i class="fas fa-user-tie w-4 h-4 mr-2"></i>
-                    <span>{{ supplier.contact_person }}</span>
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-                <div class="flex items-center space-x-2">
-                    <span class="text-xs text-gray-500 dark:text-gray-400">
-                        {% if supplier.supplier_type == 'company' %}
-                            Pessoa Jurídica
-                        {% else %}
-                            Pessoa Física
-                        {% endif %}
-                    </span>
-                </div>
-                <div class="flex space-x-2">
-                    <a href="{% url 'suppliers:detail' supplier.pk %}" class="p-2 text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300" title="Ver Detalhes">
-                        <i class="fas fa-eye"></i>
+                
+                <!-- Action Buttons -->
+                <div class="flex space-x-2 mt-4">
+                    <a href="{% url 'suppliers:detail' supplier.pk %}" 
+                       class="flex-1 bg-coffee-100 hover:bg-coffee-200 dark:bg-coffee-800 dark:hover:bg-coffee-700 text-coffee-700 dark:text-coffee-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 text-center">
+                        <i class="fas fa-eye mr-1"></i>
+                        Ver
                     </a>
-                    <a href="{% url 'suppliers:update' supplier.pk %}" class="p-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300" title="Editar">
-                        <i class="fas fa-edit"></i>
+                    <a href="{% url 'suppliers:update' supplier.pk %}" 
+                       class="flex-1 bg-coffee-600 hover:bg-coffee-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 text-center">
+                        <i class="fas fa-edit mr-1"></i>
+                        Editar
                     </a>
-                    <button class="p-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300" title="Excluir" onclick="confirmDelete('{{ supplier.name }}', '{% url 'suppliers:delete' supplier.pk %}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
                 </div>
-            </div>
-        </div>
-        {% empty %}
-        <div class="col-span-full">
-            <div class="text-center py-12">
-                <i class="fas fa-truck text-gray-400 text-6xl mb-4"></i>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Nenhum fornecedor encontrado</h3>
-                <p class="text-gray-500 dark:text-gray-400 mb-6">Comece criando seu primeiro fornecedor</p>
-                <a href="{% url 'suppliers:create' %}" class="inline-flex items-center px-4 py-2 bg-coffee-600 hover:bg-coffee-700 text-white font-medium rounded-lg transition-colors">
-                    <i class="fas fa-plus mr-2"></i>
-                    Criar Primeiro Fornecedor
-                </a>
             </div>
         </div>
         {% endfor %}
@@ -289,37 +271,47 @@
 
     <!-- Pagination -->
     {% if is_paginated %}
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 px-6 py-4">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                <span>Mostrando <span class="font-medium text-gray-900 dark:text-white">{{ page_obj.start_index }}</span> a <span class="font-medium text-gray-900 dark:text-white">{{ page_obj.end_index }}</span> de <span class="font-medium text-gray-900 dark:text-white">{{ paginator.count }}</span> resultados</span>
-            </div>
-            <div class="flex items-center space-x-2">
-                {% if page_obj.has_previous %}
-                    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" class="px-3 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                        Anterior
-                    </a>
-                {% else %}
-                    <span class="px-3 py-1 text-sm text-gray-400 cursor-not-allowed">Anterior</span>
+    <div class="flex justify-center mt-8">
+        <nav class="flex items-center space-x-2">
+            {% if page_obj.has_previous %}
+                <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" 
+                   class="px-3 py-2 text-sm font-medium text-coffee-600 dark:text-coffee-400 bg-white dark:bg-gray-800 border border-coffee-300 dark:border-coffee-600 rounded-lg hover:bg-coffee-50 dark:hover:bg-coffee-900">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="px-3 py-2 text-sm font-medium text-white bg-coffee-600 border border-coffee-600 rounded-lg">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}" 
+                       class="px-3 py-2 text-sm font-medium text-coffee-600 dark:text-coffee-400 bg-white dark:bg-gray-800 border border-coffee-300 dark:border-coffee-600 rounded-lg hover:bg-coffee-50 dark:hover:bg-coffee-900">{{ num }}</a>
                 {% endif %}
-                
-                {% for page in page_obj.paginator.page_range %}
-                    {% if page == page_obj.number %}
-                        <span class="px-3 py-1 text-sm bg-coffee-600 text-white rounded-lg">{{ page }}</span>
-                    {% else %}
-                        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page }}" class="px-3 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">{{ page }}</a>
-                    {% endif %}
-                {% endfor %}
-                
-                {% if page_obj.has_next %}
-                    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" class="px-3 py-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                        Próximo
-                    </a>
-                {% else %}
-                    <span class="px-3 py-1 text-sm text-gray-400 cursor-not-allowed">Próximo</span>
-                {% endif %}
-            </div>
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" 
+                   class="px-3 py-2 text-sm font-medium text-coffee-600 dark:text-coffee-400 bg-white dark:bg-gray-800 border border-coffee-300 dark:border-coffee-600 rounded-lg hover:bg-coffee-50 dark:hover:bg-coffee-900">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700 p-12 text-center">
+        <div class="w-24 h-24 bg-coffee-100 dark:bg-coffee-900 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-truck text-coffee-600 dark:text-coffee-400 text-3xl"></i>
         </div>
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Nenhum fornecedor encontrado</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">Comece adicionando fornecedores ao seu sistema.</p>
+        <a href="{% url 'suppliers:create' %}" 
+           class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200 inline-flex items-center space-x-2">
+            <i class="fas fa-plus"></i>
+            <span>Adicionar Primeiro Fornecedor</span>
+        </a>
     </div>
     {% endif %}
 </div>
@@ -356,6 +348,18 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => alert.remove(), 500);
         });
     }, 5000);
+
+    // Card hover effects
+    const cards = document.querySelectorAll('.supplier-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-4px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
 });
 </script>
 {% endblock %}

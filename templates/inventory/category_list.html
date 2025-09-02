@@ -160,14 +160,12 @@
             </div>
             <div class="flex items-center space-x-2">
                 <!-- Status Badge -->
-                {% if category.status == 'active' %}
+                {% if category.is_active %}
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
-                        <i class="fas fa-check-circle w-2 h-2 mr-1"></i>
                         Ativa
                     </span>
                 {% else %}
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">
-                        <i class="fas fa-times-circle w-2 h-2 mr-1"></i>
                         Inativa
                     </span>
                 {% endif %}
@@ -218,10 +216,8 @@
                        bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
                    {% endif %}">
                 {% if category.type == 'material' %}
-                    <i class="fas fa-cogs w-2 h-2 mr-1"></i>
                     Material
                 {% else %}
-                    <i class="fas fa-box w-2 h-2 mr-1"></i>
                     Produto
                 {% endif %}
             </span>

@@ -169,14 +169,14 @@
     {% for product in products %}
     <div class="product-card bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700 overflow-hidden">
         <!-- Product Header -->
-        <div class="bg-gradient-to-r from-green-500 to-green-600 p-4">
+        <div class="bg-gradient-to-r from-coffee-500 to-coffee-600 p-4">
             <div class="flex items-center space-x-3">
                 <div class="product-avatar flex-shrink-0 w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                    <i class="fas fa-box text-green-600 text-lg"></i>
+                    <i class="fas fa-box text-coffee-600 text-lg"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-semibold text-white truncate">{{ product.name }}</h3>
-                    <p class="text-green-100 text-sm truncate">{{ product.code }}</p>
+                    <p class="text-coffee-100 text-sm truncate">{{ product.code }}</p>
                 </div>
                 {% if product.status == 'active' %}
                     <span class="status-badge inline-flex items-center justify-center w-3 h-3 bg-green-400 rounded-full"></span>
@@ -192,19 +192,19 @@
         <div class="p-4">
             <div class="space-y-3">
                 <div class="flex items-center text-sm">
-                    <i class="fas fa-tags text-green-500 w-5"></i>
+                    <i class="fas fa-tags text-coffee-500 w-5"></i>
                     <span class="text-gray-600 dark:text-gray-400 ml-2">{{ product.category.name }}</span>
                 </div>
                 <div class="flex items-center text-sm">
-                    <i class="fas fa-balance-scale text-green-500 w-5"></i>
+                    <i class="fas fa-balance-scale text-coffee-500 w-5"></i>
                     <span class="text-gray-600 dark:text-gray-400 ml-2">{{ product.unit_of_measure.abbreviation }}</span>
                 </div>
                 <div class="flex items-center text-sm">
-                    <i class="fas fa-dollar-sign text-green-500 w-5"></i>
+                    <i class="fas fa-dollar-sign text-coffee-500 w-5"></i>
                     <span class="text-gray-600 dark:text-gray-400 ml-2">R$ {{ product.selling_price }}</span>
                 </div>
                 <div class="flex items-center text-sm">
-                    <i class="fas fa-warehouse text-green-500 w-5"></i>
+                    <i class="fas fa-warehouse text-coffee-500 w-5"></i>
                     <span class="text-gray-600 dark:text-gray-400 ml-2">
                         Estoque: {{ product.current_stock|floatformat:2 }} {{ product.unit_of_measure.abbreviation }}
                     </span>
@@ -230,12 +230,12 @@
             <!-- Action Buttons -->
             <div class="flex space-x-2 mt-4">
                 <a href="{% url 'inventory:product_detail' product.pk %}" 
-                   class="flex-1 bg-green-100 hover:bg-green-200 dark:bg-green-800 dark:hover:bg-green-700 text-green-700 dark:text-green-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 text-center">
+                   class="flex-1 bg-coffee-100 hover:bg-coffee-200 dark:bg-coffee-800 dark:hover:bg-coffee-700 text-coffee-700 dark:text-coffee-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 text-center">
                     <i class="fas fa-eye mr-1"></i>
                     Ver
                 </a>
                 <a href="{% url 'inventory:product_update' product.pk %}" 
-                   class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 text-center">
+                   class="flex-1 bg-coffee-600 hover:bg-coffee-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 text-center">
                     <i class="fas fa-edit mr-1"></i>
                     Editar
                 </a>

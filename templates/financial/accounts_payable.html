@@ -52,10 +52,10 @@
                 </p>
             </div>
             <div class="mt-4 lg:mt-0 flex flex-col sm:flex-row gap-3">
-                <button @click="showCreateModal = true" class="inline-flex items-center px-4 py-2 bg-coffee-600 hover:bg-coffee-700 dark:bg-coffee-500 dark:hover:bg-coffee-600 text-white font-medium rounded-lg shadow-sm transition-all duration-200">
+                <a href="{% url 'financial:accounts_payable_create' %}" class="inline-flex items-center px-4 py-2 bg-coffee-600 hover:bg-coffee-700 dark:bg-coffee-500 dark:hover:bg-coffee-600 text-white font-medium rounded-lg shadow-sm transition-all duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Nova Conta a Pagar
-                </button>
+                </a>
                 <button @click="showFilters = !showFilters" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg shadow-sm transition-all duration-200">
                     <i class="fas fa-filter mr-2"></i>
                     Filtros
