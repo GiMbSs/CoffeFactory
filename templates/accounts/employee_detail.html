@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ employee.user.get_full_name }} - Funcionários - Coffee Factory Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .info-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .info-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .profile-gradient {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+    }
+    .status-pulse {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex items-center space-x-4">
+            <a href="{% url 'accounts:employee_list' %}" 
+               class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 transition-colors">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    {{ employee.user.get_full_name }}
+                </h1>
+                <div class="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                    <span class="flex items-center">
+                        <i class="fas fa-id-badge text-coffee-500 mr-2"></i>
+                        {{ employee.employee_id }}
+                    </span>
+                    <span class="flex items-center">
+                        <i class="fas fa-briefcase text-coffee-500 mr-2"></i>
+                        {{ employee.position }}
+                    </span>
+                    <span class="flex items-center">
+                        {% if employee.is_active %}
+                            <span class="status-pulse inline-flex items-center justify-center w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                            <span class="text-green-600 dark:text-green-400">Ativo</span>
+                        {% else %}
+                            <span class="inline-flex items-center justify-center w-2 h-2 bg-red-400 rounded-full mr-2"></span>
+                            <span class="text-red-600 dark:text-red-400">Inativo</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+            <a href="{% url 'accounts:employee_update' employee.pk %}" 
+               class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2">
+                <i class="fas fa-edit"></i>
+                <span>Editar</span>
+            </a>
+            <div class="relative" x-data="{ open: false }">
+                <button @click="open = !open" 
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div x-show="open" 
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="transform opacity-0 scale-95"
+                     x-transition:enter-end="transform opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-75"
+                     x-transition:leave-start="transform opacity-100 scale-100"
+                     x-transition:leave-end="transform opacity-0 scale-95"
+                     @click.away="open = false"
+                     class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-coffee-200 dark:border-coffee-700 z-50">
+                    <div class="py-2">
+                        <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-coffee-50 dark:hover:bg-coffee-900">
+                            <i class="fas fa-file-pdf mr-3 w-4 text-center"></i>
+                            Exportar PDF
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-coffee-50 dark:hover:bg-coffee-900">
+                            <i class="fas fa-envelope mr-3 w-4 text-center"></i>
+                            Enviar Email
+                        </a>
+                        <hr class="my-2 border-coffee-200 dark:border-coffee-700">
+                        <a href="#" class="flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                            <i class="fas fa-user-times mr-3 w-4 text-center"></i>
+                            Desativar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Profile Card -->
+    <div class="lg:col-span-1">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700 overflow-hidden">
+            <!-- Profile Header -->
+            <div class="profile-gradient p-6 text-center">
+                <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
+                    {% if employee.user.first_name %}
+                        <span class="text-coffee-600 font-bold text-3xl">
+                            {{ employee.user.first_name|first|upper }}{{ employee.user.last_name|first|upper }}
+                        </span>
+                    {% else %}
+                        <i class="fas fa-user text-coffee-600 text-3xl"></i>
+                    {% endif %}
+                </div>
+                <h2 class="text-xl font-bold text-white mb-1">{{ employee.user.get_full_name }}</h2>
+                <p class="text-coffee-100">{{ employee.position }}</p>
+                <p class="text-coffee-200 text-sm mt-2">{{ employee.get_department_display }}</p>
+            </div>
+            
+            <!-- Quick Info -->
+            <div class="p-6 space-y-4">
+                <div class="flex items-center justify-between py-3 border-b border-coffee-100 dark:border-coffee-800">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">ID do Funcionário</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ employee.employee_id }}</span>
+                </div>
+                <div class="flex items-center justify-between py-3 border-b border-coffee-100 dark:border-coffee-800">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Data de Contratação</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ employee.hire_date|date:"d/m/Y" }}</span>
+                </div>
+                <div class="flex items-center justify-between py-3 border-b border-coffee-100 dark:border-coffee-800">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Tipo de Emprego</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ employee.get_employment_type_display }}</span>
+                </div>
+                <div class="flex items-center justify-between py-3">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Status</span>
+                    {% if employee.is_active %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                            <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1.5"></span>
+                            Ativo
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                            <span class="w-1.5 h-1.5 bg-red-400 rounded-full mr-1.5"></span>
+                            Inativo
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Details Section -->
+    <div class="lg:col-span-2 space-y-8">
+        <!-- Contact Information -->
+        <div class="info-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-address-book text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Informações de Contato
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-envelope text-coffee-500"></i>
+                        <a href="mailto:{{ employee.user.email }}" 
+                           class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300">
+                            {{ employee.user.email }}
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Telefone</label>
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-phone text-coffee-500"></i>
+                        {% if employee.user.phone %}
+                            <a href="tel:{{ employee.user.phone }}" 
+                               class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300">
+                                {{ employee.user.phone }}
+                            </a>
+                        {% else %}
+                            <span class="text-gray-500 dark:text-gray-400">Não informado</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Endereço</label>
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-map-marker-alt text-coffee-500 mt-1"></i>
+                        {% if employee.address %}
+                            <p class="text-gray-600 dark:text-gray-400">{{ employee.address }}</p>
+                        {% else %}
+                            <span class="text-gray-500 dark:text-gray-400">Não informado</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Employment Details -->
+        <div class="info-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-briefcase text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Detalhes do Emprego
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cargo</label>
+                    <p class="text-gray-900 dark:text-white font-medium">{{ employee.position }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-coffee-100 text-coffee-800 dark:bg-coffee-900 dark:text-coffee-200">
+                        {{ employee.get_department_display }}
+                    </span>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de Contrato</label>
+                    <p class="text-gray-900 dark:text-white font-medium">{{ employee.get_employment_type_display }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Data de Contratação</label>
+                    <p class="text-gray-900 dark:text-white font-medium">{{ employee.hire_date|date:"d/m/Y" }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tempo de Empresa</label>
+                    <p class="text-gray-900 dark:text-white font-medium">
+                        {% now "Y-m-d" as today %}
+                        {{ employee.hire_date|timesince }}
+                    </p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Salário</label>
+                    <p class="text-gray-900 dark:text-white font-medium">R$ {{ employee.salary|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Emergency Contact -->
+        <div class="info-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-phone-alt text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Contato de Emergência
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome</label>
+                    {% if employee.emergency_contact %}
+                        <p class="text-gray-900 dark:text-white font-medium">{{ employee.emergency_contact }}</p>
+                    {% else %}
+                        <span class="text-gray-500 dark:text-gray-400">Não informado</span>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Telefone</label>
+                    {% if employee.emergency_phone %}
+                        <a href="tel:{{ employee.emergency_phone }}" 
+                           class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 font-medium">
+                            {{ employee.emergency_phone }}
+                        </a>
+                    {% else %}
+                        <span class="text-gray-500 dark:text-gray-400">Não informado</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notes -->
+        {% if employee.notes %}
+        <div class="info-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-sticky-note text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Observações
+            </h3>
+            <div class="bg-coffee-50 dark:bg-coffee-900/20 rounded-lg p-4">
+                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ employee.notes }}</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Activity Timeline -->
+        <div class="info-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-history text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Histórico de Atividades
+            </h3>
+            <div class="space-y-4">
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Funcionário criado</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ employee.created_at|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-2 h-2 bg-coffee-400 rounded-full mt-2"></div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Última atualização</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ employee.updated_at|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Card hover effects
+    const cards = document.querySelectorAll('.info-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Copy employee ID to clipboard
+    const employeeId = '{{ employee.employee_id }}';
+    const copyButton = document.createElement('button');
+    copyButton.innerHTML = '<i class="fas fa-copy"></i>';
+    copyButton.className = 'ml-2 text-coffee-500 hover:text-coffee-600 transition-colors';
+    copyButton.title = 'Copiar ID';
+    copyButton.onclick = function() {
+        navigator.clipboard.writeText(employeeId);
+        this.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+        setTimeout(() => {
+            this.innerHTML = '<i class="fas fa-copy"></i>';
+        }, 2000);
+    };
+    
+    // Add copy button next to employee ID
+    const idElement = document.querySelector('span:contains("{{ employee.employee_id }}")');
+    if (idElement) {
+        idElement.appendChild(copyButton);
+    }
+});
+</script>
+{% endblock %}

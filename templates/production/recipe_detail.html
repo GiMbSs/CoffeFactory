@@ -1,0 +1,451 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {{ recipe.name }} - Receitas - Coffee Factory Management System
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-card {
+        transition: all 0.3s ease;
+    }
+    .detail-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .ingredient-item {
+        transition: all 0.3s ease;
+    }
+    .ingredient-item:hover {
+        background-color: rgba(139, 69, 19, 0.05);
+    }
+    .step-item {
+        position: relative;
+    }
+    .step-item:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 1rem;
+        top: 2.5rem;
+        width: 2px;
+        height: calc(100% - 2.5rem);
+        background: #E5E7EB;
+    }
+    .step-number {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 10;
+    }
+    .cost-breakdown {
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(210, 105, 30, 0.1) 100%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex items-center space-x-4">
+            <a href="{% url 'production:recipe_list' %}" 
+               class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 transition-colors">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                    <i class="fas fa-book text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    {{ recipe.name }}
+                </h1>
+                <div class="flex items-center space-x-4">
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Versão {{ recipe.version }} • {{ recipe.product.name }}
+                    </p>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                           {% if recipe.status == 'active' %}bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
+                           {% elif recipe.status == 'testing' %}bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100
+                           {% else %}bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100{% endif %}">
+                        <i class="fas fa-circle w-2 h-2 mr-2"></i>
+                        {{ recipe.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+            <a href="{% url 'production:recipe_update' recipe.pk %}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105">
+                <i class="fas fa-edit mr-2"></i>
+                Editar
+            </a>
+            <a href="{% url 'production:production_order_create' %}?recipe={{ recipe.pk }}" 
+               class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105">
+                <i class="fas fa-plus mr-2"></i>
+                Criar Ordem
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Recipe Details -->
+    <div class="lg:col-span-2 space-y-8">
+        <!-- Basic Information -->
+        <div class="detail-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-info-circle text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Informações da Receita
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Nome da Receita
+                    </label>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ recipe.name }}</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Código
+                    </label>
+                    <p class="text-lg text-gray-900 dark:text-white">{{ recipe.code }}</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Produto Final
+                    </label>
+                    <p class="text-lg text-gray-900 dark:text-white">{{ recipe.product.name }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ recipe.product.code }}</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Versão
+                    </label>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ recipe.version }}</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Rendimento
+                    </label>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{ recipe.yield_quantity }} {{ recipe.product.unit_of_measure.abbreviation }}
+                    </p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Tempo Estimado
+                    </label>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ recipe.estimated_time_minutes }} minutos</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Complexidade
+                    </label>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium
+                           {% if recipe.complexity == 'low' %}bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
+                           {% elif recipe.complexity == 'medium' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100
+                           {% else %}bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100{% endif %}">
+                        <i class="fas fa-chart-bar mr-1"></i>
+                        {{ recipe.get_complexity_display }}
+                    </span>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Data de Criação
+                    </label>
+                    <p class="text-lg text-gray-900 dark:text-white">{{ recipe.created_at|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+            
+            {% if recipe.description %}
+            <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Descrição
+                </label>
+                <p class="text-gray-900 dark:text-white">{{ recipe.description }}</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Ingredients/Materials -->
+        <div class="detail-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-boxes text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Materiais e Ingredientes
+            </h2>
+            
+            <div class="space-y-4">
+                {% for item in recipe.recipe_items.all %}
+                <div class="ingredient-item p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4 flex-1">
+                            <div class="w-12 h-12 bg-coffee-100 dark:bg-coffee-800 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-box text-coffee-600 dark:text-coffee-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900 dark:text-white">{{ item.material.name }}</h4>
+                                <div class="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    <span>{{ item.material.code }}</span>
+                                    <span>•</span>
+                                    <span>Estoque atual: {{ item.material.current_stock|default:0 }} {{ item.material.unit_of_measure.abbreviation }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                                {{ item.quantity }} {{ item.material.unit_of_measure.abbreviation }}
+                            </p>
+                            {% if item.material.cost_per_unit %}
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                R$ {{ item.material.cost_per_unit|floatformat:2 }}/{{ item.material.unit_of_measure.abbreviation }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if item.notes %}
+                    <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded text-sm">
+                        <i class="fas fa-sticky-note text-gray-600 dark:text-gray-400 mr-2"></i>
+                        <span class="text-gray-700 dark:text-gray-300">{{ item.notes }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Stock Status -->
+                    {% if item.material.current_stock < item.quantity %}
+                    <div class="mt-3 p-2 bg-red-50 dark:bg-red-900/20 rounded text-sm text-red-700 dark:text-red-300">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Estoque insuficiente! Faltam {{ item.quantity|sub:item.material.current_stock }} {{ item.material.unit_of_measure.abbreviation }}
+                    </div>
+                    {% elif item.material.current_stock < item.quantity|add:item.material.minimum_stock %}
+                    <div class="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded text-sm text-yellow-700 dark:text-yellow-300">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        Estoque baixo após uso desta receita
+                    </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p class="text-gray-500 dark:text-gray-400 text-center py-8">
+                    Nenhum material cadastrado nesta receita
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Instructions -->
+        {% if recipe.instructions %}
+        <div class="detail-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-list-ol text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Instruções de Preparo
+            </h2>
+            
+            <div class="space-y-6">
+                {% for instruction in recipe.instructions_list %}
+                <div class="step-item pl-12 relative">
+                    <div class="step-number bg-coffee-600 text-white flex items-center justify-center text-sm font-semibold">
+                        {{ forloop.counter }}
+                    </div>
+                    <div>
+                        <p class="text-gray-900 dark:text-white leading-relaxed">{{ instruction }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Usage History -->
+        <div class="detail-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-history text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Histórico de Uso
+            </h2>
+            
+            {% if recipe.recent_production_orders %}
+            <div class="space-y-3">
+                {% for order in recipe.recent_production_orders %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-coffee-100 dark:bg-coffee-800 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-clipboard-list text-coffee-600 dark:text-coffee-400 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ order.order_number }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ order.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                               {% if order.status == 'completed' %}bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
+                               {% elif order.status == 'in_progress' %}bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100
+                               {% else %}bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100{% endif %}">
+                            {{ order.get_status_display }}
+                        </span>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ order.quantity }} un.</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="mt-4 text-center">
+                <a href="{% url 'production:production_order_list' %}?recipe={{ recipe.pk }}" 
+                   class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 text-sm font-medium">
+                    Ver todas as ordens desta receita
+                    <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            {% else %}
+            <p class="text-gray-500 dark:text-gray-400 text-center py-8">
+                Esta receita ainda não foi usada em nenhuma ordem de produção
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="space-y-6">
+        <!-- Recipe Summary -->
+        <div class="detail-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-chart-pie text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                Resumo
+            </h3>
+            
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 dark:text-gray-400">Total de Materiais:</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">{{ recipe.recipe_items.count }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 dark:text-gray-400">Rendimento:</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">{{ recipe.yield_quantity }} un.</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 dark:text-gray-400">Tempo de Preparo:</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">{{ recipe.estimated_time_minutes }} min</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 dark:text-gray-400">Ordens Criadas:</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">{{ recipe.total_production_orders }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cost Information -->
+        <div class="detail-card cost-breakdown rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-dollar-sign text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                Análise de Custos
+            </h3>
+            
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 dark:text-gray-400">Custo dos Materiais:</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">R$ {{ recipe.total_material_cost|floatformat:2 }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 dark:text-gray-400">Custo por Unidade:</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">R$ {{ recipe.cost_per_unit|floatformat:2 }}</span>
+                </div>
+                
+                <div class="border-t border-coffee-200 dark:border-coffee-700 pt-4">
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-900 dark:text-white">Margem Sugerida (30%):</span>
+                        <span class="font-bold text-coffee-600 dark:text-coffee-400">
+                            R$ {{ recipe.suggested_price|floatformat:2 }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stock Status -->
+        <div class="detail-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-warehouse text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                Status do Estoque
+            </h3>
+            
+            {% with stock_status=recipe.stock_status %}
+            <div class="text-center">
+                {% if stock_status == 'sufficient' %}
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-800 rounded-full mb-4">
+                    <i class="fas fa-check text-green-600 dark:text-green-400 text-2xl"></i>
+                </div>
+                <p class="text-lg font-semibold text-green-600 dark:text-green-400">Estoque Suficiente</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Todos os materiais disponíveis</p>
+                {% elif stock_status == 'low' %}
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 dark:bg-yellow-800 rounded-full mb-4">
+                    <i class="fas fa-exclamation-triangle text-yellow-600 dark:text-yellow-400 text-2xl"></i>
+                </div>
+                <p class="text-lg font-semibold text-yellow-600 dark:text-yellow-400">Estoque Baixo</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Alguns materiais com pouco estoque</p>
+                {% else %}
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-800 rounded-full mb-4">
+                    <i class="fas fa-times text-red-600 dark:text-red-400 text-2xl"></i>
+                </div>
+                <p class="text-lg font-semibold text-red-600 dark:text-red-400">Estoque Insuficiente</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Materiais em falta</p>
+                {% endif %}
+            </div>
+            {% endwith %}
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="detail-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-bolt text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                Ações Rápidas
+            </h3>
+            
+            <div class="space-y-3">
+                <a href="{% url 'production:production_order_create' %}?recipe={{ recipe.pk }}" 
+                   class="block w-full bg-coffee-100 dark:bg-coffee-800 hover:bg-coffee-200 dark:hover:bg-coffee-700 text-coffee-800 dark:text-coffee-200 p-3 rounded-lg text-sm font-medium transition-colors text-center">
+                    <i class="fas fa-plus mr-2"></i>
+                    Criar Ordem de Produção
+                </a>
+                
+                <a href="{% url 'production:recipe_update' recipe.pk %}" 
+                   class="block w-full bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 text-blue-800 dark:text-blue-200 p-3 rounded-lg text-sm font-medium transition-colors text-center">
+                    <i class="fas fa-edit mr-2"></i>
+                    Editar Receita
+                </a>
+                
+                <a href="{% url 'production:recipe_list' %}" 
+                   class="block w-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 p-3 rounded-lg text-sm font-medium transition-colors text-center">
+                    <i class="fas fa-list mr-2"></i>
+                    Ver Todas as Receitas
+                </a>
+                
+                <button onclick="printRecipe()" 
+                        class="block w-full bg-green-100 dark:bg-green-800 hover:bg-green-200 dark:hover:bg-green-700 text-green-800 dark:text-green-200 p-3 rounded-lg text-sm font-medium transition-colors text-center">
+                    <i class="fas fa-print mr-2"></i>
+                    Imprimir Receita
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function printRecipe() {
+    window.print();
+}
+</script>
+{% endblock %}

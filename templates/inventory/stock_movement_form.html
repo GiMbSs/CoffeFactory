@@ -1,0 +1,493 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Editar Movimentação - Estoque
+    {% else %}
+        Nova Movimentação de Estoque
+    {% endif %} - Coffee Factory Management System
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        transition: all 0.3s ease;
+    }
+    .form-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .movement-type-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+    .movement-type-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.2);
+    }
+    .movement-type-card.selected {
+        border-color: #8B4513;
+        background: rgba(139, 69, 19, 0.05);
+    }
+    .movement-type-card.selected.in {
+        border-color: #10B981;
+        background: rgba(16, 185, 129, 0.05);
+    }
+    .movement-type-card.selected.out {
+        border-color: #EF4444;
+        background: rgba(239, 68, 68, 0.05);
+    }
+    .movement-type-card.selected.adjustment {
+        border-color: #3B82F6;
+        background: rgba(59, 130, 246, 0.05);
+    }
+    .input-group {
+        position: relative;
+    }
+    .input-group i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8B4513;
+        z-index: 10;
+    }
+    .input-group input,
+    .input-group select,
+    .input-group textarea {
+        padding-left: 40px;
+    }
+    .stock-info {
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(210, 105, 30, 0.1) 100%);
+        border: 1px solid rgba(139, 69, 19, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex items-center space-x-4">
+            <a href="{% url 'inventory:dashboard' %}" 
+               class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 transition-colors">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                    <i class="fas fa-exchange-alt text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    {% if form.instance.pk %}
+                        Editar Movimentação
+                    {% else %}
+                        Nova Movimentação de Estoque
+                    {% endif %}
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    {% if form.instance.pk %}
+                        Atualize as informações da movimentação
+                    {% else %}
+                        Registre entrada, saída ou ajuste de estoque
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+            <span class="text-sm text-gray-600 dark:text-gray-400">
+                <i class="fas fa-info-circle mr-1"></i>
+                Campos obrigatórios marcados com *
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Form Container -->
+<div class="max-w-4xl mx-auto">
+    <form method="post" x-data="stockMovementForm()" class="space-y-8">
+        {% csrf_token %}
+        
+        <!-- Movement Type Selection -->
+        <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-coffee-200 dark:border-coffee-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-route text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Tipo de Movimentação
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Entry -->
+                <div class="movement-type-card bg-green-50 dark:bg-green-900/20 rounded-lg p-6 text-center"
+                     @click="selectMovementType('in')"
+                     :class="{ 'selected in': movementType === 'in' }">
+                    <div class="w-16 h-16 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-arrow-down text-green-600 dark:text-green-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-green-800 dark:text-green-200 mb-2">Entrada</h3>
+                    <p class="text-sm text-green-600 dark:text-green-400">
+                        Adicionar itens ao estoque
+                    </p>
+                    <input type="radio" 
+                           name="{{ form.movement_type.name }}" 
+                           value="in" 
+                           x-model="movementType"
+                           class="hidden">
+                </div>
+                
+                <!-- Exit -->
+                <div class="movement-type-card bg-red-50 dark:bg-red-900/20 rounded-lg p-6 text-center"
+                     @click="selectMovementType('out')"
+                     :class="{ 'selected out': movementType === 'out' }">
+                    <div class="w-16 h-16 bg-red-100 dark:bg-red-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-arrow-up text-red-600 dark:text-red-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">Saída</h3>
+                    <p class="text-sm text-red-600 dark:text-red-400">
+                        Remover itens do estoque
+                    </p>
+                    <input type="radio" 
+                           name="{{ form.movement_type.name }}" 
+                           value="out" 
+                           x-model="movementType"
+                           class="hidden">
+                </div>
+                
+                <!-- Adjustment -->
+                <div class="movement-type-card bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 text-center"
+                     @click="selectMovementType('adjustment')"
+                     :class="{ 'selected adjustment': movementType === 'adjustment' }">
+                    <div class="w-16 h-16 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-adjust text-blue-600 dark:text-blue-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2">Ajuste</h3>
+                    <p class="text-sm text-blue-600 dark:text-blue-400">
+                        Corrigir quantidade em estoque
+                    </p>
+                    <input type="radio" 
+                           name="{{ form.movement_type.name }}" 
+                           value="adjustment" 
+                           x-model="movementType"
+                           class="hidden">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Item Selection & Details -->
+        <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-coffee-200 dark:border-coffee-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-boxes text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Detalhes da Movimentação
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Material Selection -->
+                <div class="input-group">
+                    <label for="{{ form.material.id_for_label }}" 
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Material *
+                    </label>
+                    <i class="fas fa-cogs"></i>
+                    <select name="{{ form.material.name }}" 
+                            id="{{ form.material.id_for_label }}"
+                            x-model="selectedMaterial"
+                            @change="updateItemInfo"
+                            class="w-full pl-10 pr-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent"
+                            required>
+                        <option value="">Selecione um material</option>
+                        {% for material in form.material.field.queryset %}
+                            <option value="{{ material.pk }}" 
+                                    data-code="{{ material.code }}"
+                                    data-unit="{{ material.unit_of_measure.abbreviation }}"
+                                    data-stock="{{ material.current_stock }}"
+                                    {% if form.material.value == material.pk %}selected{% endif %}>
+                                {{ material.code }} - {{ material.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if form.material.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.material.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Product Selection -->
+                <div class="input-group">
+                    <label for="{{ form.product.id_for_label }}" 
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Produto
+                    </label>
+                    <i class="fas fa-box"></i>
+                    <select name="{{ form.product.name }}" 
+                            id="{{ form.product.id_for_label }}"
+                            x-model="selectedProduct"
+                            @change="updateItemInfo"
+                            class="w-full pl-10 pr-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
+                        <option value="">Selecione um produto</option>
+                        {% for product in form.product.field.queryset %}
+                            <option value="{{ product.pk }}" 
+                                    data-code="{{ product.code }}"
+                                    data-unit="{{ product.unit_of_measure.abbreviation }}"
+                                    data-stock="{{ product.current_stock }}"
+                                    {% if form.product.value == product.pk %}selected{% endif %}>
+                                {{ product.code }} - {{ product.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if form.product.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.product.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Quantity -->
+                <div class="input-group">
+                    <label for="{{ form.quantity.id_for_label }}" 
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Quantidade *
+                    </label>
+                    <i class="fas fa-calculator"></i>
+                    <input type="number" 
+                           name="{{ form.quantity.name }}"
+                           id="{{ form.quantity.id_for_label }}"
+                           value="{{ form.quantity.value|default:'' }}"
+                           step="0.001"
+                           min="0.001"
+                           placeholder="0.000"
+                           x-model="quantity"
+                           @input="calculateNewStock"
+                           class="w-full pl-10 pr-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent"
+                           required>
+                    {% if form.quantity.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.quantity.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Date -->
+                <div class="input-group">
+                    <label for="{{ form.date.id_for_label }}" 
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Data da Movimentação *
+                    </label>
+                    <i class="fas fa-calendar"></i>
+                    <input type="datetime-local" 
+                           name="{{ form.date.name }}"
+                           id="{{ form.date.id_for_label }}"
+                           value="{{ form.date.value|default:'' }}"
+                           class="w-full pl-10 pr-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent"
+                           required>
+                    {% if form.date.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.date.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Current Stock Info -->
+            <div x-show="selectedMaterial || selectedProduct" class="mt-6">
+                <div class="stock-info rounded-lg p-4">
+                    <h3 class="text-sm font-semibold text-coffee-800 dark:text-coffee-200 mb-2">
+                        Informações do Estoque
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-600 dark:text-gray-400">Estoque Atual:</span>
+                            <span class="font-medium text-gray-900 dark:text-white ml-2" x-text="currentStock + ' ' + unit"></span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600 dark:text-gray-400">Após Movimentação:</span>
+                            <span class="font-medium ml-2" 
+                                  :class="{
+                                      'text-green-600': movementType === 'in',
+                                      'text-red-600': movementType === 'out',
+                                      'text-blue-600': movementType === 'adjustment'
+                                  }"
+                                  x-text="newStock + ' ' + unit"></span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600 dark:text-gray-400">Diferença:</span>
+                            <span class="font-medium ml-2"
+                                  :class="{
+                                      'text-green-600': difference >= 0,
+                                      'text-red-600': difference < 0
+                                  }"
+                                  x-text="(difference >= 0 ? '+' : '') + difference + ' ' + unit"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reason -->
+            <div class="mt-6">
+                <label for="{{ form.reason.id_for_label }}" 
+                       class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Motivo/Observação
+                </label>
+                <textarea name="{{ form.reason.name }}" 
+                          id="{{ form.reason.id_for_label }}"
+                          rows="3"
+                          placeholder="Descreva o motivo da movimentação"
+                          class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent">{{ form.reason.value|default:'' }}</textarea>
+                {% if form.reason.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.reason.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Submit Section -->
+        <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-coffee-200 dark:border-coffee-700">
+            <div class="flex justify-between items-center">
+                <a href="{% url 'inventory:dashboard' %}" 
+                   class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                    Cancelar
+                </a>
+                <button type="submit" 
+                        :disabled="!movementType || (!selectedMaterial && !selectedProduct) || !quantity"
+                        class="bg-coffee-600 hover:bg-coffee-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2">
+                    <i class="fas fa-save"></i>
+                    <span>{% if form.instance.pk %}Atualizar Movimentação{% else %}Registrar Movimentação{% endif %}</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function stockMovementForm() {
+    return {
+        movementType: '{{ form.movement_type.value|default:"" }}',
+        selectedMaterial: '{{ form.material.value|default:"" }}',
+        selectedProduct: '{{ form.product.value|default:"" }}',
+        quantity: parseFloat('{{ form.quantity.value|default:"0" }}') || 0,
+        currentStock: 0,
+        unit: '',
+        
+        selectMovementType(type) {
+            this.movementType = type;
+            this.calculateNewStock();
+        },
+        
+        updateItemInfo() {
+            let selected = null;
+            
+            if (this.selectedMaterial) {
+                const option = document.querySelector(`select[name="{{ form.material.name }}"] option[value="${this.selectedMaterial}"]`);
+                if (option) {
+                    this.currentStock = parseFloat(option.dataset.stock) || 0;
+                    this.unit = option.dataset.unit || '';
+                    this.selectedProduct = '';
+                }
+            } else if (this.selectedProduct) {
+                const option = document.querySelector(`select[name="{{ form.product.name }}"] option[value="${this.selectedProduct}"]`);
+                if (option) {
+                    this.currentStock = parseFloat(option.dataset.stock) || 0;
+                    this.unit = option.dataset.unit || '';
+                    this.selectedMaterial = '';
+                }
+            }
+            
+            this.calculateNewStock();
+        },
+        
+        calculateNewStock() {
+            if (!this.quantity || !this.movementType) return;
+            
+            const qty = parseFloat(this.quantity) || 0;
+            
+            switch (this.movementType) {
+                case 'in':
+                    this.newStock = this.currentStock + qty;
+                    break;
+                case 'out':
+                    this.newStock = this.currentStock - qty;
+                    break;
+                case 'adjustment':
+                    this.newStock = qty;
+                    break;
+                default:
+                    this.newStock = this.currentStock;
+            }
+        },
+        
+        get difference() {
+            return this.newStock - this.currentStock;
+        },
+        
+        get newStock() {
+            return this._newStock || this.currentStock;
+        },
+        
+        set newStock(value) {
+            this._newStock = value;
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Set current date if not set
+    const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+    if (dateInput && !dateInput.value) {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        dateInput.value = now.toISOString().slice(0, 16);
+    }
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const movementType = document.querySelector('input[name="{{ form.movement_type.name }}"]:checked');
+        const material = document.getElementById('{{ form.material.id_for_label }}');
+        const product = document.getElementById('{{ form.product.id_for_label }}');
+        const quantity = document.getElementById('{{ form.quantity.id_for_label }}');
+        
+        if (!movementType) {
+            e.preventDefault();
+            alert('Por favor, selecione o tipo de movimentação.');
+            return;
+        }
+        
+        if (!material.value && !product.value) {
+            e.preventDefault();
+            alert('Por favor, selecione um material ou produto.');
+            return;
+        }
+        
+        if (material.value && product.value) {
+            e.preventDefault();
+            alert('Por favor, selecione apenas um material OU um produto, não ambos.');
+            return;
+        }
+        
+        if (!quantity.value || parseFloat(quantity.value) <= 0) {
+            e.preventDefault();
+            alert('Por favor, informe uma quantidade válida.');
+            return;
+        }
+    });
+    
+    // Clear opposite selection
+    const materialSelect = document.getElementById('{{ form.material.id_for_label }}');
+    const productSelect = document.getElementById('{{ form.product.id_for_label }}');
+    
+    materialSelect.addEventListener('change', function() {
+        if (this.value) {
+            productSelect.value = '';
+        }
+    });
+    
+    productSelect.addEventListener('change', function() {
+        if (this.value) {
+            materialSelect.value = '';
+        }
+    });
+});
+</script>
+{% endblock %}

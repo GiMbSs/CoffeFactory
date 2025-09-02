@@ -1,0 +1,596 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Coffee Factory Management System{% endblock %}
+
+{% block extra_css %}
+<!-- Chart.js CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.css">
+<style>
+    .gradient-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .gradient-card-green {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+    .gradient-card-orange {
+        background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+    }
+    .gradient-card-coffee {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+    }
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+    .activity-item:hover {
+        transform: translateX(8px);
+        transition: transform 0.2s ease-in-out;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <i class="fas fa-tachometer-alt text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Dashboard Principal
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                Visão geral do Coffee Factory Management System
+            </p>
+        </div>
+        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+            <!-- Period Filter -->
+            <div x-data="{ period: 'month' }" class="relative">
+                <select x-model="period" class="bg-white dark:bg-gray-800 border border-coffee-200 dark:border-coffee-700 rounded-lg px-4 py-2 text-sm dark:text-white focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
+                    <option value="today">Hoje</option>
+                    <option value="week">Esta Semana</option>
+                    <option value="month">Este Mês</option>
+                    <option value="year">Este Ano</option>
+                </select>
+            </div>
+            <!-- Refresh Button -->
+            <button onclick="location.reload()" class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2">
+                <i class="fas fa-sync-alt"></i>
+                <span>Atualizar</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    
+    <!-- Produ��o Ativa -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Ordens de Produção</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">12</p>
+                <div class="flex items-center mt-2">
+                    <span class="text-sm text-green-600 dark:text-green-400 font-medium">+8%</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">vs mês anterior</span>
+                </div>
+            </div>
+            <div class="bg-gradient-to-br from-coffee-500 to-coffee-600 w-14 h-14 rounded-lg flex items-center justify-center">
+                <i class="fas fa-industry text-white text-xl"></i>
+            </div>
+        </div>
+        <div class="mt-4">
+            <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
+                <span>Capacidade utilizada</span>
+                <span>75%</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div class="bg-coffee-600 dark:bg-coffee-500 h-2 rounded-full" style="width: 75%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estoque -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Produtos em Estoque</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">2,847</p>
+                <div class="flex items-center mt-2">
+                    <span class="text-sm text-red-600 dark:text-red-400 font-medium">-3%</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">vs semana anterior</span>
+                </div>
+            </div>
+            <div class="bg-gradient-to-br from-coffee-500 to-coffee-600 dark:from-coffee-400 dark:to-coffee-500 w-14 h-14 rounded-lg flex items-center justify-center">
+                <i class="fas fa-boxes text-white text-xl"></i>
+            </div>
+        </div>
+        <div class="mt-4">
+            <div class="flex items-center text-xs text-amber-600 dark:text-amber-400">
+                <i class="fas fa-exclamation-triangle mr-1"></i>
+                <span>5 produtos com estoque baixo</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendas -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Vendas do Mês</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">R$ 89.4K</p>
+                <div class="flex items-center mt-2">
+                    <span class="text-sm text-green-600 dark:text-green-400 font-medium">+12%</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">vs mês anterior</span>
+                </div>
+            </div>
+            <div class="bg-gradient-to-br from-coffee-600 to-coffee-700 dark:from-coffee-500 dark:to-coffee-600 w-14 h-14 rounded-lg flex items-center justify-center">
+                <i class="fas fa-shopping-cart text-white text-xl"></i>
+            </div>
+        </div>
+        <div class="mt-4">
+            <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
+                <span>Meta mensal</span>
+                <span>89%</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div class="bg-coffee-600 dark:bg-coffee-500 h-2 rounded-full" style="width: 89%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financeiro -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Fluxo de Caixa</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">R$ 142K</p>
+                <div class="flex items-center mt-2">
+                    <span class="text-sm text-green-600 dark:text-green-400 font-medium">+5%</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">vs mês anterior</span>
+                </div>
+            </div>
+            <div class="bg-gradient-to-br from-coffee-700 to-coffee-800 dark:from-coffee-600 dark:to-coffee-700 w-14 h-14 rounded-lg flex items-center justify-center">
+                <i class="fas fa-dollar-sign text-white text-xl"></i>
+            </div>
+        </div>
+        <div class="mt-4">
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="text-green-600 dark:text-green-400">
+                    <i class="fas fa-arrow-up mr-1"></i>R$ 65K receber
+                </div>
+                <div class="text-red-600 dark:text-red-400">
+                    <i class="fas fa-arrow-down mr-1"></i>R$ 23K pagar
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700 mb-8">
+    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+        <i class="fas fa-bolt text-coffee-500 dark:text-coffee-400 mr-3"></i>
+        Ações Rápidas
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="{% url 'sales:sales_order_create' %}" class="group bg-gradient-to-br from-coffee-50 to-coffee-100 dark:from-coffee-900/20 dark:to-coffee-800/20 hover:from-coffee-100 hover:to-coffee-200 dark:hover:from-coffee-800/30 dark:hover:to-coffee-700/30 p-4 rounded-lg border border-coffee-200 dark:border-coffee-700 transition-all duration-200 hover:scale-105">
+            <div class="flex items-center space-x-3">
+                <div class="bg-coffee-600 p-3 rounded-lg group-hover:bg-coffee-700 transition-colors">
+                    <i class="fas fa-plus text-white"></i>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-900 dark:text-white">Nova Venda</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Criar pedido</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{% url 'production:production_order_create' %}" class="group bg-gradient-to-br from-coffee-100 to-coffee-200 dark:from-coffee-800/20 dark:to-coffee-700/20 hover:from-coffee-200 hover:to-coffee-300 dark:hover:from-coffee-700/30 dark:hover:to-coffee-600/30 p-4 rounded-lg border border-coffee-300 dark:border-coffee-600 transition-all duration-200 hover:scale-105">
+            <div class="flex items-center space-x-3">
+                <div class="bg-coffee-700 p-3 rounded-lg group-hover:bg-coffee-800 transition-colors">
+                    <i class="fas fa-industry text-white"></i>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-900 dark:text-white">Nova Produção</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Iniciar ordem</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{% url 'inventory:product_create' %}" class="group bg-gradient-to-br from-coffee-200 to-coffee-300 dark:from-coffee-700/20 dark:to-coffee-600/20 hover:from-coffee-300 hover:to-coffee-400 dark:hover:from-coffee-600/30 dark:hover:to-coffee-500/30 p-4 rounded-lg border border-coffee-400 dark:border-coffee-500 transition-all duration-200 hover:scale-105">
+            <div class="flex items-center space-x-3">
+                <div class="bg-coffee-800 p-3 rounded-lg group-hover:bg-coffee-900 transition-colors">
+                    <i class="fas fa-coffee text-white"></i>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-900 dark:text-white">Novo Produto</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Cadastrar item</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{% url 'suppliers:create' %}" class="group bg-gradient-to-br from-coffee-300 to-coffee-400 dark:from-coffee-600/20 dark:to-coffee-500/20 hover:from-coffee-400 hover:to-coffee-500 dark:hover:from-coffee-500/30 dark:hover:to-coffee-400/30 p-4 rounded-lg border border-coffee-500 dark:border-coffee-400 transition-all duration-200 hover:scale-105">
+            <div class="flex items-center space-x-3">
+                <div class="bg-coffee-900 p-3 rounded-lg group-hover:bg-coffee-950 transition-colors">
+                    <i class="fas fa-truck text-white"></i>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-900 dark:text-white">Fornecedor</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Novo parceiro</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Charts and Analytics -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Sales Chart -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+            <i class="fas fa-chart-line text-coffee-500 dark:text-coffee-400 mr-3"></i>
+            Vendas Mensais
+        </h3>
+        <div class="chart-container">
+            <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Production Chart -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+            <i class="fas fa-chart-bar text-coffee-600 dark:text-coffee-500 mr-3"></i>
+            Produção por Categoria
+        </h3>
+        <div class="chart-container">
+            <canvas id="productionChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities and Alerts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Recent Activities -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+            <i class="fas fa-clock text-coffee-500 dark:text-coffee-400 mr-3"></i>
+            Atividades Recentes
+        </h3>
+        <div class="space-y-4">
+            <div class="activity-item flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
+                <div class="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+                    <i class="fas fa-check text-green-600 dark:text-green-400 text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                        Ordem de produção #OP-2024-089 concluída
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Café Espresso Premium - 500kg " há 2 horas
+                    </p>
+                </div>
+            </div>
+
+            <div class="activity-item flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
+                <div class="flex-shrink-0 w-8 h-8 bg-coffee-100 dark:bg-coffee-900/20 rounded-full flex items-center justify-center">
+                    <i class="fas fa-shopping-cart text-coffee-600 dark:text-coffee-400 text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                        Nova venda registrada - Pedido #V-2024-456
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Cliente: Café Central " R$ 2.847,50 " há 3 horas
+                    </p>
+                </div>
+            </div>
+
+            <div class="activity-item flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
+                <div class="flex-shrink-0 w-8 h-8 bg-coffee-200 dark:bg-coffee-800/20 rounded-full flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-coffee-500 dark:text-coffee-400 text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                        Estoque baixo detectado
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Grãos Arábica Premium - 45kg restantes " há 4 horas
+                    </p>
+                </div>
+            </div>
+
+            <div class="activity-item flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
+                <div class="flex-shrink-0 w-8 h-8 bg-coffee-300 dark:bg-coffee-700/20 rounded-full flex items-center justify-center">
+                    <i class="fas fa-truck text-coffee-700 dark:text-coffee-500 text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                        Entrega programada confirmada
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Fornecedor: Café do Vale " Chegada: amanhã às 14h " há 5 horas
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <a href="#" class="text-sm text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 font-medium flex items-center">
+                Ver todas as atividades
+                <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Alerts and Notifications -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+            <i class="fas fa-bell text-coffee-600 dark:text-coffee-500 mr-3"></i>
+            Alertas e Notificações
+        </h3>
+        <div class="space-y-4">
+            <!-- Critical Alert -->
+            <div class="border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-r-lg">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-red-500 dark:text-red-400"></i>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h4 class="text-sm font-medium text-red-800 dark:text-red-200">
+                            Estoque Crítico
+                        </h4>
+                        <p class="text-sm text-red-700 dark:text-red-300 mt-1">
+                            3 produtos com estoque abaixo do mínimo
+                        </p>
+                        <div class="mt-2">
+                            <a href="{% url 'inventory:product_list' %}" class="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium">
+                                Verificar estoque
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warning Alert -->
+            <div class="border-l-4 border-coffee-500 bg-coffee-50 dark:bg-coffee-900/20 p-4 rounded-r-lg">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-clock text-yellow-500 dark:text-yellow-400"></i>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                            Vencimentos Próximos
+                        </h4>
+                        <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                            5 contas a pagar vencem em 3 dias
+                        </p>
+                        <div class="mt-2">
+                            <a href="{% url 'financial:accounts_payable' %}" class="text-xs text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 font-medium">
+                                Ver contas a pagar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Alert -->
+            <div class="border-l-4 border-coffee-600 bg-coffee-100 dark:bg-coffee-800/20 p-4 rounded-r-lg">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-500 dark:text-blue-400"></i>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h4 class="text-sm font-medium text-blue-800 dark:text-blue-200">
+                            Meta de Vendas
+                        </h4>
+                        <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                            89% da meta mensal alcançada
+                        </p>
+                        <div class="mt-2">
+                            <a href="{% url 'sales:dashboard' %}" class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+                                Ver detalhes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Alert -->
+            <div class="border-l-4 border-green-500 bg-green-50 dark:bg-green-900/20 p-4 rounded-r-lg">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-check-circle text-green-500 dark:text-green-400"></i>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h4 class="text-sm font-medium text-green-800 dark:text-green-200">
+                            Produção Eficiente
+                        </h4>
+                        <p class="text-sm text-green-700 dark:text-green-300 mt-1">
+                            Capacidade otimizada em 95% esta semana
+                        </p>
+                        <div class="mt-2">
+                            <a href="{% url 'production:dashboard' %}" class="text-xs text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium">
+                                Ver produção
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <a href="#" class="text-sm text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 font-medium">
+                    Ver todas as notificações
+                </a>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                    8 não lidas
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Chart colors based on theme
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    const textColor = isDarkMode ? '#e5e7eb' : '#374151';
+    const gridColor = isDarkMode ? '#374151' : '#e5e7eb';
+
+    // Sales Chart
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+    new Chart(salesCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'],
+            datasets: [{
+                label: 'Vendas (R$)',
+                data: [65000, 72000, 68000, 89000, 85000, 92000, 87000, 94000, 89400],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#3b82f6',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: textColor,
+                        font: {
+                            size: 12,
+                            family: 'Inter'
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: textColor,
+                        callback: function(value) {
+                            return 'R$ ' + (value / 1000) + 'K';
+                        }
+                    },
+                    grid: {
+                        color: gridColor
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: textColor
+                    },
+                    grid: {
+                        color: gridColor
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+
+    // Production Chart
+    const productionCtx = document.getElementById('productionChart').getContext('2d');
+    new Chart(productionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Café Espresso', 'Café Premium', 'Café Orgânico', 'Café Descafeinado', 'Café Especial'],
+            datasets: [{
+                data: [35, 25, 20, 12, 8],
+                backgroundColor: [
+                    '#3b82f6',
+                    '#10b981',
+                    '#f59e0b',
+                    '#ef4444',
+                    '#8b5cf6'
+                ],
+                borderColor: [
+                    '#2563eb',
+                    '#059669',
+                    '#d97706',
+                    '#dc2626',
+                    '#7c3aed'
+                ],
+                borderWidth: 2,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: textColor,
+                        padding: 20,
+                        font: {
+                            size: 11,
+                            family: 'Inter'
+                        },
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                }
+            }
+        }
+    });
+
+    // Auto-refresh data every 5 minutes
+    setInterval(function() {
+        // In a real application, you would fetch new data from the server
+        console.log('Refreshing dashboard data...');
+    }, 300000);
+
+    // Add pulse animation to critical alerts
+    const criticalAlerts = document.querySelectorAll('.border-red-500');
+    criticalAlerts.forEach(alert => {
+        alert.classList.add('pulse-animation');
+    });
+});
+
+// Real-time updates simulation
+function updateKPIs() {
+    // Simulate real-time updates for demonstration
+    const kpiElements = document.querySelectorAll('[data-kpi]');
+    kpiElements.forEach(element => {
+        // Add subtle animation on update
+        element.style.transform = 'scale(1.05)';
+        setTimeout(() => {
+            element.style.transform = 'scale(1)';
+        }, 200);
+    });
+}
+
+// Update KPIs every 30 seconds (in production, this would be real data)
+setInterval(updateKPIs, 30000);
+</script>
+{% endblock %}

@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar Categoria{% else %}Nova Categoria{% endif %} - Coffee Factory Management System
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        transition: all 0.3s ease;
+    }
+    .form-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .type-option {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        cursor: pointer;
+    }
+    .type-option:hover {
+        border-color: #8B4513;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px -2px rgba(139, 69, 19, 0.2);
+    }
+    .type-option.selected {
+        border-color: #8B4513;
+        background: rgba(139, 69, 19, 0.05);
+    }
+    .field-error {
+        animation: shake 0.5s ease-in-out;
+    }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex items-center space-x-4">
+            <a href="{% url 'inventory:category_list' %}" 
+               class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 transition-colors">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                    <i class="fas fa-tags text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    {% if form.instance.pk %}
+                        Editar Categoria
+                    {% else %}
+                        Nova Categoria
+                    {% endif %}
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    {% if form.instance.pk %}
+                        Atualize as informações da categoria
+                    {% else %}
+                        Preencha as informações para criar uma nova categoria
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+            <span class="text-sm text-gray-600 dark:text-gray-400">
+                <i class="fas fa-info-circle mr-1"></i>
+                Campos obrigatórios marcados com *
+            </span>
+        </div>
+    </div>
+</div>
+<!-- Form Container -->
+<div class="max-w-4xl mx-auto">
+    <form method="post" class="space-y-8">
+        {% csrf_token %}
+                
+        <!-- Basic Information -->
+        <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-coffee-200 dark:border-coffee-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-info-circle text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Informações Básicas
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Name Field -->
+                <div>
+                    <label for="{{ form.name.id_for_label }}" 
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.name.label }} *
+                    </label>
+                    <input type="text" 
+                           name="{{ form.name.name }}"
+                           id="{{ form.name.id_for_label }}"
+                           value="{{ form.name.value|default:'' }}"
+                           placeholder="Digite o nome da categoria"
+                           class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                           required>
+                    {% if form.name.errors %}
+                    <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {{ form.name.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Type Field -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Tipo *
+                    </label>
+                    <select name="{{ form.category_type.name }}" 
+                            id="{{ form.category_type.id_for_label }}"
+                            class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                            required>
+                        <option value="">Selecione o tipo</option>
+                        <option value="material" {% if form.category_type.value == 'material' %}selected{% endif %}>Material</option>
+                        <option value="product" {% if form.category_type.value == 'product' %}selected{% endif %}>Produto</option>
+                    </select>
+                    {% if form.category_type.errors %}
+                    <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {{ form.category_type.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Description Field (Full Width) -->
+            <div class="mt-6">
+                <label for="{{ form.description.id_for_label }}" 
+                       class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.description.label }}
+                </label>
+                <textarea name="{{ form.description.name }}" 
+                          id="{{ form.description.id_for_label }}"
+                          rows="3"
+                          placeholder="Descreva a categoria (opcional)"
+                          class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors">{{ form.description.value|default:'' }}</textarea>
+                {% if form.description.errors %}
+                <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                    {{ form.description.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Status -->
+        <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-coffee-200 dark:border-coffee-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-toggle-on text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Status da Categoria
+            </h2>
+            
+            <div class="flex items-center space-x-6">
+                <label class="flex items-center">
+                    <input type="radio" 
+                           name="{{ form.status.name }}" 
+                           value="active"
+                           {% if form.status.value == 'active' or not form.instance.pk %}checked{% endif %}
+                           class="w-4 h-4 text-green-600 border-gray-300 dark:border-gray-600 focus:ring-green-500 dark:focus:ring-green-400 transition-colors">
+                    <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                        Ativa
+                    </span>
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" 
+                           name="{{ form.status.name }}" 
+                           value="inactive"
+                           {% if form.status.value == 'inactive' %}checked{% endif %}
+                           class="w-4 h-4 text-red-600 border-gray-300 dark:border-gray-600 focus:ring-red-500 dark:focus:ring-red-400 transition-colors">
+                    <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                        <i class="fas fa-times-circle text-red-600 mr-2"></i>
+                        Inativa
+                    </span>
+                </label>
+            </div>
+            {% if form.status.errors %}
+            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                {{ form.status.errors.0 }}
+            </div>
+            {% endif %}
+        </div>
+        <!-- Form Actions -->
+        <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-coffee-200 dark:border-coffee-700">
+            <div class="flex justify-between items-center">
+                <a href="{% url 'inventory:category_list' %}" 
+                   class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                    Cancelar
+                </a>
+                <button type="submit" 
+                        class="bg-coffee-600 hover:bg-coffee-700 text-white px-8 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center space-x-2">
+                    <i class="fas fa-save"></i>
+                    <span>{% if form.instance.pk %}Atualizar Categoria{% else %}Criar Categoria{% endif %}</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const nameInput = document.getElementById('{{ form.name.id_for_label }}');
+    const typeSelect = document.getElementById('{{ form.category_type.id_for_label }}');
+    
+    // Form validation
+    function validateField(field, isRequired = false) {
+        const value = field.value.trim();
+        let isValid = true;
+        
+        // Check if required field is empty
+        if (isRequired && !value) {
+            isValid = false;
+            field.classList.add('field-error');
+            setTimeout(() => field.classList.remove('field-error'), 500);
+        } else {
+            field.classList.remove('field-error');
+        }
+        
+        return isValid;
+    }
+    
+    // Real-time validation
+    if (nameInput) {
+        nameInput.addEventListener('blur', function() {
+            validateField(this, true);
+        });
+    }
+    
+    if (typeSelect) {
+        typeSelect.addEventListener('change', function() {
+            validateField(this, true);
+        });
+    }
+    
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        let isFormValid = true;
+        
+        // Validate required fields
+        if (nameInput && !validateField(nameInput, true)) {
+            isFormValid = false;
+        }
+        
+        if (typeSelect && !validateField(typeSelect, true)) {
+            isFormValid = false;
+        }
+        
+        if (!isFormValid) {
+            e.preventDefault();
+            
+            // Focus on first invalid field
+            const firstError = document.querySelector('.field-error');
+            if (firstError) {
+                firstError.focus();
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+    
+    // Auto-focus on name field
+    if (nameInput && !nameInput.value) {
+        nameInput.focus();
+    }
+});
+</script>
+{% endblock %}

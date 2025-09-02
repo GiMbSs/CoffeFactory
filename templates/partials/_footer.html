@@ -1,0 +1,73 @@
+<!-- Footer -->
+<footer class="bg-white dark:bg-gray-900 border-t border-coffee-200 dark:border-coffee-700 px-4 py-3 mt-auto">
+    <div class="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
+        
+        <!-- Left side - Copyright -->
+        <div class="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+            <p>
+                Copyright {% now "Y" %} Coffee Factory Management System. 
+                <span class="hidden sm:inline">Todos os direitos reservados.</span>
+            </p>
+        </div>
+        
+        <!-- Center - Status indicators -->
+        <div class="flex items-center space-x-4">
+            <!-- System status -->
+            <div class="flex items-center space-x-2 text-xs">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-gray-500 dark:text-gray-400 hidden sm:inline">Sistema Online</span>
+            </div>
+            
+            <!-- Current time -->
+            <div class="text-xs text-gray-500 dark:text-gray-400 hidden md:block" x-data="{ currentTime: new Date().toLocaleString('pt-BR') }" x-init="setInterval(() => currentTime = new Date().toLocaleString('pt-BR'), 1000)">
+                <i class="fas fa-clock mr-1"></i>
+                <span x-text="currentTime"></span>
+            </div>
+        </div>
+        
+        <!-- Right side - Links and version -->
+        <div class="flex items-center space-x-4 text-sm">
+            <!-- Quick links -->
+            <div class="hidden sm:flex items-center space-x-3">
+                <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
+                    Suporte
+                </a>
+                <span class="text-gray-300 dark:text-gray-600">|</span>
+                <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
+                    Documentação
+                </a>
+                {% if user.is_staff %}
+                <span class="text-gray-300 dark:text-gray-600">|</span>
+                <a href="{% url 'api:schema' %}" class="text-gray-500 dark:text-gray-400 hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
+                    API
+                </a>
+                {% endif %}
+            </div>
+            
+            <!-- Version -->
+            <div class="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+                <i class="fas fa-code-branch"></i>
+                <span>v1.0.0</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Additional info row for mobile -->
+    <div class="sm:hidden mt-2 pt-2 border-t border-coffee-200 dark:border-coffee-700">
+        <div class="flex justify-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+            <a href="#" class="hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
+                Suporte
+            </a>
+            <span>|</span>
+            <a href="#" class="hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
+                Docs
+            </a>
+            {% if user.is_staff %}
+            <span>|</span>
+            <a href="{% url 'api:schema' %}" class="hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
+                API
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</footer>

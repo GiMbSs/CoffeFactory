@@ -1,0 +1,909 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar Pedido{% else %}Novo Pedido{% endif %} - Coffee Factory Management System
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.02) 0%, rgba(210, 105, 30, 0.02) 100%);
+        transition: all 0.3s ease;
+    }
+    .form-section:hover {
+        box-shadow: 0 4px 12px rgba(139, 69, 19, 0.1);
+        transform: translateY(-1px);
+    }
+    .item-row {
+        background: rgba(139, 69, 19, 0.05);
+        border: 1px solid rgba(139, 69, 19, 0.1);
+        transition: all 0.3s ease;
+    }
+    .item-row:hover {
+        background: rgba(139, 69, 19, 0.08);
+        transform: translateY(-1px);
+    }
+    .required-asterisk {
+        color: #ef4444;
+    }
+    .calculation-summary {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .item-total {
+        font-weight: 600;
+        color: #059669;
+    }
+    .remove-item {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .item-row:hover .remove-item {
+        opacity: 1;
+    }
+    .product-info {
+        background: rgba(59, 130, 246, 0.05);
+        border: 1px solid rgba(59, 130, 246, 0.1);
+    }
+    
+    /* Custom Tailwind form styles */
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background-color: white;
+        color: #111827;
+        transition: all 0.2s;
+    }
+    
+    .dark .form-input, .dark .form-select, .dark .form-textarea {
+        border-color: #4b5563;
+        background-color: #374151;
+        color: white;
+    }
+    
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #8b4513;
+        box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+    }
+    
+    .form-error {
+        border-color: #fca5a5 !important;
+    }
+    
+    .dark .form-error {
+        border-color: #dc2626 !important;
+    }
+    
+    .btn-primary {
+        background-color: #8b4513;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary:hover {
+        background-color: #a0522d;
+        transform: scale(1.05);
+    }
+    
+    .btn-secondary {
+        background-color: #4b5563;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #374151;
+        transform: scale(1.05);
+    }
+    
+    .btn-success {
+        background-color: #059669;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-success:hover {
+        background-color: #047857;
+        transform: scale(1.05);
+    }
+    
+    .btn-danger {
+        background-color: #dc2626;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-danger:hover {
+        background-color: #b91c1c;
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                <i class="fas fa-{% if form.instance.pk %}edit{% else %}plus{% endif %} text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                {% if form.instance.pk %}Editar Pedido{% else %}Novo Pedido{% endif %}
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                {% if form.instance.pk %}
+                    Atualize as informações do pedido #{{ form.instance.order_number }}
+                {% else %}
+                    Crie um novo pedido de venda
+                {% endif %}
+            </p>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{% url 'sales:sales_order_list' %}" 
+               class="btn-secondary flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Voltar
+            </a>
+            {% if form.instance.pk %}
+            <a href="{% url 'sales:sales_order_detail' form.instance.pk %}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 flex items-center">
+                <i class="fas fa-eye mr-2"></i>
+                Ver Detalhes
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Form -->
+<form method="post" id="orderForm" class="space-y-8" novalidate>
+    {% csrf_token %}
+    
+    {% if form.non_field_errors %}
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div class="flex">
+            <i class="fas fa-exclamation-triangle text-red-400 mt-1 mr-3"></i>
+            <div>
+                <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+                    Erro na validação
+                </h3>
+                <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+                    {{ form.non_field_errors }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Order Information -->
+    <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center mb-6">
+            <div class="p-2 rounded-full bg-coffee-100 dark:bg-coffee-900 mr-3">
+                <i class="fas fa-file-alt text-coffee-600 dark:text-coffee-400"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Informações do Pedido</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Customer -->
+            <div class="md:col-span-2">
+                <label for="{{ form.customer.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.customer.label }}
+                    {% if form.customer.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                <div class="relative">
+                    <select name="{{ form.customer.name }}" id="{{ form.customer.id_for_label }}" 
+                            class="form-select {% if form.customer.errors %}form-error{% endif %}">
+                        <option value="">---------</option>
+                        {% for choice in form.customer.field.queryset %}
+                            <option value="{{ choice.pk }}" 
+                                    {% if form.customer.value == choice.pk %}selected{% endif %}>
+                                {{ choice.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" onclick="openCustomerModal()" 
+                            class="absolute right-2 top-2 text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 z-10">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Cliente</p>
+                {% if form.customer.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.customer.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Status -->
+            <div>
+                <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.status.label }}
+                    {% if form.status.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                <select name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" 
+                        class="form-select {% if form.status.errors %}form-error{% endif %}">
+                    {% for value, label in form.status.field.choices %}
+                        <option value="{{ value }}" 
+                                {% if form.status.value == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Status do pedido</p>
+                {% if form.status.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.status.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            <!-- Priority -->
+            <div>
+                <label for="{{ form.priority.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.priority.label }}
+                    {% if form.priority.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                <select name="{{ form.priority.name }}" id="{{ form.priority.id_for_label }}" 
+                        class="form-select {% if form.priority.errors %}form-error{% endif %}">
+                    {% for value, label in form.priority.field.choices %}
+                        <option value="{{ value }}" 
+                                {% if form.priority.value == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Prioridade do pedido</p>
+                {% if form.priority.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.priority.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Delivery Date -->
+            <div>
+                <label for="{{ form.delivery_date.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.delivery_date.label }}
+                    {% if form.delivery_date.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                <input type="date" name="{{ form.delivery_date.name }}" id="{{ form.delivery_date.id_for_label }}" 
+                       value="{{ form.delivery_date.value|default:'' }}"
+                       class="form-input {% if form.delivery_date.errors %}form-error{% endif %}">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Data de entrega prometida</p>
+                {% if form.delivery_date.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.delivery_date.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Sales Representative -->
+            <div>
+                <label for="{{ form.sales_representative.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.sales_representative.label }}
+                    {% if form.sales_representative.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                <select name="{{ form.sales_representative.name }}" id="{{ form.sales_representative.id_for_label }}" 
+                        class="form-select {% if form.sales_representative.errors %}form-error{% endif %}">
+                    <option value="">---------</option>
+                    {% for choice in form.sales_representative.field.queryset %}
+                        <option value="{{ choice.pk }}" 
+                                {% if form.sales_representative.value == choice.pk %}selected{% endif %}>
+                            {{ choice.first_name }} {{ choice.last_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Representante de vendas</p>
+                {% if form.sales_representative.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.sales_representative.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <!-- Payment Method -->
+            <div>
+                <label for="{{ form.payment_method.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.payment_method.label }}
+                </label>
+                <input type="text" name="{{ form.payment_method.name }}" id="{{ form.payment_method.id_for_label }}" 
+                       value="{{ form.payment_method.value|default:'' }}"
+                       placeholder="Ex: Cartão, Dinheiro, PIX..."
+                       class="form-input {% if form.payment_method.errors %}form-error{% endif %}">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Forma de pagamento</p>
+                {% if form.payment_method.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.payment_method.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Payment Terms -->
+            <div>
+                <label for="{{ form.payment_terms.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.payment_terms.label }}
+                </label>
+                <input type="text" name="{{ form.payment_terms.name }}" id="{{ form.payment_terms.id_for_label }}" 
+                       value="{{ form.payment_terms.value|default:'' }}"
+                       placeholder="Ex: À vista, 30 dias, 2x sem juros..."
+                       class="form-input {% if form.payment_terms.errors %}form-error{% endif %}">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Condições de pagamento</p>
+                {% if form.payment_terms.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.payment_terms.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <!-- Discount Percentage -->
+            <div>
+                <label for="{{ form.discount_percentage.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.discount_percentage.label }}
+                </label>
+                <div class="relative">
+                    <input type="number" name="{{ form.discount_percentage.name }}" id="{{ form.discount_percentage.id_for_label }}" 
+                           value="{{ form.discount_percentage.value|default:'0' }}"
+                           step="0.01" min="0" max="100"
+                           class="form-input {% if form.discount_percentage.errors %}form-error{% endif %} pr-8">
+                    <span class="absolute right-3 top-3 text-gray-500 dark:text-gray-400">%</span>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Desconto em percentual</p>
+                {% if form.discount_percentage.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.discount_percentage.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Order Number -->
+            <div>
+                <label for="{{ form.order_number.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.order_number.label }}
+                </label>
+                <input type="text" name="{{ form.order_number.name }}" id="{{ form.order_number.id_for_label }}" 
+                       value="{{ form.order_number.value|default:'' }}"
+                       placeholder="Número do pedido (deixe vazio para gerar automaticamente)"
+                       class="form-input {% if form.order_number.errors %}form-error{% endif %}">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Número único do pedido</p>
+                {% if form.order_number.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.order_number.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Notes -->
+        <div class="mt-6">
+            <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {{ form.notes.label }}
+            </label>
+            <textarea name="{{ form.notes.name }}" id="{{ form.notes.id_for_label }}" rows="3"
+                      placeholder="Observações sobre o pedido..."
+                      class="form-textarea {% if form.notes.errors %}form-error{% endif %}">{{ form.notes.value|default:'' }}</textarea>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Observações adicionais</p>
+            {% if form.notes.errors %}
+            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                {{ form.notes.errors.0 }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.delivery_date.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Information Display -->
+    <div id="customerInfo" class="hidden form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-blue-200 dark:border-blue-700">
+        <div class="flex items-center mb-4">
+            <div class="p-2 rounded-full bg-blue-100 dark:bg-blue-900 mr-3">
+                <i class="fas fa-user text-blue-600 dark:text-blue-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Informações do Cliente</h3>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div>
+                <span class="text-gray-600 dark:text-gray-400">Limite de Crédito:</span>
+                <span id="customerCreditLimit" class="font-medium text-gray-900 dark:text-white ml-2">-</span>
+            </div>
+            <div>
+                <span class="text-gray-600 dark:text-gray-400">Débito Atual:</span>
+                <span id="customerDebt" class="font-medium text-gray-900 dark:text-white ml-2">-</span>
+            </div>
+            <div>
+                <span class="text-gray-600 dark:text-gray-400">Crédito Disponível:</span>
+                <span id="customerAvailableCredit" class="font-medium text-green-600 dark:text-green-400 ml-2">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center">
+                <div class="p-2 rounded-full bg-purple-100 dark:bg-purple-900 mr-3">
+                    <i class="fas fa-list text-purple-600 dark:text-purple-400"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Itens do Pedido</h2>
+            </div>
+            <button type="button" onclick="addItem()" 
+                    class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                <i class="fas fa-plus mr-2"></i>
+                Adicionar Item
+            </button>
+        </div>
+        
+        <!-- Items Container -->
+        <div id="itemsContainer" class="space-y-4">
+            <!-- Items will be dynamically added here -->
+        </div>
+        
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+            <i class="fas fa-box-open text-gray-400 text-3xl mb-3"></i>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">Nenhum item adicionado ao pedido</p>
+            <button type="button" onclick="addItem()" 
+                    class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                <i class="fas fa-plus mr-2"></i>
+                Adicionar Primeiro Item
+            </button>
+        </div>
+    </div>
+
+    <!-- Financial Summary -->
+    <div class="calculation-summary bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-green-200 dark:border-green-700">
+        <div class="flex items-center mb-6">
+            <div class="p-2 rounded-full bg-green-100 dark:bg-green-900 mr-3">
+                <i class="fas fa-calculator text-green-600 dark:text-green-400"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Resumo Financeiro</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Left Column - Totals -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 dark:text-gray-400">Subtotal:</span>
+                    <span id="subtotalDisplay" class="font-medium text-gray-900 dark:text-white text-lg">R$ 0,00</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <label for="{{ form.discount_percentage.id_for_label }}" class="text-gray-600 dark:text-gray-400">
+                        Desconto (%):
+                    </label>
+                    <div class="flex items-center space-x-2">
+                        {{ form.discount_percentage }}
+                        <span id="discountDisplay" class="font-medium text-red-600 dark:text-red-400">R$ 0,00</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <label for="{{ form.tax_percentage.id_for_label }}" class="text-gray-600 dark:text-gray-400">
+                        Impostos (%):
+                    </label>
+                    <div class="flex items-center space-x-2">
+                        {{ form.tax_percentage }}
+                        <span id="taxDisplay" class="font-medium text-gray-900 dark:text-white">R$ 0,00</span>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-lg font-bold text-gray-900 dark:text-white">Total:</span>
+                        <span id="totalDisplay" class="text-2xl font-bold text-coffee-600 dark:text-coffee-400">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column - Additional Fields -->
+            <div class="space-y-4">
+                <!-- Payment Terms -->
+                <div>
+                    <label for="{{ form.payment_terms.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.payment_terms.label }}
+                    </label>
+                    {{ form.payment_terms }}
+                    {% if form.payment_terms.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.payment_terms.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Shipping Cost -->
+                <div>
+                    <label for="{{ form.shipping_cost.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.shipping_cost.label }}
+                    </label>
+                    {{ form.shipping_cost }}
+                    {% if form.shipping_cost.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.shipping_cost.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center mb-6">
+            <div class="p-2 rounded-full bg-yellow-100 dark:bg-yellow-900 mr-3">
+                <i class="fas fa-sticky-note text-yellow-600 dark:text-yellow-400"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Observações</h2>
+        </div>
+        
+        <div>
+            <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {{ form.notes.label }}
+            </label>
+            {{ form.notes }}
+            {% if form.notes.help_text %}
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ form.notes.help_text }}</p>
+            {% endif %}
+            {% if form.notes.errors %}
+            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                {{ form.notes.errors.0 }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+                <i class="fas fa-info-circle mr-1"></i>
+                Os campos marcados com <span class="required-asterisk">*</span> são obrigatórios
+            </div>
+            
+            <div class="flex space-x-3">
+                <button type="button" onclick="saveDraft()" 
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+                    <i class="fas fa-save mr-2"></i>
+                    Salvar Rascunho
+                </button>
+                <a href="{% url 'sales:sales_order_list' %}" 
+                   class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancelar
+                </a>
+                <button type="submit" 
+                        class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+                    <i class="fas fa-save mr-2"></i>
+                    {% if form.instance.pk %}Atualizar Pedido{% else %}Salvar Pedido{% endif %}
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Item Template (Hidden) -->
+<div id="itemTemplate" class="hidden">
+    <div class="item-row rounded-lg p-4 relative">
+        <button type="button" class="remove-item absolute top-2 right-2 text-red-600 hover:text-red-700" onclick="removeItem(this)">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <!-- Product -->
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Produto <span class="required-asterisk">*</span>
+                </label>
+                <select class="item-product w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-coffee-500 focus:border-transparent"
+                        onchange="updateItemProduct(this)">
+                    <option value="">Selecione um produto...</option>
+                    <!-- Options will be populated via AJAX -->
+                </select>
+            </div>
+            
+            <!-- Quantity -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Quantidade <span class="required-asterisk">*</span>
+                </label>
+                <input type="number" class="item-quantity w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-coffee-500 focus:border-transparent"
+                       min="1" step="1" onchange="calculateItemTotal(this)">
+            </div>
+            
+            <!-- Unit Price -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Preço Unitário
+                </label>
+                <input type="number" class="item-price w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-coffee-500 focus:border-transparent"
+                       min="0" step="0.01" onchange="calculateItemTotal(this)">
+            </div>
+            
+            <!-- Total -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Total
+                </label>
+                <div class="item-total px-3 py-2 bg-gray-100 dark:bg-gray-600 rounded-lg text-center font-medium">
+                    R$ 0,00
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Info -->
+        <div class="product-info mt-4 p-3 rounded-lg hidden">
+            <div class="flex items-center">
+                <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 mr-2"></i>
+                <span class="product-description text-sm text-gray-700 dark:text-gray-300"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let itemCount = 0;
+
+function addItem() {
+    itemCount++;
+    
+    const template = document.getElementById('itemTemplate');
+    const newItem = template.cloneNode(true);
+    newItem.id = `item-${itemCount}`;
+    newItem.classList.remove('hidden');
+    
+    // Update input names
+    const inputs = newItem.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        if (input.classList.contains('item-product')) {
+            input.name = `items-${itemCount-1}-product`;
+        } else if (input.classList.contains('item-quantity')) {
+            input.name = `items-${itemCount-1}-quantity`;
+        } else if (input.classList.contains('item-price')) {
+            input.name = `items-${itemCount-1}-unit_price`;
+        }
+    });
+    
+    document.getElementById('itemsContainer').appendChild(newItem);
+    document.getElementById('emptyState').classList.add('hidden');
+    
+    // Load products
+    loadProducts(newItem.querySelector('.item-product'));
+}
+
+function removeItem(button) {
+    const item = button.closest('.item-row');
+    item.remove();
+    
+    // Show empty state if no items
+    const container = document.getElementById('itemsContainer');
+    if (container.children.length === 0) {
+        document.getElementById('emptyState').classList.remove('hidden');
+    }
+    
+    calculateTotals();
+}
+
+function loadProducts(selectElement) {
+    // Load products via AJAX
+    fetch('/api/products/')
+        .then(response => response.json())
+        .then(data => {
+            selectElement.innerHTML = '<option value="">Selecione um produto...</option>';
+            data.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.id;
+                option.textContent = `${product.name} - R$ ${product.price}`;
+                option.dataset.price = product.price;
+                option.dataset.description = product.description;
+                selectElement.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Erro ao carregar produtos:', error);
+        });
+}
+
+function updateItemProduct(selectElement) {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const row = selectElement.closest('.item-row');
+    const priceInput = row.querySelector('.item-price');
+    const productInfo = row.querySelector('.product-info');
+    const productDescription = row.querySelector('.product-description');
+    
+    if (selectedOption.value) {
+        priceInput.value = selectedOption.dataset.price || 0;
+        productDescription.textContent = selectedOption.dataset.description || '';
+        productInfo.classList.remove('hidden');
+    } else {
+        priceInput.value = 0;
+        productInfo.classList.add('hidden');
+    }
+    
+    calculateItemTotal(selectElement);
+}
+
+function calculateItemTotal(element) {
+    const row = element.closest('.item-row');
+    const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
+    const price = parseFloat(row.querySelector('.item-price').value) || 0;
+    const total = quantity * price;
+    
+    row.querySelector('.item-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    
+    calculateTotals();
+}
+
+function calculateTotals() {
+    let subtotal = 0;
+    
+    // Calculate subtotal
+    document.querySelectorAll('.item-row').forEach(row => {
+        const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        subtotal += quantity * price;
+    });
+    
+    // Get discount and tax percentages
+    const discountPercentage = parseFloat(document.getElementById('{{ form.discount_percentage.id_for_label }}').value) || 0;
+    const taxPercentage = parseFloat(document.getElementById('{{ form.tax_percentage.id_for_label }}').value) || 0;
+    const shippingCost = parseFloat(document.getElementById('{{ form.shipping_cost.id_for_label }}').value) || 0;
+    
+    // Calculate amounts
+    const discountAmount = subtotal * (discountPercentage / 100);
+    const taxableAmount = subtotal - discountAmount;
+    const taxAmount = taxableAmount * (taxPercentage / 100);
+    const total = taxableAmount + taxAmount + shippingCost;
+    
+    // Update display
+    document.getElementById('subtotalDisplay').textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+    document.getElementById('discountDisplay').textContent = `R$ ${discountAmount.toFixed(2).replace('.', ',')}`;
+    document.getElementById('taxDisplay').textContent = `R$ ${taxAmount.toFixed(2).replace('.', ',')}`;
+    document.getElementById('totalDisplay').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+}
+
+function loadCustomerInfo() {
+    const customerId = document.getElementById('{{ form.customer.id_for_label }}').value;
+    
+    if (customerId) {
+        fetch(`/api/customers/${customerId}/`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('customerCreditLimit').textContent = `R$ ${data.credit_limit.toFixed(2).replace('.', ',')}`;
+                document.getElementById('customerDebt').textContent = `R$ ${data.current_debt.toFixed(2).replace('.', ',')}`;
+                document.getElementById('customerAvailableCredit').textContent = `R$ ${data.available_credit.toFixed(2).replace('.', ',')}`;
+                document.getElementById('customerInfo').classList.remove('hidden');
+            })
+            .catch(error => {
+                console.error('Erro ao carregar informações do cliente:', error);
+                document.getElementById('customerInfo').classList.add('hidden');
+            });
+    } else {
+        document.getElementById('customerInfo').classList.add('hidden');
+    }
+}
+
+function saveDraft() {
+    // Implement save as draft functionality
+    const form = document.getElementById('orderForm');
+    const formData = new FormData(form);
+    formData.append('save_draft', 'true');
+    
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Rascunho salvo com sucesso!');
+        } else {
+            alert('Erro ao salvar rascunho.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao salvar rascunho:', error);
+        alert('Erro ao salvar rascunho.');
+    });
+}
+
+function openCustomerModal() {
+    // Open customer creation modal or redirect to customer form
+    window.open("{% url 'sales:customer_create' %}", '_blank');
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Customer change listener
+    document.getElementById('{{ form.customer.id_for_label }}').addEventListener('change', loadCustomerInfo);
+    
+    // Percentage change listeners
+    document.getElementById('{{ form.discount_percentage.id_for_label }}').addEventListener('input', calculateTotals);
+    document.getElementById('{{ form.tax_percentage.id_for_label }}').addEventListener('input', calculateTotals);
+    document.getElementById('{{ form.shipping_cost.id_for_label }}').addEventListener('input', calculateTotals);
+    
+    // Load customer info if customer is already selected
+    loadCustomerInfo();
+    
+    // Add at least one item if creating new order
+    {% if not form.instance.pk %}
+    addItem();
+    {% endif %}
+});
+
+// Form validation
+document.getElementById('orderForm').addEventListener('submit', function(e) {
+    const items = document.querySelectorAll('.item-row');
+    
+    if (items.length === 0) {
+        e.preventDefault();
+        alert('Adicione pelo menos um item ao pedido.');
+        return false;
+    }
+    
+    let hasValidItems = false;
+    items.forEach(item => {
+        const product = item.querySelector('.item-product').value;
+        const quantity = item.querySelector('.item-quantity').value;
+        const price = item.querySelector('.item-price').value;
+        
+        if (product && quantity && price) {
+            hasValidItems = true;
+        }
+    });
+    
+    if (!hasValidItems) {
+        e.preventDefault();
+        alert('Preencha todos os campos dos itens do pedido.');
+        return false;
+    }
+});
+</script>
+{% endblock %}

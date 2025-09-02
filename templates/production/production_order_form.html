@@ -1,0 +1,618 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar{% else %}Nova{% endif %} Ordem de Produção - Coffee Factory Management System
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-step {
+        transition: all 0.3s ease;
+    }
+    .form-step.hidden {
+        display: none;
+    }
+    .step-indicator {
+        transition: all 0.3s ease;
+    }
+    .step-indicator.active {
+        background-color: #8B4513;
+        color: white;
+    }
+    .step-indicator.completed {
+        background-color: #059669;
+        color: white;
+    }
+    .recipe-card {
+        transition: all 0.3s ease;
+    }
+    .recipe-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .material-requirement {
+        background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+    }
+    .dark .material-requirement {
+        background: linear-gradient(135deg, #374151 0%, #4B5563 100%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex items-center space-x-4">
+        <a href="{% url 'production:production_order_list' %}" 
+           class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 transition-colors">
+            <i class="fas fa-arrow-left text-xl"></i>
+        </a>
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                <i class="fas fa-plus-circle text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                {% if form.instance.pk %}Editar Ordem{% else %}Nova Ordem de Produção{% endif %}
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                {% if form.instance.pk %}
+                    Edite os dados da ordem {{ form.instance.order_number }}
+                {% else %}
+                    Crie uma nova ordem de produção
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Multi-step Form -->
+<div x-data="productionOrderForm()" class="max-w-6xl mx-auto">
+    <!-- Step Indicators -->
+    <div class="mb-8">
+        <div class="flex items-center justify-center space-x-4">
+            <div class="step-indicator active flex items-center justify-center w-10 h-10 rounded-full bg-coffee-600 text-white font-semibold text-sm">
+                1
+            </div>
+            <div class="flex-1 h-1 bg-gray-200 dark:bg-gray-700 mx-2">
+                <div class="h-full bg-coffee-600" :style="{ width: currentStep >= 2 ? '100%' : '0%' }"></div>
+            </div>
+            <div class="step-indicator flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 font-semibold text-sm"
+                 :class="{ 'active': currentStep >= 2, 'completed': currentStep > 2 }">
+                2
+            </div>
+            <div class="flex-1 h-1 bg-gray-200 dark:bg-gray-700 mx-2">
+                <div class="h-full bg-coffee-600" :style="{ width: currentStep >= 3 ? '100%' : '0%' }"></div>
+            </div>
+            <div class="step-indicator flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 font-semibold text-sm"
+                 :class="{ 'active': currentStep >= 3, 'completed': currentStep > 3 }">
+                3
+            </div>
+        </div>
+        <div class="flex justify-between mt-4 text-sm text-gray-600 dark:text-gray-400">
+            <span class="font-medium" :class="{ 'text-coffee-600 dark:text-coffee-400': currentStep === 1 }">
+                Informações Básicas
+            </span>
+            <span class="font-medium" :class="{ 'text-coffee-600 dark:text-coffee-400': currentStep === 2 }">
+                Receita e Materiais
+            </span>
+            <span class="font-medium" :class="{ 'text-coffee-600 dark:text-coffee-400': currentStep === 3 }">
+                Revisão e Confirmação
+            </span>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <form method="post" @submit.prevent="submitForm">
+        {% csrf_token %}
+        
+        <!-- Step 1: Basic Information -->
+        <div x-show="currentStep === 1" class="form-step">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                    <i class="fas fa-info-circle text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    Informações Básicas da Ordem
+                </h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Order Number -->
+                    <div>
+                        <label for="id_order_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Número da Ordem <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.order_number }}
+                        {% if form.order_number.errors %}
+                        <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                            {{ form.order_number.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Priority -->
+                    <div>
+                        <label for="id_priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Prioridade <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.priority }}
+                        {% if form.priority.errors %}
+                        <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                            {{ form.priority.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Recipe Selection -->
+                    <div>
+                        <label for="id_recipe" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Receita <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.recipe }}
+                        {% if form.recipe.errors %}
+                        <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                            {{ form.recipe.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Planned Quantity -->
+                    <div>
+                        <label for="id_planned_quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Quantidade Planejada <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.planned_quantity }}
+                        {% if form.planned_quantity.errors %}
+                        <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                            {{ form.planned_quantity.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Planned Start Date -->
+                    <div>
+                        <label for="id_planned_start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Data de Início Planejada <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.planned_start_date }}
+                        {% if form.planned_start_date.errors %}
+                        <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                            {{ form.planned_start_date.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Planned End Date -->
+                    <div>
+                        <label for="id_planned_end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Data de Fim Planejada <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.planned_end_date }}
+                        {% if form.planned_end_date.errors %}
+                        <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                            {{ form.planned_end_date.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Supervisor -->
+                    <div>
+                        <label for="id_supervisor" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Supervisor <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.supervisor }}
+                        {% if form.supervisor.errors %}
+                        <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                            {{ form.supervisor.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div class="lg:col-span-2">
+                        <label for="id_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Observações
+                        </label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                        <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                            {{ form.notes.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <div class="flex justify-end mt-8">
+                    <button type="button" @click="nextStep()" 
+                            class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+                        Próximo
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step 2: Recipe and Materials -->
+        <div x-show="currentStep === 2" class="form-step">
+            <div class="space-y-6">
+                <!-- Recipe Selection -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                        <i class="fas fa-book text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                        Seleção de Receita
+                    </h2>
+                    
+                    <div class="mb-6">
+                        <label for="id_recipe" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Receita
+                        </label>
+                        {{ form.recipe }}
+                        {% if form.recipe.errors %}
+                        <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                            {{ form.recipe.errors.0 }}
+                        </div>
+                        {% endif %}
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            Selecione uma receita para esta produção (opcional)
+                        </p>
+                    </div>
+                    
+                    <!-- Recipe Details (shown when recipe is selected) -->
+                    <div x-show="selectedRecipe" class="recipe-card p-4 bg-coffee-50 dark:bg-coffee-900/20 rounded-lg border border-coffee-200 dark:border-coffee-700">
+                        <h3 class="font-semibold text-coffee-800 dark:text-coffee-200 mb-3">Detalhes da Receita</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <span class="font-medium text-coffee-700 dark:text-coffee-300">Versão:</span>
+                                <span class="text-coffee-600 dark:text-coffee-400 ml-2" x-text="selectedRecipe?.version"></span>
+                            </div>
+                            <div>
+                                <span class="font-medium text-coffee-700 dark:text-coffee-300">Rendimento:</span>
+                                <span class="text-coffee-600 dark:text-coffee-400 ml-2" x-text="selectedRecipe?.yield_quantity + ' un.'"></span>
+                            </div>
+                            <div>
+                                <span class="font-medium text-coffee-700 dark:text-coffee-300">Tempo:</span>
+                                <span class="text-coffee-600 dark:text-coffee-400 ml-2" x-text="selectedRecipe?.estimated_time_minutes + ' min'"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Material Requirements -->
+                <div x-show="selectedRecipe?.materials?.length > 0" 
+                     class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-boxes text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                        Materiais Necessários
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <template x-for="material in selectedRecipe?.materials || []" :key="material.id">
+                            <div class="material-requirement p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-coffee-100 dark:bg-coffee-800 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-box text-coffee-600 dark:text-coffee-400"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900 dark:text-white" x-text="material.name"></p>
+                                            <p class="text-sm text-gray-600 dark:text-gray-400" x-text="material.code"></p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-semibold text-gray-900 dark:text-white">
+                                            <span x-text="material.quantity"></span>
+                                            <span x-text="material.unit"></span>
+                                        </p>
+                                        <p class="text-sm" 
+                                           :class="material.available_stock >= material.quantity ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                                            Estoque: <span x-text="material.available_stock"></span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div x-show="material.available_stock < material.quantity" 
+                                     class="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-sm text-red-700 dark:text-red-300">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    Estoque insuficiente! Faltam <span x-text="material.quantity - material.available_stock"></span> 
+                                    <span x-text="material.unit"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    
+                    <!-- Stock Warning -->
+                    <div x-show="hasStockIssues" 
+                         class="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-yellow-600 dark:text-yellow-400 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-medium text-yellow-800 dark:text-yellow-200">Atenção: Estoque Insuficiente</h4>
+                                <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                                    Alguns materiais não possuem estoque suficiente. Verifique a disponibilidade antes de prosseguir com a produção.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <div class="flex justify-between">
+                    <button type="button" @click="prevStep()" 
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Anterior
+                    </button>
+                    <button type="button" @click="nextStep()" 
+                            class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+                        Próximo
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step 3: Review and Confirmation -->
+        <div x-show="currentStep === 3" class="form-step">
+            <div class="space-y-6">
+                <!-- Order Summary -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                        <i class="fas fa-clipboard-check text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                        Revisão da Ordem
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Produto</label>
+                                <p class="text-lg font-semibold text-gray-900 dark:text-white" x-text="formData.product_name"></p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Quantidade</label>
+                                <p class="text-lg font-semibold text-gray-900 dark:text-white" x-text="formData.quantity + ' ' + formData.product_unit"></p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridade</label>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium"
+                                      :class="{
+                                          'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100': formData.priority === 'high',
+                                          'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100': formData.priority === 'normal',
+                                          'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100': formData.priority === 'low'
+                                      }">
+                                    <span x-text="getPriorityDisplay(formData.priority)"></span>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Data de Início</label>
+                                <p class="text-lg text-gray-900 dark:text-white" x-text="formatDate(formData.planned_start_date)"></p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Data de Conclusão</label>
+                                <p class="text-lg text-gray-900 dark:text-white" x-text="formatDate(formData.planned_end_date)"></p>
+                            </div>
+                            
+                            <div x-show="selectedRecipe">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Receita</label>
+                                <p class="text-lg text-gray-900 dark:text-white" x-text="selectedRecipe?.name"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div x-show="formData.notes" class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Observações</label>
+                        <p class="text-gray-900 dark:text-white" x-text="formData.notes"></p>
+                    </div>
+                </div>
+                
+                <!-- Final Actions -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Confirmar Ordem</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                Revise todos os dados antes de {% if form.instance.pk %}atualizar{% else %}criar{% endif %} a ordem de produção.
+                            </p>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button type="button" @click="prevStep()" 
+                                    class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-arrow-left mr-2"></i>
+                                Anterior
+                            </button>
+                            <button type="submit" 
+                                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-check mr-2"></i>
+                                {% if form.instance.pk %}Atualizar Ordem{% else %}Criar Ordem{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <div class="flex justify-between">
+                    <button type="button" @click="prevStep()" 
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Anterior
+                    </button>
+                    <button type="submit" 
+                            class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+                        <i class="fas fa-check mr-2"></i>
+                        {% if form.instance.pk %}Atualizar Ordem{% else %}Criar Ordem{% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function productionOrderForm() {
+    return {
+        currentStep: 1,
+        selectedRecipe: null,
+        formData: {
+            product_name: '',
+            product_unit: '',
+            quantity: '',
+            priority: '',
+            planned_start_date: '',
+            planned_end_date: '',
+            notes: ''
+        },
+        hasStockIssues: false,
+        
+        init() {
+            this.setupFormWatchers();
+            this.loadInitialData();
+        },
+        
+        setupFormWatchers() {
+            // Watch for recipe changes
+            const recipeSelect = document.getElementById('id_recipe');
+            if (recipeSelect) {
+                recipeSelect.addEventListener('change', (e) => {
+                    this.loadRecipeData(e.target.value);
+                });
+            }
+            
+            // Watch for product changes
+            const productSelect = document.getElementById('id_product');
+            if (productSelect) {
+                productSelect.addEventListener('change', (e) => {
+                    this.updateProductInfo(e.target.value);
+                });
+            }
+        },
+        
+        loadInitialData() {
+            // Load current form values
+            const productSelect = document.getElementById('id_product');
+            if (productSelect && productSelect.value) {
+                this.updateProductInfo(productSelect.value);
+            }
+            
+            const recipeSelect = document.getElementById('id_recipe');
+            if (recipeSelect && recipeSelect.value) {
+                this.loadRecipeData(recipeSelect.value);
+            }
+        },
+        
+        loadRecipeData(recipeId) {
+            if (!recipeId) {
+                this.selectedRecipe = null;
+                return;
+            }
+            
+            fetch(`/api/recipes/${recipeId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    this.selectedRecipe = data;
+                    this.checkStockAvailability();
+                })
+                .catch(error => {
+                    console.error('Error loading recipe:', error);
+                });
+        },
+        
+        updateProductInfo(productId) {
+            if (!productId) return;
+            
+            fetch(`/api/products/${productId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    this.formData.product_name = data.name;
+                    this.formData.product_unit = data.unit_of_measure.abbreviation;
+                })
+                .catch(error => {
+                    console.error('Error loading product:', error);
+                });
+        },
+        
+        checkStockAvailability() {
+            if (!this.selectedRecipe?.materials) return;
+            
+            this.hasStockIssues = this.selectedRecipe.materials.some(material => 
+                material.available_stock < material.quantity
+            );
+        },
+        
+        nextStep() {
+            if (this.validateCurrentStep()) {
+                if (this.currentStep < 3) {
+                    this.currentStep++;
+                    this.updateFormData();
+                }
+            }
+        },
+        
+        prevStep() {
+            if (this.currentStep > 1) {
+                this.currentStep--;
+            }
+        },
+        
+        validateCurrentStep() {
+            const step = this.currentStep;
+            
+            if (step === 1) {
+                const requiredFields = ['id_product', 'id_quantity', 'id_priority', 'id_planned_start_date', 'id_planned_end_date'];
+                return requiredFields.every(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    return field && field.value.trim() !== '';
+                });
+            }
+            
+            return true;
+        },
+        
+        updateFormData() {
+            // Update form data for review step
+            const formElements = document.querySelectorAll('input, select, textarea');
+            formElements.forEach(element => {
+                if (element.name && element.value) {
+                    this.formData[element.name] = element.value;
+                }
+            });
+            
+            // Get display values
+            const productSelect = document.getElementById('id_product');
+            if (productSelect) {
+                this.formData.product_name = productSelect.options[productSelect.selectedIndex]?.text || '';
+            }
+            
+            const prioritySelect = document.getElementById('id_priority');
+            if (prioritySelect) {
+                this.formData.priority = prioritySelect.value;
+            }
+        },
+        
+        getPriorityDisplay(priority) {
+            const priorities = {
+                'high': 'Alta',
+                'normal': 'Normal',
+                'low': 'Baixa'
+            };
+            return priorities[priority] || priority;
+        },
+        
+        formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        },
+        
+        submitForm() {
+            const form = document.querySelector('form');
+            if (form) {
+                form.submit();
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

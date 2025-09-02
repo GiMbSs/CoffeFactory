@@ -1,0 +1,580 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - Coffee Factory Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(249, 250, 251, 0.9) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(139, 69, 19, 0.1);
+        transition: all 0.3s ease;
+    }
+    .detail-card:hover {
+        border-color: rgba(139, 69, 19, 0.2);
+        box-shadow: 0 10px 40px -10px rgba(139, 69, 19, 0.2);
+    }
+    .info-item {
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        padding: 12px;
+    }
+    .info-item:hover {
+        background-color: rgba(139, 69, 19, 0.05);
+    }
+    .action-button {
+        transition: all 0.2s ease;
+    }
+    .action-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.2);
+    }
+    .item-card {
+        transition: all 0.3s ease;
+        border: 1px solid rgba(139, 69, 19, 0.1);
+    }
+    .item-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -8px rgba(139, 69, 19, 0.3);
+        border-color: rgba(139, 69, 19, 0.3);
+    }
+    .stats-grid {
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.05) 0%, rgba(210, 105, 30, 0.05) 100%);
+        border: 1px solid rgba(139, 69, 19, 0.1);
+    }
+    .breadcrumb-item {
+        color: #6B7280;
+        transition: color 0.2s ease;
+    }
+    .breadcrumb-item:hover {
+        color: #8B4513;
+    }
+    .category-icon {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+    }
+    .timeline-item {
+        position: relative;
+        padding-left: 2rem;
+    }
+    .timeline-item:before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 0;
+        bottom: -1rem;
+        width: 2px;
+        background: linear-gradient(to bottom, #8B4513, #D2691E);
+    }
+    .timeline-item:last-child:before {
+        display: none;
+    }
+    .timeline-dot {
+        position: absolute;
+        left: 0;
+        top: 6px;
+        width: 16px;
+        height: 16px;
+        background: #8B4513;
+        border: 3px solid white;
+        border-radius: 50%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="mb-6">
+    <ol class="flex items-center space-x-2 text-sm">
+        <li><a href="{% url 'inventory:dashboard' %}" class="breadcrumb-item hover:text-coffee-600">Dashboard</a></li>
+        <li><i class="fas fa-chevron-right text-gray-400 text-xs"></i></li>
+        <li><a href="{% url 'inventory:category_list' %}" class="breadcrumb-item hover:text-coffee-600">Categorias</a></li>
+        <li><i class="fas fa-chevron-right text-gray-400 text-xs"></i></li>
+        <li class="text-gray-900 dark:text-white font-medium">{{ category.name }}</li>
+    </ol>
+</nav>
+
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+        <div class="flex items-start space-x-4">
+            <div class="category-icon w-16 h-16 rounded-xl flex items-center justify-center text-white">
+                {% if category.type == 'material' %}
+                    <i class="fas fa-cogs text-2xl"></i>
+                {% else %}
+                    <i class="fas fa-box text-2xl"></i>
+                {% endif %}
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    {{ category.name }}
+                </h1>
+                <div class="flex items-center space-x-4 mb-2">
+                    <!-- Type Badge -->
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                           {% if category.type == 'material' %}
+                               bg-coffee-100 text-coffee-800 dark:bg-coffee-800 dark:text-coffee-100
+                           {% else %}
+                               bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
+                           {% endif %}">
+                        {% if category.type == 'material' %}
+                            <i class="fas fa-cogs w-3 h-3 mr-2"></i>
+                            Material
+                        {% else %}
+                            <i class="fas fa-box w-3 h-3 mr-2"></i>
+                            Produto
+                        {% endif %}
+                    </span>
+                    
+                    <!-- Status Badge -->
+                    {% if category.status == 'active' %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                            <i class="fas fa-check-circle w-3 h-3 mr-2"></i>
+                            Ativa
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">
+                            <i class="fas fa-times-circle w-3 h-3 mr-2"></i>
+                            Inativa
+                        </span>
+                    {% endif %}
+                </div>
+                {% if category.description %}
+                    <p class="text-gray-600 dark:text-gray-400 max-w-2xl">
+                        {{ category.description }}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex items-center space-x-3 mt-6 lg:mt-0">
+            <a href="{% url 'inventory:category_update' category.pk %}" 
+               class="action-button bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-sm font-medium flex items-center space-x-2">
+                <i class="fas fa-edit"></i>
+                <span>Editar</span>
+            </a>
+            <button onclick="confirmDelete('{{ category.name }}', '{% url 'inventory:category_delete' category.pk %}')" 
+                    class="action-button bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg text-sm font-medium flex items-center space-x-2">
+                <i class="fas fa-trash"></i>
+                <span>Excluir</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Grid -->
+<div class="stats-grid rounded-xl p-6 mb-8">
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+        <i class="fas fa-chart-bar text-coffee-600 dark:text-coffee-400 mr-3"></i>
+        Estatísticas da Categoria
+    </h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% if category.type == 'material' %}
+            <div class="bg-white dark:bg-gray-700 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Total de Materiais</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ materials_count }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-coffee-100 dark:bg-coffee-800 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-cogs text-coffee-600 dark:text-coffee-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-700 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Materiais Ativos</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ materials.count }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="bg-white dark:bg-gray-700 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Total de Produtos</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ products_count }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-box text-green-600 dark:text-green-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-700 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Produtos Ativos</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ products.count }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-800 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check-circle text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <div class="bg-white dark:bg-gray-700 rounded-lg p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Criada em</p>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ category.created_at|date:"d/m/Y" }}</p>
+                </div>
+                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-800 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-purple-600 dark:text-purple-400"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-700 rounded-lg p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Última Atualização</p>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ category.updated_at|date:"d/m/Y" }}</p>
+                </div>
+                <div class="w-10 h-10 bg-orange-100 dark:bg-orange-800 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-clock text-orange-600 dark:text-orange-400"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content -->
+    <div class="lg:col-span-2 space-y-8">
+        <!-- Related Items -->
+        {% if category.type == 'material' and materials %}
+        <div class="detail-card rounded-xl p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-cogs text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    Materiais nesta Categoria
+                </h3>
+                {% if materials_count > 10 %}
+                    <a href="{% url 'inventory:material_list' %}?category={{ category.pk }}" 
+                       class="text-coffee-600 hover:text-coffee-700 dark:text-coffee-400 dark:hover:text-coffee-300 text-sm font-medium">
+                        Ver todos ({{ materials_count }}) <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                {% endif %}
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for material in materials %}
+                <div class="item-card bg-white dark:bg-gray-700 rounded-lg p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h4 class="font-medium text-gray-900 dark:text-white">{{ material.name }}</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ material.code }}</p>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                               {% if material.status == 'active' %}
+                                   bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
+                               {% else %}
+                                   bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100
+                               {% endif %}">
+                            {{ material.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600 dark:text-gray-400">Estoque atual:</span>
+                        <span class="font-medium text-gray-900 dark:text-white">
+                            {{ material.current_stock|default:0 }} {{ material.unit_of_measure.symbol }}
+                        </span>
+                    </div>
+                    
+                    <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                        <a href="{% url 'inventory:material_detail' material.pk %}" 
+                           class="text-coffee-600 hover:text-coffee-700 dark:text-coffee-400 dark:hover:text-coffee-300 text-sm font-medium">
+                            Ver detalhes <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if category.type == 'product' and products %}
+        <div class="detail-card rounded-xl p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-box text-green-600 dark:text-green-400 mr-3"></i>
+                    Produtos nesta Categoria
+                </h3>
+                {% if products_count > 10 %}
+                    <a href="{% url 'inventory:product_list' %}?category={{ category.pk }}" 
+                       class="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 text-sm font-medium">
+                        Ver todos ({{ products_count }}) <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                {% endif %}
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for product in products %}
+                <div class="item-card bg-white dark:bg-gray-700 rounded-lg p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h4 class="font-medium text-gray-900 dark:text-white">{{ product.name }}</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ product.code }}</p>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                               {% if product.status == 'active' %}
+                                   bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
+                               {% else %}
+                                   bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100
+                               {% endif %}">
+                            {{ product.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600 dark:text-gray-400">Estoque atual:</span>
+                        <span class="font-medium text-gray-900 dark:text-white">
+                            {{ product.current_stock|default:0 }} {{ product.unit_of_measure.symbol }}
+                        </span>
+                    </div>
+                    
+                    <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                        <a href="{% url 'inventory:product_detail' product.pk %}" 
+                           class="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 text-sm font-medium">
+                            Ver detalhes <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Empty State -->
+        {% if category.type == 'material' and not materials %}
+        <div class="detail-card rounded-xl p-8 text-center">
+            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-cogs text-gray-400 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Nenhum material nesta categoria</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Adicione materiais a esta categoria para começar a organizar seu estoque.
+            </p>
+            <a href="{% url 'inventory:material_create' %}?category={{ category.pk }}" 
+               class="action-button bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium inline-flex items-center space-x-2">
+                <i class="fas fa-plus"></i>
+                <span>Adicionar Material</span>
+            </a>
+        </div>
+        {% endif %}
+        
+        {% if category.type == 'product' and not products %}
+        <div class="detail-card rounded-xl p-8 text-center">
+            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-box text-gray-400 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Nenhum produto nesta categoria</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Adicione produtos a esta categoria para começar a organizar seu catálogo.
+            </p>
+            <a href="{% url 'inventory:product_create' %}?category={{ category.pk }}" 
+               class="action-button bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg text-sm font-medium inline-flex items-center space-x-2">
+                <i class="fas fa-plus"></i>
+                <span>Adicionar Produto</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="space-y-6">
+        <!-- Category Information -->
+        <div class="detail-card rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-info-circle text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Informações
+            </h3>
+            
+            <div class="space-y-4">
+                <div class="info-item">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Código ID</span>
+                        <span class="text-sm text-gray-900 dark:text-white font-mono">{{ category.pk|stringformat:"05d" }}</span>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Tipo</span>
+                        <span class="text-sm text-gray-900 dark:text-white">{{ category.get_type_display }}</span>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Status</span>
+                        <span class="text-sm text-gray-900 dark:text-white">{{ category.get_status_display }}</span>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Criada por</span>
+                        <span class="text-sm text-gray-900 dark:text-white">{{ category.created_by.get_full_name|default:category.created_by.username }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="detail-card rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-bolt text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Ações Rápidas
+            </h3>
+            
+            <div class="space-y-3">
+                {% if category.type == 'material' %}
+                    <a href="{% url 'inventory:material_create' %}?category={{ category.pk }}" 
+                       class="w-full bg-coffee-100 hover:bg-coffee-200 dark:bg-coffee-800 dark:hover:bg-coffee-700 text-coffee-700 dark:text-coffee-300 py-3 px-4 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Novo Material</span>
+                    </a>
+                    
+                    <a href="{% url 'inventory:material_list' %}?category={{ category.pk }}" 
+                       class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 py-3 px-4 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                        <i class="fas fa-list"></i>
+                        <span>Ver Todos os Materiais</span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'inventory:product_create' %}?category={{ category.pk }}" 
+                       class="w-full bg-green-100 hover:bg-green-200 dark:bg-green-800 dark:hover:bg-green-700 text-green-700 dark:text-green-300 py-3 px-4 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Novo Produto</span>
+                    </a>
+                    
+                    <a href="{% url 'inventory:product_list' %}?category={{ category.pk }}" 
+                       class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 py-3 px-4 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                        <i class="fas fa-list"></i>
+                        <span>Ver Todos os Produtos</span>
+                    </a>
+                {% endif %}
+                
+                <a href="{% url 'inventory:category_update' category.pk %}" 
+                   class="w-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-blue-700 dark:text-blue-300 py-3 px-4 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                    <i class="fas fa-edit"></i>
+                    <span>Editar Categoria</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Activity Timeline -->
+        <div class="detail-card rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-history text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Histórico
+            </h3>
+            
+            <div class="space-y-4">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Categoria criada</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ category.created_at|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+                
+                {% if category.updated_at != category.created_at %}
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Última atualização</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ category.updated_at|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900">
+                <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mt-4">Confirmar Exclusão</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Tem certeza que deseja excluir a categoria "<span id="categoryName" class="font-semibold"></span>"? 
+                    Esta ação não pode ser desfeita e todos os itens associados perderão esta categoria.
+                </p>
+            </div>
+            <div class="items-center px-4 py-3">
+                <div class="flex space-x-3">
+                    <button id="cancelDelete" 
+                            class="flex-1 px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors">
+                        Cancelar
+                    </button>
+                    <a id="confirmDelete" 
+                       class="flex-1 px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300 transition-colors text-center">
+                        Excluir
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Delete confirmation
+function confirmDelete(categoryName, deleteUrl) {
+    const modal = document.getElementById('deleteModal');
+    const categoryNameSpan = document.getElementById('categoryName');
+    const confirmButton = document.getElementById('confirmDelete');
+    const cancelButton = document.getElementById('cancelDelete');
+    
+    categoryNameSpan.textContent = categoryName;
+    confirmButton.href = deleteUrl;
+    
+    modal.classList.remove('hidden');
+    
+    cancelButton.onclick = function() {
+        modal.classList.add('hidden');
+    };
+    
+    // Close modal when clicking outside
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            modal.classList.add('hidden');
+        }
+    };
+}
+
+// Animation on load
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate cards on load
+    const cards = document.querySelectorAll('.detail-card, .item-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

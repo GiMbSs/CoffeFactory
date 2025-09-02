@@ -1,0 +1,495 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Perfil - Coffee Factory Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        transition: all 0.3s ease;
+    }
+    .form-input:focus {
+        border-color: #8B4513;
+        box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+        transform: translateY(-1px);
+    }
+    .form-group {
+        transition: transform 0.2s ease;
+    }
+    .form-group:hover {
+        transform: translateY(-1px);
+    }
+    .profile-gradient {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        transition: transform 0.3s ease;
+    }
+    .profile-gradient:hover {
+        transform: scale(1.05);
+    }
+    
+    /* Field validation states */
+    .form-input.border-green-400 {
+        border-color: #34d399;
+        box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.1);
+    }
+    .form-input.border-orange-400 {
+        border-color: #fbbf24;
+        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+    }
+    .form-input.border-red-500 {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+    
+    /* Character counter animation */
+    .character-counter {
+        transition: color 0.3s ease;
+    }
+    
+    /* Phone validation styling */
+    .phone-validation-error {
+        animation: slideIn 0.3s ease;
+    }
+    
+    .field-validation-error {
+        animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Input focus animation */
+    .form-input {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Label animation */
+    label {
+        transition: color 0.3s ease;
+    }
+    
+    /* Success state animation */
+    .form-input:valid {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3e%3cpath fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1rem 1rem;
+        padding-right: 2.5rem;
+    }
+    
+    /* Loading button animation */
+    button[disabled] {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+    
+    /* Hover effects */
+    .form-group:hover .fas {
+        color: #8B4513;
+        transform: scale(1.1);
+        transition: all 0.2s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                <i class="fas fa-user-edit text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Editar Perfil
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                Atualize suas informações pessoais
+            </p>
+        </div>
+        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+            <a href="{% url 'accounts:profile' %}" 
+               class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2">
+                <i class="fas fa-arrow-left"></i>
+                <span>Voltar</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Form Container -->
+<div class="max-w-2xl mx-auto">
+    <div class="form-container bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-coffee-200 dark:border-coffee-700">
+        
+        <!-- Profile Avatar Section -->
+        <div class="text-center mb-8">
+            <div class="inline-block mb-4">
+                <div class="w-20 h-20 profile-gradient rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                    {{ user.first_name|slice:":1"|upper }}{{ user.last_name|slice:":1"|upper }}
+                </div>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">
+                Atualizando perfil de {{ user.get_full_name|default:user.username }}
+            </h2>
+            <p class="text-gray-600 dark:text-gray-400 text-sm">
+                {{ user.email }}
+            </p>
+        </div>
+
+        <!-- Form -->
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle text-red-400 mr-2"></i>
+                        <div class="text-sm text-red-800 dark:text-red-200">
+                            {{ form.non_field_errors }}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- First Name Field -->
+            <div class="form-group">
+                <label for="{{ form.first_name.id_for_label }}" 
+                       class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <i class="fas fa-user text-coffee-500 mr-2"></i>
+                    Nome
+                </label>
+                <div class="relative">
+                    <input type="text" 
+                           name="{{ form.first_name.name }}" 
+                           id="{{ form.first_name.id_for_label }}"
+                           value="{{ form.first_name.value|default:'' }}"
+                           class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-coffee-500 dark:bg-gray-700 dark:text-white transition-all duration-200{% if form.first_name.errors %} border-red-500 focus:border-red-500 focus:ring-red-500{% endif %}"
+                           placeholder="Digite seu nome"
+                           {% if form.first_name.field.required %}required{% endif %}>
+                    {% if form.first_name.errors %}
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if form.first_name.errors %}
+                    <div class="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        {{ form.first_name.errors.0 }}
+                    </div>
+                {% endif %}
+                {% if form.first_name.help_text %}
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        {{ form.first_name.help_text }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- Last Name Field -->
+            <div class="form-group">
+                <label for="{{ form.last_name.id_for_label }}" 
+                       class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <i class="fas fa-user text-coffee-500 mr-2"></i>
+                    Sobrenome
+                </label>
+                <div class="relative">
+                    <input type="text" 
+                           name="{{ form.last_name.name }}" 
+                           id="{{ form.last_name.id_for_label }}"
+                           value="{{ form.last_name.value|default:'' }}"
+                           class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-coffee-500 dark:bg-gray-700 dark:text-white transition-all duration-200{% if form.last_name.errors %} border-red-500 focus:border-red-500 focus:ring-red-500{% endif %}"
+                           placeholder="Digite seu sobrenome"
+                           {% if form.last_name.field.required %}required{% endif %}>
+                    {% if form.last_name.errors %}
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if form.last_name.errors %}
+                    <div class="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        {{ form.last_name.errors.0 }}
+                    </div>
+                {% endif %}
+                {% if form.last_name.help_text %}
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        {{ form.last_name.help_text }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- Phone Field -->
+            <div class="form-group">
+                <label for="{{ form.phone.id_for_label }}" 
+                       class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <i class="fas fa-phone text-coffee-500 mr-2"></i>
+                    Telefone
+                </label>
+                <div class="relative">
+                    <input type="tel" 
+                           name="{{ form.phone.name }}" 
+                           id="{{ form.phone.id_for_label }}"
+                           value="{{ form.phone.value|default:'' }}"
+                           class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-coffee-500 dark:bg-gray-700 dark:text-white transition-all duration-200{% if form.phone.errors %} border-red-500 focus:border-red-500 focus:ring-red-500{% endif %}"
+                           placeholder="Ex: +5511999999999"
+                           {% if form.phone.field.required %}required{% endif %}>
+                    {% if form.phone.errors %}
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if form.phone.errors %}
+                    <div class="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        {{ form.phone.errors.0 }}
+                    </div>
+                {% endif %}
+                {% if form.phone.help_text %}
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-info-circle text-coffee-500 mr-1"></i>
+                        {{ form.phone.help_text }}
+                    </p>
+                {% else %}
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-info-circle text-coffee-500 mr-1"></i>
+                        Formato recomendado: +5511999999999 (código país + DDD + número)
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- Info Box -->
+            <div class="bg-coffee-50 dark:bg-coffee-900 border border-coffee-200 dark:border-coffee-700 rounded-lg p-4">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-coffee-500 mt-0.5 mr-3"></i>
+                    <div class="text-sm text-coffee-800 dark:text-coffee-200">
+                        <p class="font-medium mb-1">Informações sobre a edição de perfil:</p>
+                        <ul class="list-disc list-inside space-y-1 text-coffee-700 dark:text-coffee-300">
+                            <li>Para alterar seu email ou nome de usuário, entre em contato com o administrador</li>
+                            <li>Para alterar sua senha, use o botão "Alterar Senha" na página do perfil</li>
+                            <li>Mantenha suas informações sempre atualizadas</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+                <a href="{% url 'accounts:profile' %}" 
+                   class="w-full sm:w-auto mb-4 sm:mb-0 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2">
+                    <i class="fas fa-times"></i>
+                    <span>Cancelar</span>
+                </a>
+                
+                <button type="submit" 
+                        class="w-full sm:w-auto bg-coffee-600 hover:bg-coffee-700 text-white px-8 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 hover:scale-105">
+                    <i class="fas fa-save"></i>
+                    <span>Salvar Alterações</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript for form enhancements -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form inputs
+    const firstNameInput = document.getElementById('{{ form.first_name.id_for_label }}');
+    const lastNameInput = document.getElementById('{{ form.last_name.id_for_label }}');
+    const phoneInput = document.getElementById('{{ form.phone.id_for_label }}');
+    const form = document.querySelector('form');
+    const avatarContainer = document.querySelector('.profile-gradient');
+    
+    // Add focus styles to form inputs
+    const inputs = document.querySelectorAll('.form-input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            const label = this.parentElement.parentElement.querySelector('label');
+            if (label) {
+                label.classList.add('text-coffee-600');
+            }
+        });
+        
+        input.addEventListener('blur', function() {
+            const label = this.parentElement.parentElement.querySelector('label');
+            if (label) {
+                label.classList.remove('text-coffee-600');
+            }
+        });
+    });
+    
+    // Update avatar when name changes
+    function updateAvatar() {
+        const firstName = firstNameInput.value.trim();
+        const lastName = lastNameInput.value.trim();
+        const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : '';
+        const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
+        
+        if (avatarContainer) {
+            avatarContainer.textContent = firstInitial + lastInitial;
+        }
+        
+        // Update header name
+        const headerName = document.querySelector('.text-xl.font-semibold');
+        if (headerName && (firstName || lastName)) {
+            headerName.textContent = `Atualizando perfil de ${firstName} ${lastName}`.trim();
+        }
+    }
+    
+    // Add event listeners for name fields
+    if (firstNameInput) {
+        firstNameInput.addEventListener('input', updateAvatar);
+    }
+    if (lastNameInput) {
+        lastNameInput.addEventListener('input', updateAvatar);
+    }
+    
+    // Phone formatting and validation
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+            
+            // Auto-format phone number
+            if (value.length > 0 && !value.startsWith('55')) {
+                // If doesn't start with country code, add it
+                if (value.length <= 11) {
+                    value = '55' + value;
+                }
+            }
+            
+            // Add + at the beginning
+            if (value.length > 0) {
+                value = '+' + value;
+            }
+            
+            e.target.value = value;
+            
+            // Validate phone format
+            validatePhone(value);
+        });
+        
+        phoneInput.addEventListener('blur', function() {
+            validatePhone(this.value);
+        });
+    }
+    
+    function validatePhone(phone) {
+        const phonePattern = /^\+55\d{10,11}$/;
+        const phoneContainer = phoneInput.parentElement.parentElement;
+        const existingError = phoneContainer.querySelector('.phone-validation-error');
+        
+        // Remove existing error
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        if (phone && !phonePattern.test(phone)) {
+            // Add validation error
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'phone-validation-error mt-1 text-sm text-orange-600 dark:text-orange-400 flex items-center';
+            errorDiv.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>Formato sugerido: +5511999999999';
+            phoneContainer.appendChild(errorDiv);
+            
+            phoneInput.classList.add('border-orange-400', 'focus:border-orange-400', 'focus:ring-orange-400');
+            phoneInput.classList.remove('border-green-400', 'focus:border-green-400', 'focus:ring-green-400');
+        } else if (phone) {
+            // Valid phone
+            phoneInput.classList.add('border-green-400', 'focus:border-green-400', 'focus:ring-green-400');
+            phoneInput.classList.remove('border-orange-400', 'focus:border-orange-400', 'focus:ring-orange-400');
+        } else {
+            // Reset styles
+            phoneInput.classList.remove('border-green-400', 'focus:border-green-400', 'focus:ring-green-400');
+            phoneInput.classList.remove('border-orange-400', 'focus:border-orange-400', 'focus:ring-orange-400');
+        }
+    }
+    
+    // Form validation before submit
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        
+        // Basic validation
+        if (firstNameInput && !firstNameInput.value.trim()) {
+            showFieldError(firstNameInput, 'Nome é obrigatório');
+            isValid = false;
+        }
+        
+        if (lastNameInput && !lastNameInput.value.trim()) {
+            showFieldError(lastNameInput, 'Sobrenome é obrigatório');
+            isValid = false;
+        }
+        
+        if (phoneInput && phoneInput.value && !/^\+55\d{10,11}$/.test(phoneInput.value)) {
+            showFieldError(phoneInput, 'Formato de telefone inválido');
+            isValid = false;
+        }
+        
+        if (isValid) {
+            // Show loading state
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Salvando...';
+            submitBtn.disabled = true;
+        } else {
+            e.preventDefault();
+        }
+    });
+    
+    function showFieldError(field, message) {
+        const container = field.parentElement.parentElement;
+        const existingError = container.querySelector('.field-validation-error');
+        
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'field-validation-error mt-2 text-sm text-red-600 dark:text-red-400 flex items-center';
+        errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i>${message}`;
+        container.appendChild(errorDiv);
+        
+        field.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+        field.focus();
+    }
+    
+    // Character counter for name fields
+    function addCharacterCounter(input, maxLength) {
+        if (!input) return;
+        
+        const container = input.parentElement.parentElement;
+        const counter = document.createElement('div');
+        counter.className = 'character-counter mt-1 text-xs text-gray-400 text-right';
+        container.appendChild(counter);
+        
+        function updateCounter() {
+            const current = input.value.length;
+            counter.textContent = `${current}/${maxLength}`;
+            
+            if (current > maxLength * 0.8) {
+                counter.classList.add('text-orange-500');
+                counter.classList.remove('text-gray-400');
+            } else {
+                counter.classList.remove('text-orange-500');
+                counter.classList.add('text-gray-400');
+            }
+        }
+        
+        input.addEventListener('input', updateCounter);
+        updateCounter();
+    }
+    
+    // Add character counters
+    addCharacterCounter(firstNameInput, 30);
+    addCharacterCounter(lastNameInput, 30);
+    
+    // Initialize avatar
+    updateAvatar();
+});
+</script>
+{% endblock %}

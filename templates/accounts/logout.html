@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Logout - Coffee Factory Management System</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% load static %}{% static 'img/favicon.ico' %}">
+
+    <!-- TailwindCSS via CDN with custom config -->
+                        <p class="text-coffee-100/80 text-sm font-medium">Management System</p>
+                        <div class="w-24 h-1 bg-gradient-to-r from-coffee-400 to-coffee-600 rounded-full mx-auto mt-3"></div>
+                    </div>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Logout - Coffee Factory Management System</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% load static %}{% static 'img/favicon.ico' %}">
+    
+    <!-- TailwindCSS via CDN with custom config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'coffee': {
+                            50: '#fdf7f0',
+                            100: '#fbeee1',
+                            200: '#f6dcc2',
+                            300: '#efc199',
+                            400: '#e6a06e',
+                            500: '#dd844c',
+                            600: '#cf6e3e',
+                            700: '#ac5837',
+                            800: '#8a4735',
+                            900: '#703c2e',
+                        },
+                        'primary': {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'serif': ['Playfair Display', 'serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'bounce-gentle': 'bounceGentle 2s ease-in-out infinite',
+                        'countdown': 'countdown 3s linear forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        bounceGentle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' },
+                        },
+                        countdown: {
+                            '0%': { transform: 'scaleX(1)' },
+                            '100%': { transform: 'scaleX(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Alpine.js for interactive components -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-coffee-900 via-coffee-800 to-coffee-700 relative overflow-hidden">
+    {% load static %}
+    
+    <!-- Background Elements -->
+    <div class="absolute inset-0 overflow-hidden">
+        <!-- Coffee Bean Pattern -->
+        <div class="absolute top-10 left-10 w-8 h-8 text-coffee-500/10 animate-bounce-gentle">
+            <i class="fas fa-coffee text-2xl"></i>
+        </div>
+        <div class="absolute top-32 right-20 w-6 h-6 text-coffee-400/10 animate-bounce-gentle" style="animation-delay: 1s;">
+            <i class="fas fa-coffee text-xl"></i>
+        </div>
+        <div class="absolute bottom-20 left-16 w-10 h-10 text-coffee-600/10 animate-bounce-gentle" style="animation-delay: 2s;">
+            <i class="fas fa-coffee text-3xl"></i>
+        </div>
+        <div class="absolute bottom-40 right-10 w-7 h-7 text-coffee-500/10 animate-bounce-gentle" style="animation-delay: 0.5s;">
+            <i class="fas fa-coffee text-xl"></i>
+        </div>
+        
+        <!-- Gradient Overlays -->
+        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-coffee-500/5 to-transparent"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-radial from-coffee-600/20 to-transparent blur-3xl"></div>
+        <div class="absolute top-0 left-0 w-96 h-96 bg-gradient-radial from-coffee-400/10 to-transparent blur-3xl"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="relative min-h-screen flex items-center justify-center p-4" 
+         x-data="logoutPage()" 
+         x-init="init()">
+        
+        <!-- Logout Card -->
+        <div class="w-full max-w-md animate-fade-in">
+            <!-- Glassmorphism Card -->
+            <div class="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl border border-white/20 p-8 relative overflow-hidden">
+                <!-- Card Background Pattern -->
+                <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"></div>
+                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-radial from-coffee-400/10 to-transparent blur-2xl"></div>
+                
+                <!-- Content -->
+                <div class="relative z-10 text-center">
+                    <!-- Logo/Brand Section -->
+                    <div class="mb-8 animate-slide-up">
+                        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-coffee-400 to-coffee-600 rounded-full shadow-lg mb-4">
+                            <i class="fas fa-coffee text-3xl text-white"></i>
+                        </div>
+                        <h1 class="text-3xl font-serif font-bold text-white mb-2">Coffee Factory</h1>
+                        <p class="text-coffee-100/80 text-sm font-medium">Management System</p>
+                        <div class="w-24 h-1 bg-gradient-to-r from-coffee-400 to-coffee-600 rounded-full mx-auto mt-3"></div>
+                    </div>
+
+                    <!-- Logout Success Message -->
+                    <div class="mb-8 animate-slide-up" style="animation-delay: 0.2s;">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-green-500/20 rounded-full border-2 border-green-400/30 mb-4">
+                            <i class="fas fa-check text-2xl text-green-400"></i>
+                        </div>
+                        <h2 class="text-2xl font-semibold text-white mb-2">Logout Realizado</h2>
+                        <p class="text-coffee-100/70 text-sm">Você foi desconectado com sucesso do sistema.</p>
+                    </div>
+
+                    <!-- Countdown and Redirect Info -->
+                    <div class="mb-8 animate-slide-up" style="animation-delay: 0.4s;">
+                        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                            <p class="text-coffee-100/80 text-sm mb-3">
+                                Redirecionando para o login em:
+                            </p>
+                            <div class="text-4xl font-bold text-coffee-400 mb-3" x-text="countdown"></div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-coffee-400 to-coffee-600 rounded-full animate-countdown origin-left"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Manual Actions -->
+                    <div class="space-y-4 animate-slide-up" style="animation-delay: 0.6s;">
+                        <a href="{% url 'accounts:login' %}" 
+                           class="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-coffee-500 to-coffee-600 text-white font-semibold rounded-xl shadow-lg hover:from-coffee-400 hover:to-coffee-500 transition-all duration-300 transform hover:scale-105">
+                            <i class="fas fa-sign-in-alt mr-2"></i>
+                            Fazer Login Agora
+                        </a>
+                        
+                        <a href="{% url 'core:home' %}" 
+                           class="w-full inline-flex items-center justify-center px-6 py-3 bg-white/10 text-white font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300">
+                            <i class="fas fa-home mr-2"></i>
+                            Ir para Página Inicial
+                        </a>
+                    </div>
+
+                    <!-- Footer Info -->
+                    <div class="text-center text-xs text-coffee-100/50 mt-8 animate-slide-up" style="animation-delay: 0.8s;">
+                        <p class="flex items-center justify-center space-x-2">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Sessão encerrada com segurança</span>
+                        </p>
+                        <p class="mt-2">© 2024 Coffee Factory Management System</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alpine.js Component -->
+    <script>
+        function logoutPage() {
+            return {
+                countdown: 5,
+                redirectUrl: '{% url "accounts:login" %}',
+
+                init() {
+                    this.startCountdown();
+                },
+
+                startCountdown() {
+                    const timer = setInterval(() => {
+                        this.countdown--;
+                        
+                        if (this.countdown <= 0) {
+                            clearInterval(timer);
+                            this.redirect();
+                        }
+                    }, 1000);
+                },
+
+                redirect() {
+                    // Add fade out effect before redirect
+                    document.body.style.transition = 'opacity 0.5s ease-out';
+                    document.body.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        window.location.href = this.redirectUrl;
+                    }, 500);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

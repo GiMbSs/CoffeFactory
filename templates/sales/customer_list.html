@@ -1,0 +1,426 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Clientes - Coffee Factory Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .customer-card {
+        transition: all 0.3s ease;
+    }
+    .customer-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .filter-panel {
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.05) 0%, rgba(210, 105, 30, 0.05) 100%);
+    }
+    .customer-status {
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                <i class="fas fa-users text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Clientes
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                Gerencie informações de clientes e relacionamentos comerciais
+            </p>
+        </div>
+        <div class="flex space-x-3">
+            <button class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 flex items-center">
+                <i class="fas fa-download mr-2"></i>
+                Exportar
+            </button>
+            <a href="{% url 'sales:customer_create' %}" 
+               class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 flex items-center">
+                <i class="fas fa-user-plus mr-2"></i>
+                Novo Cliente
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-panel bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700 mb-8">
+    <form method="get" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Search -->
+            <div class="md:col-span-2">
+                <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Buscar Cliente
+                </label>
+                <div class="relative">
+                    <input type="text" 
+                           name="search" 
+                           id="search"
+                           value="{{ request.GET.search }}"
+                           placeholder="Nome, código, CNPJ/CPF..."
+                           class="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+            </div>
+            
+            <!-- Customer Type -->
+            <div>
+                <label for="customer_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Tipo
+                </label>
+                <select name="customer_type" id="customer_type"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
+                    <option value="">Todos os tipos</option>
+                    <option value="individual" {% if request.GET.customer_type == 'individual' %}selected{% endif %}>Pessoa Física</option>
+                    <option value="company" {% if request.GET.customer_type == 'company' %}selected{% endif %}>Pessoa Jurídica</option>
+                </select>
+            </div>
+            
+            <!-- Status -->
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Status
+                </label>
+                <select name="status" id="status"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
+                    <option value="">Todos os status</option>
+                    <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Ativo</option>
+                    <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inativo</option>
+                    <option value="blocked" {% if request.GET.status == 'blocked' %}selected{% endif %}>Bloqueado</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="flex justify-between items-center">
+            <div class="flex space-x-2">
+                <button type="submit" 
+                        class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-search mr-2"></i>
+                    Filtrar
+                </button>
+                <a href="{% url 'sales:customer_list' %}" 
+                   class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-times mr-2"></i>
+                    Limpar
+                </a>
+            </div>
+            
+            <!-- View Toggle -->
+            <div class="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
+                <button type="button" id="gridView" onclick="toggleView('grid')"
+                        class="px-3 py-1 rounded-md text-sm font-medium transition-colors bg-coffee-600 text-white">
+                    <i class="fas fa-th-large"></i>
+                </button>
+                <button type="button" id="listView" onclick="toggleView('list')"
+                        class="px-3 py-1 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Statistics Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center">
+            <div class="p-2 rounded-full bg-blue-100 dark:bg-blue-900">
+                <i class="fas fa-users text-blue-600 dark:text-blue-400"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Total</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ statistics.total_customers }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center">
+            <div class="p-2 rounded-full bg-green-100 dark:bg-green-900">
+                <i class="fas fa-user-check text-green-600 dark:text-green-400"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Ativos</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ statistics.active_customers }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center">
+            <div class="p-2 rounded-full bg-yellow-100 dark:bg-yellow-900">
+                <i class="fas fa-building text-yellow-600 dark:text-yellow-400"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Empresas</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ statistics.company_customers }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center">
+            <div class="p-2 rounded-full bg-purple-100 dark:bg-purple-900">
+                <i class="fas fa-user text-purple-600 dark:text-purple-400"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Pessoas Físicas</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ statistics.individual_customers }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Customers Grid View -->
+<div id="customersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {% for customer in customers %}
+    <div class="customer-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-coffee-100 dark:bg-coffee-900 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-{% if customer.customer_type == 'company' %}building{% else %}user{% endif %} text-coffee-600 dark:text-coffee-400"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white text-sm">{{ customer.get_display_name|truncatechars:20 }}</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ customer.code }}</p>
+                </div>
+            </div>
+            <span class="customer-status px-2 py-1 text-xs font-medium rounded-full
+                {% if customer.status == 'active' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+                {% elif customer.status == 'blocked' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300
+                {% else %}bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300{% endif %}">
+                {{ customer.get_status_display }}
+            </span>
+        </div>
+        
+        <div class="space-y-2 mb-4">
+            {% if customer.email %}
+            <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                <i class="fas fa-envelope w-4 mr-2"></i>
+                <span class="truncate">{{ customer.email }}</span>
+            </div>
+            {% endif %}
+            
+            {% if customer.phone %}
+            <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                <i class="fas fa-phone w-4 mr-2"></i>
+                <span>{{ customer.phone }}</span>
+            </div>
+            {% endif %}
+            
+            {% if customer.city %}
+            <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                <i class="fas fa-map-marker-alt w-4 mr-2"></i>
+                <span class="truncate">{{ customer.city }}, {{ customer.state }}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-600 dark:text-gray-400">Total de Pedidos:</span>
+                <span class="font-medium text-gray-900 dark:text-white">{{ customer.sales_orders.count }}</span>
+            </div>
+            {% if customer.current_debt > 0 %}
+            <div class="flex items-center justify-between text-sm mt-1">
+                <span class="text-gray-600 dark:text-gray-400">Débito:</span>
+                <span class="font-medium text-red-600 dark:text-red-400">R$ {{ customer.current_debt|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="flex space-x-2 mt-4">
+            <a href="{% url 'sales:customer_detail' customer.pk %}" 
+               class="flex-1 bg-coffee-600 hover:bg-coffee-700 text-white px-3 py-2 rounded-lg text-sm font-medium text-center transition-colors">
+                <i class="fas fa-eye mr-1"></i>
+                Detalhes
+            </a>
+            <a href="{% url 'sales:customer_edit' customer.pk %}" 
+               class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium text-center transition-colors">
+                <i class="fas fa-edit mr-1"></i>
+                Editar
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full text-center py-12">
+        <i class="fas fa-users text-gray-400 text-6xl mb-4"></i>
+        <h3 class="text-xl font-medium text-gray-900 dark:text-white mb-2">Nenhum cliente encontrado</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
+            {% if request.GET.search %}
+                Não encontramos clientes com os critérios de busca.
+            {% else %}
+                Comece cadastrando seu primeiro cliente.
+            {% endif %}
+        </p>
+        <a href="{% url 'sales:customer_create' %}" 
+           class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 inline-flex items-center">
+            <i class="fas fa-user-plus mr-2"></i>
+            Cadastrar Cliente
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Customers List View (Hidden by default) -->
+<div id="customersList" class="hidden bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700">
+    <div class="overflow-x-auto">
+        <table class="min-w-full">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Cliente</th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Tipo</th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Contato</th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Localização</th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Status</th>
+                    <th class="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white">Pedidos</th>
+                    <th class="text-center py-3 px-4 font-semibold text-gray-900 dark:text-white">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <td class="py-3 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-coffee-100 dark:bg-coffee-900 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-{% if customer.customer_type == 'company' %}building{% else %}user{% endif %} text-coffee-600 dark:text-coffee-400 text-xs"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900 dark:text-white">{{ customer.get_display_name }}</div>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">{{ customer.code }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="text-gray-900 dark:text-white">{{ customer.get_customer_type_display }}</span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="text-sm">
+                            {% if customer.email %}
+                            <div class="text-gray-900 dark:text-white">{{ customer.email }}</div>
+                            {% endif %}
+                            {% if customer.phone %}
+                            <div class="text-gray-600 dark:text-gray-400">{{ customer.phone }}</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="text-sm text-gray-900 dark:text-white">
+                            {% if customer.city %}{{ customer.city }}, {{ customer.state }}{% else %}-{% endif %}
+                        </div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full
+                            {% if customer.status == 'active' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+                            {% elif customer.status == 'blocked' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300
+                            {% else %}bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300{% endif %}">
+                            {{ customer.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                        <div class="text-gray-900 dark:text-white">{{ customer.sales_orders.count }}</div>
+                        {% if customer.current_debt > 0 %}
+                        <div class="text-sm text-red-600 dark:text-red-400">R$ {{ customer.current_debt|floatformat:2 }}</div>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <a href="{% url 'sales:customer_detail' customer.pk %}" 
+                               class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300" 
+                               title="Ver detalhes">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'sales:customer_edit' customer.pk %}" 
+                               class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300" 
+                               title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'sales:sales_order_create' %}?customer={{ customer.pk }}" 
+                               class="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300" 
+                               title="Nova venda">
+                                <i class="fas fa-plus-circle"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="py-12 text-center">
+                        <i class="fas fa-users text-gray-400 text-4xl mb-4"></i>
+                        <p class="text-gray-600 dark:text-gray-400">Nenhum cliente encontrado</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if customers.has_other_pages %}
+<div class="mt-8 flex items-center justify-between">
+    <div class="text-sm text-gray-600 dark:text-gray-400">
+        Mostrando {{ customers.start_index }} a {{ customers.end_index }} de {{ customers.paginator.count }} clientes
+    </div>
+    
+    <nav class="flex items-center space-x-2">
+        {% if customers.has_previous %}
+        <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.customer_type %}customer_type={{ request.GET.customer_type }}&{% endif %}page={{ customers.previous_page_number }}" 
+           class="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        {% endif %}
+        
+        <span class="px-4 py-2 text-sm bg-coffee-600 text-white rounded-lg">
+            {{ customers.number }}
+        </span>
+        
+        {% if customers.has_next %}
+        <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.customer_type %}customer_type={{ request.GET.customer_type }}&{% endif %}page={{ customers.next_page_number }}" 
+           class="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}
+
+<script>
+function toggleView(view) {
+    const gridView = document.getElementById('customersGrid');
+    const listView = document.getElementById('customersList');
+    const gridBtn = document.getElementById('gridView');
+    const listBtn = document.getElementById('listView');
+    
+    if (view === 'grid') {
+        gridView.classList.remove('hidden');
+        listView.classList.add('hidden');
+        gridBtn.classList.add('bg-coffee-600', 'text-white');
+        gridBtn.classList.remove('text-gray-600', 'dark:text-gray-400');
+        listBtn.classList.remove('bg-coffee-600', 'text-white');
+        listBtn.classList.add('text-gray-600', 'dark:text-gray-400');
+    } else {
+        gridView.classList.add('hidden');
+        listView.classList.remove('hidden');
+        listBtn.classList.add('bg-coffee-600', 'text-white');
+        listBtn.classList.remove('text-gray-600', 'dark:text-gray-400');
+        gridBtn.classList.remove('bg-coffee-600', 'text-white');
+        gridBtn.classList.add('text-gray-600', 'dark:text-gray-400');
+    }
+    
+    // Store preference in localStorage
+    localStorage.setItem('customerViewPreference', view);
+}
+
+// Load preference on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const preference = localStorage.getItem('customerViewPreference') || 'grid';
+    toggleView(preference);
+});
+</script>
+{% endblock %}

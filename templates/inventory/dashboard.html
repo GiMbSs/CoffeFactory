@@ -1,0 +1,410 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard de Inventário - Coffee Factory Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(210, 105, 30, 0.1) 100%);
+        border: 1px solid rgba(139, 69, 19, 0.2);
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px -8px rgba(139, 69, 19, 0.3);
+        border-color: rgba(139, 69, 19, 0.4);
+    }
+    .stat-icon {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
+    }
+    .quick-action-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    .quick-action-card:hover {
+        border-color: #8B4513;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -8px rgba(139, 69, 19, 0.4);
+    }
+    .chart-container {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(139, 69, 19, 0.1);
+    }
+    .progress-bar {
+        background: linear-gradient(90deg, #8B4513 0%, #D2691E 100%);
+        transition: width 0.5s ease;
+    }
+    .alert-card {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+    .inventory-icon {
+        color: #8B4513;
+        transition: all 0.3s ease;
+    }
+    .inventory-icon:hover {
+        color: #D2691E;
+        transform: rotate(10deg);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                <i class="fas fa-warehouse text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Dashboard de Inventário
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                Controle completo do estoque de materiais e produtos
+            </p>
+        </div>
+        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+            <a href="{% url 'inventory:material_create' %}" 
+               class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 hover:scale-105">
+                <i class="fas fa-plus"></i>
+                <span>Novo Material</span>
+            </a>
+            <a href="{% url 'inventory:product_create' %}" 
+               class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 hover:scale-105">
+                <i class="fas fa-box"></i>
+                <span>Novo Produto</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Materials -->
+    <div class="stat-card rounded-xl p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Total de Materiais</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total_materials|default:0 }}</p>
+                <p class="text-coffee-600 dark:text-coffee-400 text-xs">Ativos no sistema</p>
+            </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                <i class="fas fa-cogs text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Products -->
+    <div class="stat-card rounded-xl p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Total de Produtos</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total_products|default:0 }}</p>
+                <p class="text-green-600 dark:text-green-400 text-xs">Produtos acabados</p>
+            </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                <i class="fas fa-box text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Categories -->
+    <div class="stat-card rounded-xl p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Categorias</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total_categories|default:0 }}</p>
+                <p class="text-blue-600 dark:text-blue-400 text-xs">Organizando estoque</p>
+            </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                <i class="fas fa-tags text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Low Stock Alert -->
+    <div class="stat-card rounded-xl p-6 {% if stats.low_stock_items > 0 %}alert-card bg-red-50 border-red-200{% endif %}">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Estoque Baixo</p>
+                <p class="text-2xl font-bold {% if stats.low_stock_items > 0 %}text-red-600{% else %}text-gray-900 dark:text-white{% endif %}">
+                    {{ stats.low_stock_items|default:0 }}
+                </p>
+                <p class="{% if stats.low_stock_items > 0 %}text-red-600{% else %}text-gray-600 dark:text-gray-400{% endif %} text-xs">
+                    {% if stats.low_stock_items > 0 %}Requer atenção{% else %}Tudo OK{% endif %}
+                </p>
+            </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white {% if stats.low_stock_items > 0 %}bg-red-500{% endif %}">
+                <i class="fas fa-exclamation-triangle text-xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions & Recent Activity -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Quick Actions -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+            <i class="fas fa-bolt text-coffee-600 dark:text-coffee-400 mr-3"></i>
+            Ações Rápidas
+        </h3>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Material Management -->
+            <a href="{% url 'inventory:material_list' %}" 
+               class="quick-action-card bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:bg-coffee-50 dark:hover:bg-coffee-900 transition-all duration-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-coffee-100 dark:bg-coffee-800 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-cogs inventory-icon"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">Materiais</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Gerenciar insumos</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Product Management -->
+            <a href="{% url 'inventory:product_list' %}" 
+               class="quick-action-card bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:bg-green-50 dark:hover:bg-green-900 transition-all duration-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-box text-green-600 dark:text-green-400"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">Produtos</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Produtos acabados</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Category Management -->
+            <a href="{% url 'inventory:category_list' %}" 
+               class="quick-action-card bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:bg-blue-50 dark:hover:bg-blue-900 transition-all duration-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-800 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-tags text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">Categorias</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Organizar itens</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Stock Movement -->
+            <a href="{% url 'inventory:stock_movement_create' %}" 
+               class="quick-action-card bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:bg-purple-50 dark:hover:bg-purple-900 transition-all duration-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-purple-100 dark:bg-purple-800 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-exchange-alt text-purple-600 dark:text-purple-400"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">Movimentação</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Entrada/Saída</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Inventory Status -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+            <i class="fas fa-chart-pie text-coffee-600 dark:text-coffee-400 mr-3"></i>
+            Status do Inventário
+        </h3>
+        
+        <div class="space-y-6">
+            <!-- Materials Status -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Materiais Ativos</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ stats.total_materials }}/100</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div class="progress-bar h-2 rounded-full" style="width: 75%"></div>
+                </div>
+            </div>
+
+            <!-- Products Status -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Produtos Ativos</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ stats.total_products }}/50</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div class="bg-green-500 h-2 rounded-full" style="width: 60%"></div>
+                </div>
+            </div>
+
+            <!-- Storage Capacity -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Capacidade do Estoque</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">85%</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div class="bg-yellow-500 h-2 rounded-full" style="width: 85%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex items-center space-x-3">
+                <a href="#" 
+                   class="flex-1 bg-coffee-100 hover:bg-coffee-200 dark:bg-coffee-800 dark:hover:bg-coffee-700 text-coffee-700 dark:text-coffee-300 py-2 px-4 rounded-lg text-sm font-medium text-center transition-colors">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    Relatório
+                </a>
+                <a href="#" 
+                   class="flex-1 bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-blue-700 dark:text-blue-300 py-2 px-4 rounded-lg text-sm font-medium text-center transition-colors">
+                    <i class="fas fa-download mr-2"></i>
+                    Exportar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Low Stock Alerts (if any) -->
+{% if stats.low_stock_items > 0 %}
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-red-200 dark:border-red-700 mb-8">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-red-600 dark:text-red-400 flex items-center">
+            <i class="fas fa-exclamation-triangle mr-3"></i>
+            Alertas de Estoque Baixo
+        </h3>
+        <a href="{% url 'inventory:material_list' %}?low_stock=true" 
+           class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium">
+            Ver todos <i class="fas fa-arrow-right ml-1"></i>
+        </a>
+    </div>
+    
+    <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+            </div>
+            <div class="ml-3">
+                <h4 class="text-sm font-medium text-red-800 dark:text-red-200">
+                    {{ stats.low_stock_items }} item{{ stats.low_stock_items|pluralize:"s" }} com estoque baixo
+                </h4>
+                <p class="mt-1 text-sm text-red-700 dark:text-red-300">
+                    Verifique os níveis de estoque e considere fazer novos pedidos para evitar interrupções na produção.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Activity & Quick Stats -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Recent Stock Movements -->
+    <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <i class="fas fa-history text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Movimentações Recentes
+            </h3>
+            <a href="#" 
+               class="text-coffee-600 hover:text-coffee-700 dark:text-coffee-400 dark:hover:text-coffee-300 text-sm font-medium">
+                Ver todas <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+        
+        <div class="space-y-4">
+            <!-- Sample Movement Items -->
+            <div class="flex items-center space-x-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">Entrada de Café Arábica</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">+50 kg • Hoje, 09:30</p>
+                </div>
+                <span class="text-xs text-green-600 dark:text-green-400 font-medium">ENTRADA</span>
+            </div>
+            
+            <div class="flex items-center space-x-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">Saída de Açúcar Cristal</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">-10 kg • Ontem, 15:45</p>
+                </div>
+                <span class="text-xs text-red-600 dark:text-red-400 font-medium">SAÍDA</span>
+            </div>
+            
+            <div class="flex items-center space-x-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">Ajuste de Leite em Pó</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Ajuste de inventário • Ontem, 11:20</p>
+                </div>
+                <span class="text-xs text-blue-600 dark:text-blue-400 font-medium">AJUSTE</span>
+            </div>
+        </div>
+        
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <a href="{% url 'inventory:stock_movement_create' %}" 
+               class="w-full bg-coffee-600 hover:bg-coffee-700 text-white py-2 px-4 rounded-lg text-sm font-medium text-center transition-colors flex items-center justify-center">
+                <i class="fas fa-plus mr-2"></i>
+                Nova Movimentação
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary & Tips -->
+    <div class="space-y-6">
+        <!-- Summary Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-info-circle text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                Resumo do Dia
+            </h4>
+            
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-600 dark:text-gray-400">Entradas</span>
+                    <span class="text-sm font-medium text-green-600 dark:text-green-400">+12 itens</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-600 dark:text-gray-400">Saídas</span>
+                    <span class="text-sm font-medium text-red-600 dark:text-red-400">-8 itens</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-600 dark:text-gray-400">Saldo</span>
+                    <span class="text-sm font-medium text-coffee-600 dark:text-coffee-400">+4 itens</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips Card -->
+        <div class="bg-gradient-to-br from-coffee-50 to-orange-50 dark:from-coffee-900 dark:to-orange-900 rounded-xl p-6 border border-coffee-200 dark:border-coffee-700">
+            <h4 class="text-sm font-semibold text-coffee-800 dark:text-coffee-200 mb-3 flex items-center">
+                <i class="fas fa-lightbulb text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                Dica do Sistema
+            </h4>
+            
+            <p class="text-xs text-coffee-700 dark:text-coffee-300 leading-relaxed">
+                Configure alertas automáticos para materiais com estoque baixo e mantenha seus fornecedores atualizados 
+                para garantir o fluxo contínuo da produção.
+            </p>
+            
+            <a href="#" 
+               class="inline-flex items-center mt-3 text-xs text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 font-medium">
+                Saiba mais <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

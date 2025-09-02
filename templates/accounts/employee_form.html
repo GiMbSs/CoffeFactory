@@ -1,0 +1,675 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Editar {{ form.instance.user.get_full_name }} - Funcionários
+    {% else %}
+        Novo Funcionário
+    {% endif %} - Coffee Factory Management System
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        transition: all 0.3s ease;
+    }
+    .form-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .form-step {
+        transition: opacity 0.3s ease;
+    }
+    .form-step.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+    .step-indicator {
+        transition: all 0.3s ease;
+    }
+    .step-indicator.active {
+        background-color: #8B4513;
+        color: white;
+    }
+    .step-indicator.completed {
+        background-color: #10B981;
+        color: white;
+    }
+    .field-error {
+        animation: shake 0.5s ease-in-out;
+    }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex items-center space-x-4">
+            <a href="{% url 'accounts:employee_list' %}" 
+               class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 transition-colors">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                    <i class="fas fa-user-plus text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    {% if form.instance.pk %}
+                        Editar Funcionário
+                    {% else %}
+                        Novo Funcionário
+                    {% endif %}
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    {% if form.instance.pk %}
+                        Atualize as informações do funcionário
+                    {% else %}
+                        Preencha as informações para cadastrar um novo funcionário
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+            <span class="text-sm text-gray-600 dark:text-gray-400">
+                <i class="fas fa-info-circle mr-1"></i>
+                Campos obrigatórios marcados com *
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Form Container -->
+<div class="max-w-4xl mx-auto">
+    <!-- Progress Steps -->
+    <div class="mb-8">
+        <div class="flex items-center justify-center space-x-4">
+            <div class="step-indicator active flex items-center justify-center w-10 h-10 rounded-full border-2 border-coffee-300 text-coffee-600 font-semibold">
+                1
+            </div>
+            <div class="w-16 h-1 bg-coffee-200 dark:bg-coffee-700"></div>
+            <div class="step-indicator flex items-center justify-center w-10 h-10 rounded-full border-2 border-gray-300 text-gray-500 font-semibold">
+                2
+            </div>
+            <div class="w-16 h-1 bg-gray-200 dark:bg-gray-700"></div>
+            <div class="step-indicator flex items-center justify-center w-10 h-10 rounded-full border-2 border-gray-300 text-gray-500 font-semibold">
+                3
+            </div>
+        </div>
+        <div class="flex justify-center mt-4 space-x-20">
+            <span class="text-sm font-medium text-coffee-600 dark:text-coffee-400">Dados Pessoais</span>
+            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Emprego</span>
+            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Contato</span>
+        </div>
+    </div>
+
+    <form method="post" x-data="employeeForm()" class="space-y-8">
+        {% csrf_token %}
+        
+        <!-- Step 1: Personal Information -->
+        <div x-show="currentStep === 1" class="form-step">
+            <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-coffee-200 dark:border-coffee-700">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                    <i class="fas fa-user text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    Dados Pessoais
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- First Name -->
+                    <div>
+                        <label for="{{ form.first_name.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Primeiro Nome *
+                        </label>
+                        <input type="text" 
+                               name="{{ form.first_name.name }}" 
+                               id="{{ form.first_name.id_for_label }}"
+                               value="{{ form.first_name.value|default:'' }}"
+                               class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                               placeholder="Digite o primeiro nome"
+                               required>
+                        {% if form.first_name.errors %}
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.first_name.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Last Name -->
+                    <div>
+                        <label for="{{ form.last_name.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Sobrenome *
+                        </label>
+                        <input type="text" 
+                               name="{{ form.last_name.name }}" 
+                               id="{{ form.last_name.id_for_label }}"
+                               value="{{ form.last_name.value|default:'' }}"
+                               class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                               placeholder="Digite o sobrenome"
+                               required>
+                        {% if form.last_name.errors %}
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.last_name.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Email -->
+                    <div>
+                        <label for="{{ form.email.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Email *
+                        </label>
+                        <input type="email" 
+                               name="{{ form.email.name }}" 
+                               id="{{ form.email.id_for_label }}"
+                               value="{{ form.email.value|default:'' }}"
+                               class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                               placeholder="funcionario@empresa.com"
+                               required>
+                        {% if form.email.errors %}
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.email.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Username -->
+                    <div>
+                        <label for="{{ form.username.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Nome de Usuário *
+                        </label>
+                        <input type="text" 
+                               name="{{ form.username.name }}" 
+                               id="{{ form.username.id_for_label }}"
+                               value="{{ form.username.value|default:'' }}"
+                               class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                               placeholder="nome.usuario"
+                               required>
+                        {% if form.username.errors %}
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.username.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Phone -->
+                    <div>
+                        <label for="{{ form.phone.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Telefone
+                        </label>
+                        <input type="tel" 
+                               name="{{ form.phone.name }}" 
+                               id="{{ form.phone.id_for_label }}"
+                               value="{{ form.phone.value|default:'' }}"
+                               class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                               placeholder="(11) 99999-9999">
+                        {% if form.phone.errors %}
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.phone.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <div class="flex justify-end mt-8">
+                    <button type="button" 
+                            @click="nextStep()" 
+                            class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2">
+                        <span>Próximo</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step 2: Employment Information -->
+        <div x-show="currentStep === 2" class="form-step">
+            <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-coffee-200 dark:border-coffee-700">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                    <i class="fas fa-briefcase text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    Informações de Emprego
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Employee ID -->
+                    <div>
+                        <label for="{{ form.employee_id.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            ID do Funcionário *
+                        </label>
+                        <input type="text" 
+                               name="{{ form.employee_id.name }}" 
+                               id="{{ form.employee_id.id_for_label }}"
+                               value="{{ form.employee_id.value|default:'' }}"
+                               class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                               placeholder="EMP001"
+                               required>
+                        {% if form.employee_id.errors %}
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.employee_id.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Position -->
+                    <div>
+                        <label for="{{ form.position.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Cargo *
+                        </label>
+                        <input type="text" 
+                               name="{{ form.position.name }}" 
+                               id="{{ form.position.id_for_label }}"
+                               value="{{ form.position.value|default:'' }}"
+                               class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                               placeholder="Ex: Analista de Produção"
+                               required>
+                        {% if form.position.errors %}
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.position.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Department -->
+                    <div>
+                        <label for="{{ form.department.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Departamento *
+                        </label>
+                        <select name="{{ form.department.name }}" 
+                                id="{{ form.department.id_for_label }}"
+                                class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                                required>
+                            <option value="">Selecione um departamento</option>
+                            {% for value, label in form.department.field.choices %}
+                                <option value="{{ value }}" 
+                                        {% if form.department.value == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.department.errors %}
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.department.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Employment Type -->
+                    <div>
+                        <label for="{{ form.employment_type.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Tipo de Emprego *
+                        </label>
+                        <select name="{{ form.employment_type.name }}" 
+                                id="{{ form.employment_type.id_for_label }}"
+                                class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                                required>
+                            {% for value, label in form.employment_type.field.choices %}
+                                <option value="{{ value }}" 
+                                        {% if form.employment_type.value == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.employment_type.errors %}
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.employment_type.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Hire Date -->
+                    <div>
+                        <label for="{{ form.hire_date.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Data de Contratação *
+                        </label>
+                        <input type="date" 
+                               name="{{ form.hire_date.name }}" 
+                               id="{{ form.hire_date.id_for_label }}"
+                               value="{{ form.hire_date.value|date:'Y-m-d'|default:'' }}"
+                               class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                               required>
+                        {% if form.hire_date.errors %}
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.hire_date.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Salary -->
+                    <div>
+                        <label for="{{ form.salary.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Salário (R$) *
+                        </label>
+                        <input type="number" 
+                               name="{{ form.salary.name }}" 
+                               id="{{ form.salary.id_for_label }}"
+                               value="{{ form.salary.value|default:'' }}"
+                               step="0.01"
+                               min="0"
+                               class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                               placeholder="0.00"
+                               required>
+                        {% if form.salary.errors %}
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.salary.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Status -->
+                    <div>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" 
+                                   name="{{ form.is_active.name }}" 
+                                   id="{{ form.is_active.id_for_label }}"
+                                   {% if form.is_active.value %}checked{% endif %}
+                                   class="w-5 h-5 text-coffee-600 bg-white dark:bg-gray-700 border-coffee-300 dark:border-coffee-600 rounded focus:ring-coffee-500 focus:ring-2 transition-colors">
+                            <div>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Funcionário Ativo
+                                </span>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    Marque para ativar o funcionário no sistema
+                                </p>
+                            </div>
+                        </label>
+                        {% if form.is_active.errors %}
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.is_active.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <div class="flex justify-between mt-8">
+                    <button type="button" 
+                            @click="prevStep()" 
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Anterior</span>
+                    </button>
+                    <button type="button" 
+                            @click="nextStep()" 
+                            class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2">
+                        <span>Próximo</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step 3: Contact Information -->
+        <div x-show="currentStep === 3" class="form-step">
+            <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-coffee-200 dark:border-coffee-700">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                    <i class="fas fa-address-book text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    Informações de Contato
+                </h2>
+                
+                <div class="space-y-6">
+                    <!-- Address -->
+                    <div>
+                        <label for="{{ form.address.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Endereço
+                        </label>
+                        <textarea name="{{ form.address.name }}" 
+                                  id="{{ form.address.id_for_label }}"
+                                  rows="3"
+                                  class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors resize-none"
+                                  placeholder="Rua, número, bairro, cidade, CEP">{{ form.address.value|default:'' }}</textarea>
+                        {% if form.address.errors %}
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.address.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Emergency Contact -->
+                        <div>
+                            <label for="{{ form.emergency_contact.id_for_label }}" 
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Contato de Emergência
+                            </label>
+                            <input type="text" 
+                                   name="{{ form.emergency_contact.name }}" 
+                                   id="{{ form.emergency_contact.id_for_label }}"
+                                   value="{{ form.emergency_contact.value|default:'' }}"
+                                   class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                                   placeholder="Nome do contato">
+                            {% if form.emergency_contact.errors %}
+                                <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                    {{ form.emergency_contact.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Emergency Phone -->
+                        <div>
+                            <label for="{{ form.emergency_phone.id_for_label }}" 
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Telefone de Emergência
+                            </label>
+                            <input type="tel" 
+                                   name="{{ form.emergency_phone.name }}" 
+                                   id="{{ form.emergency_phone.id_for_label }}"
+                                   value="{{ form.emergency_phone.value|default:'' }}"
+                                   class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                                   placeholder="(11) 99999-9999">
+                            {% if form.emergency_phone.errors %}
+                                <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                    {{ form.emergency_phone.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div>
+                        <label for="{{ form.notes.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Observações
+                        </label>
+                        <textarea name="{{ form.notes.name }}" 
+                                  id="{{ form.notes.id_for_label }}"
+                                  rows="4"
+                                  class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors resize-none"
+                                  placeholder="Informações adicionais sobre o funcionário...">{{ form.notes.value|default:'' }}</textarea>
+                        {% if form.notes.errors %}
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.notes.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Navigation and Submit -->
+                <div class="flex justify-between mt-8">
+                    <button type="button" 
+                            @click="prevStep()" 
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Anterior</span>
+                    </button>
+                    <div class="flex space-x-4">
+                        <a href="{% url 'accounts:employee_list' %}"
+                           class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                            Cancelar
+                        </a>
+                        <button type="submit" 
+                                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2">
+                            <i class="fas fa-save"></i>
+                            <span>
+                                {% if form.instance.pk %}
+                                    Atualizar Funcionário
+                                {% else %}
+                                    Cadastrar Funcionário
+                                {% endif %}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function employeeForm() {
+    return {
+        currentStep: 1,
+        
+        nextStep() {
+            if (this.validateCurrentStep()) {
+                if (this.currentStep < 3) {
+                    this.currentStep++;
+                    this.updateStepIndicators();
+                }
+            }
+        },
+        
+        prevStep() {
+            if (this.currentStep > 1) {
+                this.currentStep--;
+                this.updateStepIndicators();
+            }
+        },
+        
+        validateCurrentStep() {
+            const currentFormStep = document.querySelector(`[x-show="currentStep === ${this.currentStep}"]`);
+            const requiredFields = currentFormStep.querySelectorAll('input[required], select[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('border-red-500', 'field-error');
+                    isValid = false;
+                } else {
+                    field.classList.remove('border-red-500', 'field-error');
+                }
+            });
+            
+            if (!isValid) {
+                // Show error message
+                this.showErrorMessage('Por favor, preencha todos os campos obrigatórios.');
+            }
+            
+            return isValid;
+        },
+        
+        updateStepIndicators() {
+            const indicators = document.querySelectorAll('.step-indicator');
+            indicators.forEach((indicator, index) => {
+                const stepNumber = index + 1;
+                indicator.classList.remove('active', 'completed');
+                
+                if (stepNumber === this.currentStep) {
+                    indicator.classList.add('active');
+                } else if (stepNumber < this.currentStep) {
+                    indicator.classList.add('completed');
+                }
+            });
+        },
+        
+        showErrorMessage(message) {
+            // Create or update error notification
+            let errorDiv = document.getElementById('form-error-message');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.id = 'form-error-message';
+                errorDiv.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50';
+                document.body.appendChild(errorDiv);
+            }
+            
+            errorDiv.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+            }, 5000);
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Form field validation
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                this.classList.add('border-red-500');
+            } else {
+                this.classList.remove('border-red-500');
+            }
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('border-red-500') && this.value.trim()) {
+                this.classList.remove('border-red-500');
+            }
+        });
+    });
+    
+    // Phone number formatting
+    const phoneInputs = document.querySelectorAll('input[type="tel"]');
+    phoneInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length >= 11) {
+                value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else if (value.length >= 7) {
+                value = value.replace(/(\d{2})(\d{4})(\d+)/, '($1) $2-$3');
+            } else if (value.length >= 3) {
+                value = value.replace(/(\d{2})(\d+)/, '($1) $2');
+            }
+            this.value = value;
+        });
+    });
+    
+    // Auto-generate employee ID if empty
+    const employeeIdInput = document.getElementById('{{ form.employee_id.id_for_label }}');
+    const firstNameInput = document.getElementById('{{ form.first_name.id_for_label }}');
+    const lastNameInput = document.getElementById('{{ form.last_name.id_for_label }}');
+    
+    if (employeeIdInput && !employeeIdInput.value) {
+        [firstNameInput, lastNameInput].forEach(input => {
+            if (input) {
+                input.addEventListener('blur', function() {
+                    if (firstNameInput.value && lastNameInput.value && !employeeIdInput.value) {
+                        const firstName = firstNameInput.value.substring(0, 3).toUpperCase();
+                        const lastName = lastNameInput.value.substring(0, 3).toUpperCase();
+                        const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+                        employeeIdInput.value = `${firstName}${lastName}${randomNum}`;
+                    }
+                });
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

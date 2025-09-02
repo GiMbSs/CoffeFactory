@@ -1,0 +1,401 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ material.name }} - Materiais - Coffee Factory Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .info-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .info-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .profile-gradient {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+    }
+    .status-pulse {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    .chart-container {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+    }
+    .movement-item {
+        transition: all 0.3s ease;
+    }
+    .movement-item:hover {
+        background: rgba(139, 69, 19, 0.05);
+        transform: translateX(5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex items-center space-x-4">
+            <a href="{% url 'inventory:material_list' %}" 
+               class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 transition-colors">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    {{ material.name }}
+                </h1>
+                <div class="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                    <span class="flex items-center">
+                        <i class="fas fa-barcode text-coffee-500 mr-2"></i>
+                        {{ material.code }}
+                    </span>
+                    <span class="flex items-center">
+                        <i class="fas fa-tags text-coffee-500 mr-2"></i>
+                        {{ material.category.name }}
+                    </span>
+                    <span class="flex items-center">
+                        {% if material.status == 'active' %}
+                            <span class="text-green-600 dark:text-green-400">Ativo</span>
+                        {% elif material.status == 'inactive' %}
+                            <span class="text-yellow-600 dark:text-yellow-400">Inativo</span>
+                        {% else %}
+                            <span class="text-red-600 dark:text-red-400">Descontinuado</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+            <a href="{% url 'inventory:material_update' material.pk %}" 
+               class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2">
+                <i class="fas fa-edit"></i>
+                <span>Editar</span>
+            </a>
+            <div class="relative" x-data="{ open: false }">
+                <button @click="open = !open" 
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div x-show="open" 
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="transform opacity-0 scale-95"
+                     x-transition:enter-end="transform opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-75"
+                     x-transition:leave-start="transform opacity-100 scale-100"
+                     x-transition:leave-end="transform opacity-0 scale-95"
+                     @click.away="open = false"
+                     class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-coffee-200 dark:border-coffee-700 z-50">
+                    <div class="py-2">
+                        <a href="{% url 'inventory:stock_movement_create' %}?material={{ material.pk }}" 
+                           class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-coffee-50 dark:hover:bg-coffee-900">
+                            <i class="fas fa-exchange-alt mr-3"></i>
+                            Nova Movimentação
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-coffee-50 dark:hover:bg-coffee-900">
+                            <i class="fas fa-chart-line mr-3"></i>
+                            Relatório de Estoque
+                        </a>
+                        <hr class="my-2 border-coffee-200 dark:border-coffee-700">
+                        <a href="#" class="flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                            <i class="fas fa-trash mr-3"></i>
+                            Excluir Material
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Profile Card -->
+    <div class="lg:col-span-1">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700 overflow-hidden">
+            <!-- Profile Header -->
+            <div class="profile-gradient p-6 text-center">
+                <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-cogs text-coffee-600 text-3xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white mb-1">{{ material.name }}</h2>
+                <p class="text-coffee-100">{{ material.code }}</p>
+                <p class="text-coffee-200 text-sm mt-2">{{ material.category.name }}</p>
+            </div>
+            
+            <!-- Quick Info -->
+            <div class="p-6 space-y-4">
+                <div class="flex items-center justify-between py-3 border-b border-coffee-100 dark:border-coffee-800">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Unidade</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ material.unit_of_measure.name }}</span>
+                </div>
+                <div class="flex items-center justify-between py-3 border-b border-coffee-100 dark:border-coffee-800">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Custo por Unidade</span>
+                    <span class="font-medium text-gray-900 dark:text-white">R$ {{ material.cost_per_unit }}</span>
+                </div>
+                <div class="flex items-center justify-between py-3 border-b border-coffee-100 dark:border-coffee-800">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Estoque Atual</span>
+                    <span class="font-medium text-gray-900 dark:text-white">
+                        {{ material.current_stock|floatformat:2 }} {{ material.unit_of_measure.abbreviation }}
+                    </span>
+                </div>
+                <div class="flex items-center justify-between py-3 border-b border-coffee-100 dark:border-coffee-800">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Estoque Mínimo</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ material.minimum_stock }}</span>
+                </div>
+                <div class="flex items-center justify-between py-3">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Status</span>
+                    {% if material.status == 'active' %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                            <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1.5 status-pulse"></span>
+                            Ativo
+                        </span>
+                    {% elif material.status == 'inactive' %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                            <span class="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-1.5"></span>
+                            Inativo
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                            <span class="w-1.5 h-1.5 bg-red-400 rounded-full mr-1.5"></span>
+                            Descontinuado
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Alert -->
+        {% if material.is_low_stock %}
+        <div class="mt-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+                        Estoque Baixo
+                    </h3>
+                    <p class="mt-1 text-sm text-red-700 dark:text-red-300">
+                        O estoque atual está abaixo do nível mínimo configurado.
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Details Section -->
+    <div class="lg:col-span-2 space-y-8">
+        <!-- Basic Information -->
+        <div class="info-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-info-circle text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Informações Básicas
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Código</label>
+                    <p class="text-gray-900 dark:text-white font-medium">{{ material.code }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome</label>
+                    <p class="text-gray-900 dark:text-white font-medium">{{ material.name }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Categoria</label>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-coffee-100 text-coffee-800 dark:bg-coffee-900 dark:text-coffee-200">
+                        {{ material.category.name }}
+                    </span>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Unidade de Medida</label>
+                    <p class="text-gray-900 dark:text-white font-medium">
+                        {{ material.unit_of_measure.name }} ({{ material.unit_of_measure.abbreviation }})
+                    </p>
+                </div>
+                {% if material.supplier %}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fornecedor Principal</label>
+                    <p class="text-gray-900 dark:text-white font-medium">{{ material.supplier.name }}</p>
+                </div>
+                {% endif %}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Data de Criação</label>
+                    <p class="text-gray-900 dark:text-white font-medium">{{ material.created_at|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+            {% if material.description %}
+            <div class="mt-6">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Descrição</label>
+                <div class="bg-coffee-50 dark:bg-coffee-900/20 rounded-lg p-4">
+                    <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ material.description }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Stock Information -->
+        <div class="info-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-warehouse text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Informações de Estoque
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-boxes text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-blue-600 dark:text-blue-400 font-medium">Estoque Atual</p>
+                            <p class="text-lg font-bold text-blue-900 dark:text-blue-100">
+                                {{ material.current_stock|floatformat:2 }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-800 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-exclamation-triangle text-yellow-600 dark:text-yellow-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-yellow-600 dark:text-yellow-400 font-medium">Estoque Mínimo</p>
+                            <p class="text-lg font-bold text-yellow-900 dark:text-yellow-100">{{ material.minimum_stock }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-dollar-sign text-green-600 dark:text-green-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-green-600 dark:text-green-400 font-medium">Valor Total</p>
+                            <p class="text-lg font-bold text-green-900 dark:text-green-100">
+                                R$ {{ material.stock_value|floatformat:2 }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stock Level Progress -->
+            <div class="mt-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Nível de Estoque</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">
+                        {{ material.current_stock|floatformat:2 }}/{{ material.maximum_stock|default:"∞" }}
+                    </span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                    {% if material.maximum_stock %}
+                        {% widthratio material.current_stock material.maximum_stock 100 as stock_percentage %}
+                    {% else %}
+                        {% widthratio material.current_stock material.minimum_stock 100 as stock_percentage %}
+                    {% endif %}
+                    <div class="{% if material.is_low_stock %}bg-red-500{% elif stock_percentage > 80 %}bg-green-500{% else %}bg-blue-500{% endif %} h-3 rounded-full transition-all duration-500" 
+                         style="width: {{ stock_percentage|default:0 }}%;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Stock Movements -->
+        <div class="info-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-history text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    Movimentações Recentes
+                </h3>
+                <a href="{% url 'inventory:stock_movement_create' %}?material={{ material.pk }}" 
+                   class="text-coffee-600 hover:text-coffee-700 dark:text-coffee-400 dark:hover:text-coffee-300 text-sm font-medium">
+                    Nova Movimentação <i class="fas fa-plus ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="space-y-4">
+                {% for movement in recent_movements %}
+                <div class="movement-item flex items-center space-x-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    {% if movement.movement_type == 'in' %}
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                    {% elif movement.movement_type == 'out' %}
+                        <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                    {% else %}
+                        <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    {% endif %}
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                            {{ movement.get_movement_type_display }}: {{ movement.quantity }} {{ material.unit_of_measure.abbreviation }}
+                        </p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">
+                            {{ movement.created_at|date:"d/m/Y H:i" }}
+                            {% if movement.reason %} • {{ movement.reason }}{% endif %}
+                        </p>
+                    </div>
+                    {% if movement.movement_type == 'in' %}
+                        <span class="text-xs text-green-600 dark:text-green-400 font-medium">ENTRADA</span>
+                    {% elif movement.movement_type == 'out' %}
+                        <span class="text-xs text-red-600 dark:text-red-400 font-medium">SAÍDA</span>
+                    {% else %}
+                        <span class="text-xs text-blue-600 dark:text-blue-400 font-medium">AJUSTE</span>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="text-center py-8">
+                    <i class="fas fa-history text-gray-400 text-3xl mb-3"></i>
+                    <p class="text-gray-500 dark:text-gray-400">Nenhuma movimentação encontrada</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Notes -->
+        {% if material.notes %}
+        <div class="info-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-sticky-note text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Observações
+            </h3>
+            <div class="bg-coffee-50 dark:bg-coffee-900/20 rounded-lg p-4">
+                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ material.notes }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Card hover effects
+    const cards = document.querySelectorAll('.info-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Movement item hover effects
+    const movements = document.querySelectorAll('.movement-item');
+    movements.forEach(movement => {
+        movement.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(5px)';
+        });
+        
+        movement.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+});
+</script>
+{% endblock %}

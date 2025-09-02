@@ -1,0 +1,549 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Categorias - Coffee Factory Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .category-card {
+        transition: all 0.3s ease;
+    }
+    .category-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .category-icon {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        transition: transform 0.3s ease;
+    }
+    .category-card:hover .category-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+    .filter-chip.active {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%) !important;
+        color: white !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                <i class="fas fa-tags text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Categorias
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                Organize seus materiais e produtos por categorias
+            </p>
+        </div>
+        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+            <a href="{% url 'inventory:dashboard' %}" 
+               class="text-coffee-600 hover:text-coffee-700 dark:text-coffee-400 dark:hover:text-coffee-300 flex items-center space-x-2 transition-colors">
+                <i class="fas fa-arrow-left"></i>
+                <span>Voltar ao Dashboard</span>
+            </a>
+            <a href="{% url 'inventory:category_create' %}" 
+               class="action-button bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium flex items-center space-x-2">
+                <i class="fas fa-plus"></i>
+                <span>Nova Categoria</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700 mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-6">
+        <!-- Search Bar -->
+        <div class="flex-1">
+            <div class="relative">
+                <input type="text" 
+                       id="searchInput"
+                       placeholder="Buscar categorias..." 
+                       class="w-full pl-10 pr-4 py-2 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Type Filters -->
+        <div class="flex items-center space-x-3">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Tipo:</span>
+            <div class="flex space-x-2">
+                <button class="filter-chip bg-coffee-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+                        data-filter="all">
+                    Todas
+                </button>
+                <button class="filter-chip bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+                        data-filter="material">
+                    Materiais
+                </button>
+                <button class="filter-chip bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+                        data-filter="product">
+                    Produtos
+                </button>
+            </div>
+        </div>
+
+        <!-- View Toggle -->
+        <div class="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+            <button id="gridView" 
+                    class="p-2 rounded-md bg-coffee-600 text-white shadow-sm transition-colors duration-200">
+                <i class="fas fa-th-large"></i>
+            </button>
+            <button id="listView" 
+                    class="p-2 rounded-md text-gray-400 hover:text-coffee-600 hover:bg-white dark:hover:bg-gray-600 transition-all duration-200">
+                <i class="fas fa-list"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Summary -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Total de Categorias</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ categories.count }}</p>
+            </div>
+            <div class="w-12 h-12 bg-coffee-100 dark:bg-coffee-800 rounded-lg flex items-center justify-center">
+                <i class="fas fa-tags text-coffee-600 dark:text-coffee-400 text-xl"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Para Materiais</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ categories|length }}
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-lg flex items-center justify-center">
+                <i class="fas fa-cogs text-blue-600 dark:text-blue-400 text-xl"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Para Produtos</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ categories|length }}
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
+                <i class="fas fa-box text-green-600 dark:text-green-400 text-xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Categories Grid -->
+<div id="categoriesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {% for category in categories %}
+    <div class="category-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700 category-item hover:shadow-xl transition-all duration-300" 
+         data-name="{{ category.name|lower }}" 
+         data-type="{{ category.type|lower }}">
+        <div class="flex items-start justify-between mb-4">
+            <div class="category-icon w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                {% if category.type == 'material' %}
+                    <i class="fas fa-cogs text-xl"></i>
+                {% else %}
+                    <i class="fas fa-box text-xl"></i>
+                {% endif %}
+            </div>
+            <div class="flex items-center space-x-2">
+                <!-- Status Badge -->
+                {% if category.status == 'active' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                        <i class="fas fa-check-circle w-2 h-2 mr-1"></i>
+                        Ativa
+                    </span>
+                {% else %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">
+                        <i class="fas fa-times-circle w-2 h-2 mr-1"></i>
+                        Inativa
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                {{ category.name }}
+            </h3>
+            {% if category.description %}
+                <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                    {{ category.description }}
+                </p>
+            {% else %}
+                <p class="text-sm text-gray-500 dark:text-gray-500 italic">
+                    Sem descrição
+                </p>
+            {% endif %}
+        </div>
+
+        <!-- Category Stats -->
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4">
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-600 dark:text-gray-400">
+                    {% if category.type == 'material' %}
+                        Materiais:
+                    {% else %}
+                        Produtos:
+                    {% endif %}
+                </span>
+                <span class="font-medium text-gray-900 dark:text-white">
+                    {% if category.type == 'material' %}
+                        {{ category.materials.count|default:0 }}
+                    {% else %}
+                        {{ category.products.count|default:0 }}
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- Type Badge -->
+        <div class="flex items-center justify-between">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium 
+                   {% if category.type == 'material' %}
+                       bg-coffee-100 text-coffee-800 dark:bg-coffee-800 dark:text-coffee-100
+                   {% else %}
+                       bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
+                   {% endif %}">
+                {% if category.type == 'material' %}
+                    <i class="fas fa-cogs w-2 h-2 mr-1"></i>
+                    Material
+                {% else %}
+                    <i class="fas fa-box w-2 h-2 mr-1"></i>
+                    Produto
+                {% endif %}
+            </span>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center space-x-1">
+                <a href="{% url 'inventory:category_detail' category.pk %}" 
+                   class="bg-coffee-600 hover:bg-coffee-700 text-white p-2 rounded-lg text-sm transition-all duration-200 hover:scale-105">
+                    <i class="fas fa-eye"></i>
+                </a>
+                <a href="{% url 'inventory:category_update' category.pk %}" 
+                   class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg text-sm transition-all duration-200 hover:scale-105">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <button onclick="confirmDelete('{{ category.name|escapejs }}', '{% url 'inventory:category_delete' category.pk %}')" 
+                        class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg text-sm transition-all duration-200 hover:scale-105">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Created Date -->
+        <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+            <p class="text-xs text-gray-500 dark:text-gray-500 flex items-center">
+                <i class="fas fa-calendar-alt mr-1"></i>
+                Criada em {{ category.created_at|date:"d/m/Y" }}
+            </p>
+        </div>
+    </div>
+    {% empty %}
+    <!-- Empty State -->
+    <div class="col-span-full text-center py-12">
+        <div class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-tags text-gray-400 text-3xl"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Nenhuma categoria encontrada
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
+            Crie sua primeira categoria para organizar materiais e produtos.
+        </p>
+        <a href="{% url 'inventory:category_create' %}" 
+           class="action-button bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium inline-flex items-center space-x-2">
+            <i class="fas fa-plus"></i>
+            <span>Criar Categoria</span>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- List View (Hidden by default) -->
+<div id="categoriesList" class="hidden">
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Categoria
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Tipo
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Status
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Itens
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Criada em
+                    </th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Ações
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {% for category in categories %}
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors category-row" 
+                    data-name="{{ category.name|lower }}" 
+                    data-type="{{ category.type|lower }}">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                                <div class="category-icon h-10 w-10 rounded-lg flex items-center justify-center text-white">
+                                    {% if category.type == 'material' %}
+                                        <i class="fas fa-cogs"></i>
+                                    {% else %}
+                                        <i class="fas fa-box"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ category.name }}
+                                </div>
+                                {% if category.description %}
+                                    <div class="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
+                                        {{ category.description }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                               {% if category.type == 'material' %}
+                                   bg-coffee-100 text-coffee-800 dark:bg-coffee-800 dark:text-coffee-100
+                               {% else %}
+                                   bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
+                               {% endif %}">
+                            {{ category.get_type_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if category.status == 'active' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                                Ativa
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">
+                                Inativa
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                        {% if category.type == 'material' %}
+                            {{ category.materials.count|default:0 }} materiais
+                        {% else %}
+                            {{ category.products.count|default:0 }} produtos
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {{ category.created_at|date:"d/m/Y" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex items-center justify-end space-x-2">
+                            <a href="{% url 'inventory:category_detail' category.pk %}" 
+                               class="bg-coffee-600 hover:bg-coffee-700 text-white px-3 py-1 rounded-lg text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'inventory:category_update' category.pk %}" 
+                               class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button onclick="confirmDelete('{{ category.name|escapejs }}', '{% url 'inventory:category_delete' category.pk %}')" 
+                                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-12 text-center">
+                        <div class="text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-tags text-4xl mb-4"></i>
+                            <p class="text-lg font-medium">Nenhuma categoria encontrada</p>
+                            <p class="mt-2">Crie sua primeira categoria para começar.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900">
+                <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mt-4">Confirmar Exclusão</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Tem certeza que deseja excluir a categoria "<span id="categoryName" class="font-semibold"></span>"? 
+                    Esta ação não pode ser desfeita.
+                </p>
+            </div>
+            <div class="items-center px-4 py-3">
+                <div class="flex space-x-3">
+                    <button id="cancelDelete" 
+                            class="flex-1 px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors">
+                        Cancelar
+                    </button>
+                    <a id="confirmDelete" 
+                       class="flex-1 px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300 transition-colors text-center">
+                        Excluir
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const categoryItems = document.querySelectorAll('.category-item');
+    const categoryRows = document.querySelectorAll('.category-row');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        // Filter grid items
+        categoryItems.forEach(item => {
+            const name = item.dataset.name;
+            if (name.includes(searchTerm)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        // Filter list rows
+        categoryRows.forEach(row => {
+            const name = row.dataset.name;
+            if (name.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+    
+    // Filter functionality
+    const filterButtons = document.querySelectorAll('.filter-chip');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active state
+            filterButtons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('bg-gray-500', 'hover:bg-gray-600');
+                btn.classList.remove('bg-coffee-600');
+            });
+            
+            this.classList.add('active');
+            this.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+            this.classList.add('bg-coffee-600');
+            
+            const filterType = this.dataset.filter;
+            
+            // Filter grid items
+            categoryItems.forEach(item => {
+                if (filterType === 'all' || item.dataset.type === filterType) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Filter list rows
+            categoryRows.forEach(row => {
+                if (filterType === 'all' || row.dataset.type === filterType) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+    
+    // View toggle functionality
+    const gridView = document.getElementById('gridView');
+    const listView = document.getElementById('listView');
+    const categoriesGrid = document.getElementById('categoriesGrid');
+    const categoriesList = document.getElementById('categoriesList');
+    
+    gridView.addEventListener('click', function() {
+        categoriesGrid.classList.remove('hidden');
+        categoriesList.classList.add('hidden');
+        
+        // Update button states
+        gridView.classList.add('bg-coffee-600', 'text-white');
+        gridView.classList.remove('text-gray-400', 'hover:text-coffee-600', 'hover:bg-white', 'dark:hover:bg-gray-600');
+        
+        listView.classList.add('text-gray-400', 'hover:text-coffee-600', 'hover:bg-white', 'dark:hover:bg-gray-600');
+        listView.classList.remove('bg-coffee-600', 'text-white');
+    });
+    
+    listView.addEventListener('click', function() {
+        categoriesGrid.classList.add('hidden');
+        categoriesList.classList.remove('hidden');
+        
+        // Update button states
+        listView.classList.add('bg-coffee-600', 'text-white');
+        listView.classList.remove('text-gray-400', 'hover:text-coffee-600', 'hover:bg-white', 'dark:hover:bg-gray-600');
+        
+        gridView.classList.add('text-gray-400', 'hover:text-coffee-600', 'hover:bg-white', 'dark:hover:bg-gray-600');
+        gridView.classList.remove('bg-coffee-600', 'text-white');
+    });
+});
+
+// Delete confirmation
+function confirmDelete(categoryName, deleteUrl) {
+    const modal = document.getElementById('deleteModal');
+    const categoryNameSpan = document.getElementById('categoryName');
+    const confirmButton = document.getElementById('confirmDelete');
+    const cancelButton = document.getElementById('cancelDelete');
+    
+    categoryNameSpan.textContent = categoryName;
+    confirmButton.href = deleteUrl;
+    
+    modal.classList.remove('hidden');
+    
+    cancelButton.onclick = function() {
+        modal.classList.add('hidden');
+    };
+    
+    // Close modal when clicking outside
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            modal.classList.add('hidden');
+        }
+    };
+}
+</script>
+{% endblock %}

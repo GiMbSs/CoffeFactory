@@ -1,0 +1,506 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    Ordem {{ order.order_number }} - Produção - Coffee Factory Management System
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-card {
+        transition: all 0.3s ease;
+    }
+    .detail-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .timeline-item {
+        position: relative;
+    }
+    .timeline-item:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 1rem;
+        top: 2.5rem;
+        width: 2px;
+        height: calc(100% - 2.5rem);
+        background: #E5E7EB;
+    }
+    .timeline-dot {
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 50%;
+        position: absolute;
+        left: 0.625rem;
+        top: 0.625rem;
+        z-index: 10;
+    }
+    .progress-ring {
+        transform: rotate(-90deg);
+    }
+    .material-item {
+        transition: all 0.3s ease;
+    }
+    .material-item:hover {
+        background-color: rgba(139, 69, 19, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex items-center space-x-4">
+            <a href="{% url 'production:production_order_list' %}" 
+               class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 transition-colors">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                    <i class="fas fa-clipboard-list text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    Ordem {{ order.order_number }}
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    {{ order.recipe.product.name }} - {{ order.planned_quantity }} {{ order.recipe.product.unit_of_measure.abbreviation }}
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                   {% if order.status == 'planned' %}bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100
+                   {% elif order.status == 'approved' %}bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
+                   {% elif order.status == 'in_progress' %}bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100
+                   {% elif order.status == 'completed' %}bg-emerald-100 text-emerald-800 dark:bg-emerald-800 dark:text-emerald-100
+                   {% elif order.status == 'cancelled' %}bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100
+                   {% else %}bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100{% endif %}">
+                <i class="fas fa-circle w-2 h-2 mr-2"></i>
+                {{ order.get_status_display }}
+            </span>
+            {% if order.status in 'planned,approved' %}
+            <a href="{% url 'production:production_order_update' order.pk %}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105">
+                <i class="fas fa-edit mr-2"></i>
+                Editar
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Order Details -->
+    <div class="lg:col-span-2 space-y-8">
+        <!-- Basic Information -->
+        <div class="detail-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-info-circle text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Informações da Ordem
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Número da Ordem
+                    </label>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ order.order_number }}</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Produto
+                    </label>
+                    <p class="text-lg text-gray-900 dark:text-white">{{ order.recipe.product.name }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ order.recipe.product.code }}</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Quantidade
+                    </label>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{ order.planned_quantity }} {{ order.recipe.product.unit_of_measure.abbreviation }}
+                    </p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Prioridade
+                    </label>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium
+                           {% if order.priority == 'high' %}bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100
+                           {% elif order.priority == 'normal' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100
+                           {% else %}bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100{% endif %}">
+                        {% if order.priority == 'high' %}
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                        {% elif order.priority == 'normal' %}
+                            <i class="fas fa-minus mr-1"></i>
+                        {% else %}
+                            <i class="fas fa-arrow-down mr-1"></i>
+                        {% endif %}
+                        {{ order.get_priority_display }}
+                    </span>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Data de Início Planejada
+                    </label>
+                    <p class="text-lg text-gray-900 dark:text-white">{{ order.planned_start_date|date:"d/m/Y H:i" }}</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Data de Conclusão Planejada
+                    </label>
+                    <p class="text-lg text-gray-900 dark:text-white">{{ order.planned_end_date|date:"d/m/Y H:i" }}</p>
+                </div>
+                
+                {% if order.actual_start_date %}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Início Real
+                    </label>
+                    <p class="text-lg text-gray-900 dark:text-white">{{ order.actual_start_date|date:"d/m/Y H:i" }}</p>
+                </div>
+                {% endif %}
+                
+                {% if order.actual_end_date %}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Conclusão Real
+                    </label>
+                    <p class="text-lg text-gray-900 dark:text-white">{{ order.actual_end_date|date:"d/m/Y H:i" }}</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if order.notes %}
+            <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Observações
+                </label>
+                <p class="text-gray-900 dark:text-white">{{ order.notes }}</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Recipe and Materials -->
+        {% if order.recipe %}
+        <div class="detail-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-book text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Receita: {{ order.recipe.name }}
+            </h2>
+            
+            <div class="mb-6 p-4 bg-coffee-50 dark:bg-coffee-900/20 rounded-lg">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <span class="font-medium text-coffee-800 dark:text-coffee-200">Versão:</span>
+                        <span class="text-coffee-700 dark:text-coffee-300 ml-2">{{ order.recipe.version }}</span>
+                    </div>
+                    <div>
+                        <span class="font-medium text-coffee-800 dark:text-coffee-200">Rendimento:</span>
+                        <span class="text-coffee-700 dark:text-coffee-300 ml-2">{{ order.recipe.yield_quantity }} un.</span>
+                    </div>
+                    <div>
+                        <span class="font-medium text-coffee-800 dark:text-coffee-200">Tempo Estimado:</span>
+                        <span class="text-coffee-700 dark:text-coffee-300 ml-2">{{ order.recipe.estimated_time_minutes }} min</span>
+                    </div>
+                </div>
+                {% if order.recipe.description %}
+                <div class="mt-3 pt-3 border-t border-coffee-200 dark:border-coffee-700">
+                    <p class="text-coffee-700 dark:text-coffee-300">{{ order.recipe.description }}</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Materials List -->
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Materiais Necessários</h3>
+            <div class="space-y-3">
+                {% for item in order.recipe.recipe_items.all %}
+                <div class="material-item p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-coffee-100 dark:bg-coffee-800 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-box text-coffee-600 dark:text-coffee-400"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">{{ item.material.name }}</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ item.material.code }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold text-gray-900 dark:text-white">
+                                {{ item.quantity }} {{ item.material.unit_of_measure.abbreviation }}
+                            </p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                Estoque: {{ item.material.current_stock|default:0 }}
+                            </p>
+                        </div>
+                    </div>
+                    {% if item.notes %}
+                    <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        <i class="fas fa-sticky-note mr-1"></i>
+                        {{ item.notes }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p class="text-gray-500 dark:text-gray-400 text-center py-4">
+                    Nenhum material cadastrado na receita
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Production Timeline -->
+        <div class="detail-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-history text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Histórico de Produção
+            </h2>
+            
+            <div class="space-y-6">
+                <div class="timeline-item pl-8">
+                    <div class="timeline-dot bg-blue-500"></div>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">Ordem Criada</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            {{ order.created_at|date:"d/m/Y H:i" }} por {{ order.created_by.get_full_name|default:order.created_by.username }}
+                        </p>
+                    </div>
+                </div>
+                
+                {% if order.status != 'planned' %}
+                <div class="timeline-item pl-8">
+                    <div class="timeline-dot bg-green-500"></div>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">Ordem Aprovada</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            Data de aprovação
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if order.actual_start_date %}
+                <div class="timeline-item pl-8">
+                    <div class="timeline-dot bg-orange-500"></div>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">Produção Iniciada</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            {{ order.actual_start_date|date:"d/m/Y H:i" }}
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if order.actual_end_date %}
+                <div class="timeline-item pl-8">
+                    <div class="timeline-dot bg-emerald-500"></div>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">Produção Concluída</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            {{ order.actual_end_date|date:"d/m/Y H:i" }}
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="space-y-6">
+        <!-- Progress Card -->
+        <div class="detail-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-chart-pie text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                Progresso
+            </h3>
+            
+            <div class="text-center">
+                {% if order.status == 'completed' %}
+                <div class="inline-flex items-center justify-center w-24 h-24 bg-green-100 dark:bg-green-800 rounded-full mb-4">
+                    <i class="fas fa-check text-green-600 dark:text-green-400 text-2xl"></i>
+                </div>
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400">100%</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Concluído</p>
+                {% elif order.status == 'in_progress' %}
+                <div class="inline-flex items-center justify-center w-24 h-24 bg-orange-100 dark:bg-orange-800 rounded-full mb-4">
+                    <i class="fas fa-cogs text-orange-600 dark:text-orange-400 text-2xl"></i>
+                </div>
+                <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ order.progress_percentage|default:50 }}%</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Em Produção</p>
+                {% else %}
+                <div class="inline-flex items-center justify-center w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full mb-4">
+                    <i class="fas fa-clock text-gray-600 dark:text-gray-400 text-2xl"></i>
+                </div>
+                <p class="text-2xl font-bold text-gray-600 dark:text-gray-400">0%</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ order.get_status_display }}</p>
+                {% endif %}
+            </div>
+            
+            {% if order.status in 'approved,in_progress' %}
+            <div class="mt-6 space-y-3">
+                {% if order.status == 'approved' %}
+                <button onclick="startProduction('{{ order.pk }}')" 
+                        class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105">
+                    <i class="fas fa-play mr-2"></i>
+                    Iniciar Produção
+                </button>
+                {% elif order.status == 'in_progress' %}
+                <button onclick="completeProduction('{{ order.pk }}')" 
+                        class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105">
+                    <i class="fas fa-check mr-2"></i>
+                    Marcar como Concluído
+                </button>
+                <button onclick="pauseProduction('{{ order.pk }}')" 
+                        class="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105">
+                    <i class="fas fa-pause mr-2"></i>
+                    Pausar Produção
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Cost Information -->
+        {% if order.recipe %}
+        <div class="detail-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-dollar-sign text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                Custos Estimados
+            </h3>
+            
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Custo dos Materiais:</span>
+                    <span class="font-medium text-gray-900 dark:text-white">R$ {{ order.recipe.total_material_cost|floatformat:2 }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Custo por Unidade:</span>
+                    <span class="font-medium text-gray-900 dark:text-white">R$ {{ order.recipe.cost_per_unit|floatformat:2 }}</span>
+                </div>
+                <div class="border-t border-gray-200 dark:border-gray-600 pt-3">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-900 dark:text-white">Custo Total Estimado:</span>
+                        <span class="font-bold text-coffee-600 dark:text-coffee-400">
+                            R$ {{ order.estimated_total_cost|floatformat:2 }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Quick Actions -->
+        <div class="detail-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-bolt text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                Ações Rápidas
+            </h3>
+            
+            <div class="space-y-3">
+                <a href="{% url 'production:production_order_list' %}" 
+                   class="block w-full bg-coffee-100 dark:bg-coffee-800 hover:bg-coffee-200 dark:hover:bg-coffee-700 text-coffee-800 dark:text-coffee-200 p-3 rounded-lg text-sm font-medium transition-colors text-center">
+                    <i class="fas fa-list mr-2"></i>
+                    Ver Todas as Ordens
+                </a>
+                
+                {% if order.recipe %}
+                <a href="{% url 'production:recipe_detail' order.recipe.pk %}" 
+                   class="block w-full bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 text-blue-800 dark:text-blue-200 p-3 rounded-lg text-sm font-medium transition-colors text-center">
+                    <i class="fas fa-book mr-2"></i>
+                    Ver Receita Completa
+                </a>
+                {% endif %}
+                
+                <a href="{% url 'inventory:dashboard' %}" 
+                   class="block w-full bg-green-100 dark:bg-green-800 hover:bg-green-200 dark:hover:bg-green-700 text-green-800 dark:text-green-200 p-3 rounded-lg text-sm font-medium transition-colors text-center">
+                    <i class="fas fa-warehouse mr-2"></i>
+                    Verificar Estoque
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function startProduction(orderId) {
+    if (confirm('Deseja iniciar a produção desta ordem?')) {
+        fetch(`/production/orders/${orderId}/start/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erro ao iniciar produção: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Erro de comunicação: ' + error);
+        });
+    }
+}
+
+function completeProduction(orderId) {
+    if (confirm('Deseja marcar esta ordem como concluída?')) {
+        fetch(`/production/orders/${orderId}/complete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erro ao concluir produção: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Erro de comunicação: ' + error);
+        });
+    }
+}
+
+function pauseProduction(orderId) {
+    if (confirm('Deseja pausar a produção desta ordem?')) {
+        fetch(`/production/orders/${orderId}/pause/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erro ao pausar produção: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Erro de comunicação: ' + error);
+        });
+    }
+}
+</script>
+{% endblock %}

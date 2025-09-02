@@ -1,0 +1,562 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ customer.get_display_name }} - Detalhes do Cliente - Coffee Factory Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .info-card {
+        transition: all 0.3s ease;
+    }
+    .info-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .status-indicator {
+        position: relative;
+        overflow: hidden;
+    }
+    .status-indicator::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #10b981, #34d399);
+    }
+    .tab-content {
+        display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    .tab-button {
+        transition: all 0.3s ease;
+    }
+    .tab-button.active {
+        background-color: #8B4513;
+        color: white;
+        transform: translateY(-2px);
+    }
+    .order-timeline {
+        position: relative;
+    }
+    .order-timeline::before {
+        content: '';
+        position: absolute;
+        left: 20px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, #8B4513, #D2691E);
+    }
+    .timeline-item {
+        position: relative;
+        padding-left: 50px;
+        margin-bottom: 20px;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 14px;
+        top: 20px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #8B4513;
+        border: 3px solid white;
+        box-shadow: 0 0 0 3px #8B4513;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center">
+            <div class="w-16 h-16 bg-coffee-100 dark:bg-coffee-900 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-{% if customer.customer_type == 'company' %}building{% else %}user{% endif %} text-coffee-600 dark:text-coffee-400 text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                    {{ customer.get_display_name }}
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    {{ customer.get_customer_type_display }} • Código: {{ customer.code }}
+                </p>
+                <div class="flex items-center mt-2">
+                    <span class="px-3 py-1 text-sm font-medium rounded-full
+                        {% if customer.status == 'active' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+                        {% elif customer.status == 'blocked' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300
+                        {% else %}bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300{% endif %}">
+                        {{ customer.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex space-x-3">
+            <a href="{% url 'sales:customer_list' %}" 
+               class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Voltar
+            </a>
+            <a href="{% url 'sales:customer_edit' customer.pk %}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 flex items-center">
+                <i class="fas fa-edit mr-2"></i>
+                Editar
+            </a>
+            <a href="{% url 'sales:sales_order_create' %}?customer={{ customer.pk }}" 
+               class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 flex items-center">
+                <i class="fas fa-plus mr-2"></i>
+                Nova Venda
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="info-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900">
+                <i class="fas fa-shopping-cart text-blue-600 dark:text-blue-400"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Total de Pedidos</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ customer.sales_orders.count }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="info-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-green-100 dark:bg-green-900">
+                <i class="fas fa-dollar-sign text-green-600 dark:text-green-400"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Volume Total</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                    R$ {{ customer.sales_orders.aggregate.total_amount__sum|default:0|floatformat:2 }}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="info-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-{% if customer.current_debt > 0 %}red{% else %}green{% endif %}-100 dark:bg-{% if customer.current_debt > 0 %}red{% else %}green{% endif %}-900">
+                <i class="fas fa-{% if customer.current_debt > 0 %}exclamation-triangle{% else %}check-circle{% endif %} text-{% if customer.current_debt > 0 %}red{% else %}green{% endif %}-600 dark:text-{% if customer.current_debt > 0 %}red{% else %}green{% endif %}-400"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Débito Atual</p>
+                <p class="text-2xl font-bold {% if customer.current_debt > 0 %}text-red-600 dark:text-red-400{% else %}text-green-600 dark:text-green-400{% endif %}">
+                    R$ {{ customer.current_debt|floatformat:2 }}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="info-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900">
+                <i class="fas fa-credit-card text-purple-600 dark:text-purple-400"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Limite de Crédito</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                    R$ {{ customer.credit_limit|floatformat:2 }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs Navigation -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700 mb-8">
+    <div class="border-b border-gray-200 dark:border-gray-700">
+        <nav class="flex space-x-8 p-6">
+            <button onclick="switchTab('info')" class="tab-button active px-4 py-2 text-sm font-medium rounded-lg">
+                <i class="fas fa-info-circle mr-2"></i>
+                Informações
+            </button>
+            <button onclick="switchTab('orders')" class="tab-button px-4 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                <i class="fas fa-shopping-cart mr-2"></i>
+                Histórico de Pedidos
+            </button>
+            <button onclick="switchTab('financial')" class="tab-button px-4 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                <i class="fas fa-chart-line mr-2"></i>
+                Financeiro
+            </button>
+            <button onclick="switchTab('activity')" class="tab-button px-4 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                <i class="fas fa-clock mr-2"></i>
+                Atividades
+            </button>
+        </nav>
+    </div>
+    
+    <!-- Tab Content -->
+    <div class="p-6">
+        <!-- Information Tab -->
+        <div id="infoTab" class="tab-content active">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Basic Information -->
+                <div class="space-y-6">
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                            <i class="fas fa-id-card text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                            Dados Básicos
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Nome:</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ customer.name }}</span>
+                            </div>
+                            {% if customer.trade_name %}
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Nome Fantasia:</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ customer.trade_name }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Documento:</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ customer.document_number }}</span>
+                            </div>
+                            {% if customer.state_registration %}
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Inscrição Estadual:</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ customer.state_registration }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Cadastrado em:</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ customer.created_at|date:"d/m/Y H:i" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                            <i class="fas fa-phone text-blue-600 dark:text-blue-400 mr-2"></i>
+                            Contato
+                        </h3>
+                        <div class="space-y-3">
+                            {% if customer.email %}
+                            <div class="flex items-center">
+                                <i class="fas fa-envelope text-gray-400 mr-3 w-4"></i>
+                                <a href="mailto:{{ customer.email }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                                    {{ customer.email }}
+                                </a>
+                            </div>
+                            {% endif %}
+                            {% if customer.phone %}
+                            <div class="flex items-center">
+                                <i class="fas fa-phone text-gray-400 mr-3 w-4"></i>
+                                <a href="tel:{{ customer.phone }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                                    {{ customer.phone }}
+                                </a>
+                            </div>
+                            {% endif %}
+                            {% if customer.contact_person %}
+                            <div class="flex items-center">
+                                <i class="fas fa-user text-gray-400 mr-3 w-4"></i>
+                                <span class="text-sm text-gray-900 dark:text-white">{{ customer.contact_person }}</span>
+                            </div>
+                            {% endif %}
+                            {% if customer.website %}
+                            <div class="flex items-center">
+                                <i class="fas fa-globe text-gray-400 mr-3 w-4"></i>
+                                <a href="{{ customer.website }}" target="_blank" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                                    {{ customer.website }}
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Address and Financial -->
+                <div class="space-y-6">
+                    <!-- Address -->
+                    {% if customer.street %}
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                            <i class="fas fa-map-marker-alt text-yellow-600 dark:text-yellow-400 mr-2"></i>
+                            Endereço
+                        </h3>
+                        <div class="text-sm text-gray-900 dark:text-white leading-relaxed">
+                            {{ customer.street }}{% if customer.number %}, {{ customer.number }}{% endif %}{% if customer.complement %} - {{ customer.complement }}{% endif %}<br>
+                            {% if customer.neighborhood %}{{ customer.neighborhood }}<br>{% endif %}
+                            {{ customer.city }} - {{ customer.state }}<br>
+                            {% if customer.postal_code %}CEP: {{ customer.postal_code }}{% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Financial -->
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                            <i class="fas fa-dollar-sign text-green-600 dark:text-green-400 mr-2"></i>
+                            Informações Financeiras
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Limite de Crédito:</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">R$ {{ customer.credit_limit|floatformat:2 }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Débito Atual:</span>
+                                <span class="text-sm font-medium {% if customer.current_debt > 0 %}text-red-600 dark:text-red-400{% else %}text-green-600 dark:text-green-400{% endif %}">
+                                    R$ {{ customer.current_debt|floatformat:2 }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Crédito Disponível:</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">
+                                    R$ {{ customer.available_credit|floatformat:2 }}
+                                </span>
+                            </div>
+                            {% if customer.payment_terms %}
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Condições de Pagamento:</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ customer.payment_terms }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Notes -->
+                    {% if customer.notes %}
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                            <i class="fas fa-sticky-note text-purple-600 dark:text-purple-400 mr-2"></i>
+                            Observações
+                        </h3>
+                        <p class="text-sm text-gray-900 dark:text-white leading-relaxed">{{ customer.notes|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Orders Tab -->
+        <div id="ordersTab" class="tab-content">
+            <div class="space-y-6">
+                <!-- Orders Filter -->
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        Histórico de Pedidos ({{ customer.sales_orders.count }})
+                    </h3>
+                    <div class="flex space-x-3">
+                        <select class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                            <option>Todos os status</option>
+                            <option>Pendente</option>
+                            <option>Confirmado</option>
+                            <option>Em produção</option>
+                            <option>Entregue</option>
+                            <option>Cancelado</option>
+                        </select>
+                        <input type="month" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                    </div>
+                </div>
+                
+                <!-- Orders List -->
+                <div class="space-y-4">
+                    {% for order in customer.sales_orders.all|slice:":10" %}
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-10 h-10 bg-coffee-100 dark:bg-coffee-900 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-receipt text-coffee-600 dark:text-coffee-400"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-900 dark:text-white">
+                                        Pedido #{{ order.order_number }}
+                                    </h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        {{ order.order_date|date:"d/m/Y H:i" }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="text-right">
+                                    <p class="font-medium text-gray-900 dark:text-white">
+                                        R$ {{ order.total_amount|floatformat:2 }}
+                                    </p>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300
+                                        {% elif order.status == 'confirmed' %}bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300
+                                        {% elif order.status == 'in_production' %}bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300
+                                        {% elif order.status == 'delivered' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+                                        {% elif order.status == 'cancelled' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300
+                                        {% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </div>
+                                <a href="{% url 'sales:sales_order_detail' order.pk %}" 
+                                   class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-12">
+                        <i class="fas fa-shopping-cart text-gray-400 text-4xl mb-4"></i>
+                        <p class="text-gray-600 dark:text-gray-400">Nenhum pedido encontrado</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if customer.sales_orders.count > 10 %}
+                <div class="text-center">
+                    <a href="{% url 'sales:sales_order_list' %}?customer={{ customer.pk }}" 
+                       class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 font-medium">
+                        Ver todos os pedidos
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Financial Tab -->
+        <div id="financialTab" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Financial Summary -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Resumo Financeiro</h3>
+                    
+                    <div class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-6 border border-green-200 dark:border-green-700">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-medium text-green-900 dark:text-green-100">Faturamento Total</h4>
+                            <i class="fas fa-chart-line text-green-600 dark:text-green-400"></i>
+                        </div>
+                        <p class="text-2xl font-bold text-green-900 dark:text-green-100">
+                            R$ {{ customer.sales_orders.aggregate.total_amount__sum|default:0|floatformat:2 }}
+                        </p>
+                        <p class="text-sm text-green-700 dark:text-green-300 mt-1">
+                            Baseado em {{ customer.sales_orders.count }} pedidos
+                        </p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-6 border border-blue-200 dark:border-blue-700">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-medium text-blue-900 dark:text-blue-100">Ticket Médio</h4>
+                            <i class="fas fa-calculator text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                        <p class="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                            R$ {% widthratio customer.sales_orders.aggregate.total_amount__sum|default:0 customer.sales_orders.count|default:1 1 %}
+                        </p>
+                        <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                            Valor médio por pedido
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Credit Information -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Informações de Crédito</h3>
+                    
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Limite de Crédito</span>
+                                <span class="font-medium text-gray-900 dark:text-white">R$ {{ customer.credit_limit|floatformat:2 }}</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Débito Atual</span>
+                                <span class="font-medium {% if customer.current_debt > 0 %}text-red-600 dark:text-red-400{% else %}text-green-600 dark:text-green-400{% endif %}">
+                                    R$ {{ customer.current_debt|floatformat:2 }}
+                                </span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-4">
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">Crédito Disponível</span>
+                                <span class="font-bold text-green-600 dark:text-green-400">
+                                    R$ {{ customer.available_credit|floatformat:2 }}
+                                </span>
+                            </div>
+                            
+                            <!-- Credit Usage Bar -->
+                            <div class="mt-4">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-gray-600 dark:text-gray-400">Utilização do Crédito</span>
+                                    <span class="text-gray-900 dark:text-white">
+                                        {% widthratio customer.current_debt customer.credit_limit 100 %}%
+                                    </span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                    <div class="h-3 rounded-full bg-gradient-to-r from-green-400 to-{% if customer.current_debt > customer.credit_limit|floatformat:0|mul:0.8 %}red{% else %}green{% endif %}-600"
+                                         style="width: {% widthratio customer.current_debt customer.credit_limit 100 %}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Activity Tab -->
+        <div id="activityTab" class="tab-content">
+            <div class="order-timeline">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Atividades Recentes</h3>
+                
+                {% for order in customer.sales_orders.all|slice:":5" %}
+                <div class="timeline-item">
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-medium text-gray-900 dark:text-white">
+                                Pedido #{{ order.order_number }}
+                            </h4>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">
+                                {{ order.order_date|date:"d/m/Y H:i" }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            Valor: R$ {{ order.total_amount|floatformat:2 }} •
+                            Status: {{ order.get_status_display }}
+                        </p>
+                        {% if order.notes %}
+                        <p class="text-sm text-gray-700 dark:text-gray-300">{{ order.notes|truncatewords:15 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-12">
+                    <i class="fas fa-clock text-gray-400 text-4xl mb-4"></i>
+                    <p class="text-gray-600 dark:text-gray-400">Nenhuma atividade registrada</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function switchTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Remove active class from all buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+        button.classList.add('text-gray-600', 'dark:text-gray-400');
+        button.classList.remove('bg-coffee-600', 'text-white');
+    });
+    
+    // Show selected tab content
+    document.getElementById(tabName + 'Tab').classList.add('active');
+    
+    // Add active class to clicked button
+    event.target.closest('.tab-button').classList.add('active');
+    event.target.closest('.tab-button').classList.remove('text-gray-600', 'dark:text-gray-400');
+    event.target.closest('.tab-button').classList.add('bg-coffee-600', 'text-white');
+}
+</script>
+{% endblock %}

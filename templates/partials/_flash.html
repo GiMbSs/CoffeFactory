@@ -1,0 +1,92 @@
+<!-- Flash Messages -->
+{% if messages %}
+<div class="px-4 py-2">
+    <div class="space-y-2">
+        {% for message in messages %}
+        <div x-data="{ show: true }" 
+             x-show="show"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform scale-95"
+             x-transition:enter-end="opacity-100 transform scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform scale-100"
+             x-transition:leave-end="opacity-0 transform scale-95"
+             class="flex items-center justify-between p-4 rounded-lg border-l-4 shadow-sm
+                    {% if message.tags == 'error' or message.tags == 'danger' %}
+                        bg-red-50 dark:bg-red-900/20 border-red-400 text-red-800 dark:text-red-200
+                    {% elif message.tags == 'warning' %}
+                        bg-yellow-50 dark:bg-yellow-900/20 border-yellow-400 text-yellow-800 dark:text-yellow-200
+                    {% elif message.tags == 'success' %}
+                        bg-green-50 dark:bg-green-900/20 border-green-400 text-green-800 dark:text-green-200
+                    {% elif message.tags == 'info' %}
+                        bg-coffee-50 dark:bg-coffee-900/20 border-coffee-400 text-coffee-800 dark:text-coffee-200
+                    {% else %}
+                        bg-coffee-100 dark:bg-coffee-800 border-coffee-400 text-coffee-800 dark:text-coffee-200
+                    {% endif %}">
+            
+            <div class="flex items-center">
+                <!-- Icon -->
+                <div class="flex-shrink-0 mr-3">
+                    {% if message.tags == 'error' or message.tags == 'danger' %}
+                        <i class="fas fa-exclamation-circle text-red-500 dark:text-red-400"></i>
+                    {% elif message.tags == 'warning' %}
+                        <i class="fas fa-exclamation-triangle text-yellow-500 dark:text-yellow-400"></i>
+                    {% elif message.tags == 'success' %}
+                        <i class="fas fa-check-circle text-green-500 dark:text-green-400"></i>
+                    {% elif message.tags == 'info' %}
+                        <i class="fas fa-info-circle text-blue-500 dark:text-blue-400"></i>
+                    {% else %}
+                        <i class="fas fa-bell text-gray-500 dark:text-gray-400"></i>
+                    {% endif %}
+                </div>
+                
+                <!-- Message content -->
+                <div class="flex-1">
+                    <p class="text-sm font-medium">
+                        {{ message|safe }}
+                    </p>
+                    {% if message.extra_tags %}
+                        <p class="text-xs mt-1 opacity-75">
+                            {{ message.extra_tags }}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Close button -->
+            <button @click="show = false" 
+                    class="flex-shrink-0 ml-4 p-1 rounded-md hover:bg-black hover:bg-opacity-10 transition-colors">
+                <i class="fas fa-times text-sm opacity-75"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Auto-hide messages after 5 seconds -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-hide success messages after 5 seconds
+        const successMessages = document.querySelectorAll('[class*="bg-green-50"], [class*="bg-green-900"]');
+        successMessages.forEach(function(message) {
+            setTimeout(function() {
+                const closeButton = message.querySelector('[\\@click="show = false"]');
+                if (closeButton) {
+                    closeButton.click();
+                }
+            }, 5000);
+        });
+        
+        // Auto-hide info messages after 7 seconds
+        const infoMessages = document.querySelectorAll('[class*="bg-blue-50"], [class*="bg-blue-900"]');
+        infoMessages.forEach(function(message) {
+            setTimeout(function() {
+                const closeButton = message.querySelector('[\\@click="show = false"]');
+                if (closeButton) {
+                    closeButton.click();
+                }
+            }, 7000);
+        });
+    });
+</script>

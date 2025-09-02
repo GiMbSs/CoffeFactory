@@ -1,0 +1,381 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Produção - Coffee Factory Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        transition: all 0.3s ease;
+    }
+    .stats-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .production-chart {
+        height: 300px;
+    }
+    .order-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .order-card.planned {
+        border-left-color: #3B82F6;
+    }
+    .order-card.approved {
+        border-left-color: #10B981;
+    }
+    .order-card.in_progress {
+        border-left-color: #F59E0B;
+    }
+    .order-card.completed {
+        border-left-color: #059669;
+    }
+    .order-card.cancelled {
+        border-left-color: #EF4444;
+    }
+    .order-card.on_hold {
+        border-left-color: #6B7280;
+    }
+    .recipe-card {
+        transition: all 0.3s ease;
+    }
+    .recipe-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -8px rgba(139, 69, 19, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                <i class="fas fa-industry text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Dashboard de Produção
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                Monitore ordens de produção, receitas e desempenho da fábrica
+            </p>
+        </div>
+        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+            <button onclick="refreshDashboard()" 
+                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105">
+                <i class="fas fa-sync-alt mr-2"></i>
+                Atualizar
+            </button>
+            <a href="{% url 'production:production_order_create' %}" 
+               class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center space-x-2">
+                <i class="fas fa-plus"></i>
+                <span>Nova Ordem</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Orders -->
+    <div class="stats-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Ordens Totais</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_orders|default:0 }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Este mês</p>
+            </div>
+            <div class="w-12 h-12 bg-coffee-100 dark:bg-coffee-800 rounded-lg flex items-center justify-center">
+                <i class="fas fa-clipboard-list text-coffee-600 dark:text-coffee-400 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- In Progress -->
+    <div class="stats-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Em Produção</p>
+                <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ in_progress_orders|default:0 }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Agora</p>
+            </div>
+            <div class="w-12 h-12 bg-orange-100 dark:bg-orange-800 rounded-lg flex items-center justify-center">
+                <i class="fas fa-cogs text-orange-600 dark:text-orange-400 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completed Today -->
+    <div class="stats-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Concluídas Hoje</p>
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ completed_today|default:0 }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">{{ today|date:"d/m/Y" }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
+                <i class="fas fa-check-circle text-green-600 dark:text-green-400 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Recipes -->
+    <div class="stats-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Receitas Ativas</p>
+                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ active_recipes|default:0 }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Disponíveis</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-lg flex items-center justify-center">
+                <i class="fas fa-book text-blue-600 dark:text-blue-400 text-xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts and Recent Orders -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Production Chart -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+                <i class="fas fa-chart-line text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Produção dos Últimos 7 Dias
+            </h2>
+            <select class="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <option>Últimos 7 dias</option>
+                <option>Últimas 2 semanas</option>
+                <option>Último mês</option>
+            </select>
+        </div>
+        <div class="production-chart">
+            <canvas id="productionChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Orders by Status -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+                <i class="fas fa-chart-pie text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Ordens por Status
+            </h2>
+        </div>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-blue-500 rounded-full mr-3"></div>
+                    <span class="text-sm font-medium text-gray-900 dark:text-white">Planejado</span>
+                </div>
+                <span class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ planned_orders|default:0 }}</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-green-500 rounded-full mr-3"></div>
+                    <span class="text-sm font-medium text-gray-900 dark:text-white">Aprovado</span>
+                </div>
+                <span class="text-sm font-bold text-green-600 dark:text-green-400">{{ approved_orders|default:0 }}</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-orange-500 rounded-full mr-3"></div>
+                    <span class="text-sm font-medium text-gray-900 dark:text-white">Em Produção</span>
+                </div>
+                <span class="text-sm font-bold text-orange-600 dark:text-orange-400">{{ in_progress_orders|default:0 }}</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-emerald-500 rounded-full mr-3"></div>
+                    <span class="text-sm font-medium text-gray-900 dark:text-white">Concluído</span>
+                </div>
+                <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400">{{ completed_orders|default:0 }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders and Quick Actions -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Recent Production Orders -->
+    <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+                <i class="fas fa-clock text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Ordens Recentes
+            </h2>
+            <a href="{% url 'production:production_order_list' %}" 
+               class="text-coffee-600 hover:text-coffee-700 dark:text-coffee-400 dark:hover:text-coffee-300 text-sm font-medium">
+                Ver todas
+            </a>
+        </div>
+        
+        <div class="space-y-4 max-h-96 overflow-y-auto">
+            {% for order in recent_orders %}
+            <div class="order-card bg-gray-50 dark:bg-gray-700 rounded-lg p-4 {{ order.status }}">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ order.order_number }}</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                               {% if order.status == 'planned' %}bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100
+                               {% elif order.status == 'approved' %}bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
+                               {% elif order.status == 'in_progress' %}bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100
+                               {% elif order.status == 'completed' %}bg-emerald-100 text-emerald-800 dark:bg-emerald-800 dark:text-emerald-100
+                               {% elif order.status == 'cancelled' %}bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100
+                               {% else %}bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100{% endif %}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <a href="{% url 'production:production_order_detail' order.pk %}" 
+                           class="text-coffee-600 hover:text-coffee-700 dark:text-coffee-400 dark:hover:text-coffee-300">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        {% if order.status in 'planned,approved' %}
+                        <a href="{% url 'production:production_order_update' order.pk %}" 
+                           class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                    <div>
+                        <span class="font-medium">{{ order.recipe.product.name }}</span>
+                        <span class="mx-2">•</span>
+                        <span>{{ order.planned_quantity }} {{ order.recipe.product.unit_of_measure.abbreviation }}</span>
+                    </div>
+                    <span>{{ order.planned_start_date|date:"d/m/Y" }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                <i class="fas fa-clipboard-list text-4xl mb-4"></i>
+                <p>Nenhuma ordem de produção encontrada</p>
+                <a href="{% url 'production:production_order_create' %}" 
+                   class="mt-2 inline-block text-coffee-600 hover:text-coffee-700 dark:text-coffee-400 dark:hover:text-coffee-300">
+                    Criar primeira ordem
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="space-y-6">
+        <!-- Top Recipes -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-star text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                    Receitas Populares
+                </h3>
+                <a href="{% url 'production:recipe_list' %}" 
+                   class="text-coffee-600 hover:text-coffee-700 dark:text-coffee-400 dark:hover:text-coffee-300 text-sm">
+                    Ver todas
+                </a>
+            </div>
+            <div class="space-y-3">
+                {% for recipe in popular_recipes|slice:":5" %}
+                <div class="recipe-card bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ recipe.name }}</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">{{ recipe.product.name }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-600 dark:text-gray-400">{{ recipe.yield_quantity }} un.</p>
+                            <p class="text-xs text-coffee-600 dark:text-coffee-400">{{ recipe.estimated_time_minutes }}min</p>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                    Nenhuma receita encontrada
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-bolt text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                Ações Rápidas
+            </h3>
+            <div class="space-y-3">
+                <a href="{% url 'production:production_order_create' %}" 
+                   class="block w-full bg-coffee-100 dark:bg-coffee-800 hover:bg-coffee-200 dark:hover:bg-coffee-700 text-coffee-800 dark:text-coffee-200 p-3 rounded-lg text-sm font-medium transition-colors">
+                    <i class="fas fa-plus mr-2"></i>
+                    Nova Ordem de Produção
+                </a>
+                <a href="{% url 'production:recipe_create' %}" 
+                   class="block w-full bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 text-blue-800 dark:text-blue-200 p-3 rounded-lg text-sm font-medium transition-colors">
+                    <i class="fas fa-book mr-2"></i>
+                    Nova Receita
+                </a>
+                <a href="{% url 'inventory:dashboard' %}" 
+                   class="block w-full bg-green-100 dark:bg-green-800 hover:bg-green-200 dark:hover:bg-green-700 text-green-800 dark:text-green-200 p-3 rounded-lg text-sm font-medium transition-colors">
+                    <i class="fas fa-warehouse mr-2"></i>
+                    Verificar Estoque
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Production Chart
+    const ctx = document.getElementById('productionChart').getContext('2d');
+    const productionChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['6 dias', '5 dias', '4 dias', '3 dias', '2 dias', 'Ontem', 'Hoje'],
+            datasets: [{
+                label: 'Ordens Concluídas',
+                data: [{{ production_data|default:"0,0,0,0,0,0,0" }}],
+                borderColor: '#8B4513',
+                backgroundColor: 'rgba(139, 69, 19, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                }
+            }
+        }
+    });
+});
+
+function refreshDashboard() {
+    location.reload();
+}
+</script>
+{% endblock %}

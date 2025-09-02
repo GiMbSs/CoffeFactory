@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(.venvScriptsactivate)",
+      "Bash(python -m pip:*)",
+      "Bash(venvScripts:*)",
+      "Bash(source:*)",
+      "Bash(python manage.py:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

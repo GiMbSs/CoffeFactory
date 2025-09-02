@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Funcionários - Coffee Factory Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .employee-card {
+        transition: all 0.3s ease;
+    }
+    .employee-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .employee-avatar {
+        transition: transform 0.3s ease;
+    }
+    .employee-card:hover .employee-avatar {
+        transform: scale(1.1);
+    }
+    .status-badge {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                <i class="fas fa-users text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Funcionários
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                Gerencie funcionários, departamentos e informações de pessoal
+            </p>
+        </div>
+        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+            <!-- Add Employee Button -->
+            <a href="{% url 'accounts:employee_create' %}" 
+               class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 hover:scale-105">
+                <i class="fas fa-plus"></i>
+                <span>Novo Funcionário</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Filters and Search -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700 mb-8">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Search -->
+        <div class="relative">
+            <input type="text" 
+                   name="search" 
+                   value="{{ request.GET.search }}"
+                   placeholder="Buscar por nome, email, ID..." 
+                   class="w-full pl-10 pr-4 py-2 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
+            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        </div>
+        
+        <!-- Department Filter -->
+        <select name="department" 
+                class="border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
+            <option value="">Todos os Departamentos</option>
+            <option value="production" {% if request.GET.department == 'production' %}selected{% endif %}>Produção</option>
+            <option value="sales" {% if request.GET.department == 'sales' %}selected{% endif %}>Vendas</option>
+            <option value="admin" {% if request.GET.department == 'admin' %}selected{% endif %}>Administração</option>
+            <option value="quality" {% if request.GET.department == 'quality' %}selected{% endif %}>Controle de Qualidade</option>
+            <option value="maintenance" {% if request.GET.department == 'maintenance' %}selected{% endif %}>Manutenção</option>
+            <option value="warehouse" {% if request.GET.department == 'warehouse' %}selected{% endif %}>Estoque</option>
+        </select>
+        
+        <!-- Status Filter -->
+        <select name="is_active" 
+                class="border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
+            <option value="">Todos os Status</option>
+            <option value="true" {% if request.GET.is_active == 'true' %}selected{% endif %}>Ativos</option>
+            <option value="false" {% if request.GET.is_active == 'false' %}selected{% endif %}>Inativos</option>
+        </select>
+        
+        <!-- Filter Buttons -->
+        <div class="flex space-x-2">
+            <button type="submit" 
+                    class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2">
+                <i class="fas fa-filter"></i>
+                <span>Filtrar</span>
+            </button>
+            <a href="{% url 'accounts:employee_list' %}" 
+               class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2">
+                <i class="fas fa-times"></i>
+                <span>Limpar</span>
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Employee Statistics -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total de Funcionários</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ employees|length }}</p>
+            </div>
+            <div class="bg-gradient-to-br from-coffee-500 to-coffee-600 w-14 h-14 rounded-lg flex items-center justify-center">
+                <i class="fas fa-users text-white text-xl"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Ativos</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ employees|length }}</p>
+            </div>
+            <div class="bg-gradient-to-br from-green-500 to-green-600 w-14 h-14 rounded-lg flex items-center justify-center">
+                <i class="fas fa-check-circle text-white text-xl"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Departamentos</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">6</p>
+            </div>
+            <div class="bg-gradient-to-br from-coffee-600 to-coffee-700 w-14 h-14 rounded-lg flex items-center justify-center">
+                <i class="fas fa-building text-white text-xl"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Contratações Este Mês</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">2</p>
+            </div>
+            <div class="bg-gradient-to-br from-coffee-700 to-coffee-800 w-14 h-14 rounded-lg flex items-center justify-center">
+                <i class="fas fa-user-plus text-white text-xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Employee Cards Grid -->
+{% if employees %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {% for employee in employees %}
+    <div class="employee-card bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700 overflow-hidden">
+        <!-- Employee Header -->
+        <div class="bg-gradient-to-r from-coffee-500 to-coffee-600 p-4">
+            <div class="flex items-center space-x-3">
+                <div class="employee-avatar flex-shrink-0 w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                    {% if employee.user.first_name %}
+                        <span class="text-coffee-600 font-bold text-lg">
+                            {{ employee.user.first_name|first|upper }}{{ employee.user.last_name|first|upper }}
+                        </span>
+                    {% else %}
+                        <i class="fas fa-user text-coffee-600 text-lg"></i>
+                    {% endif %}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-white truncate">{{ employee.user.get_full_name }}</h3>
+                    <p class="text-coffee-100 text-sm truncate">{{ employee.employee_id }}</p>
+                </div>
+                {% if employee.is_active %}
+                    <span class="status-badge inline-flex items-center justify-center w-3 h-3 bg-green-400 rounded-full"></span>
+                {% else %}
+                    <span class="inline-flex items-center justify-center w-3 h-3 bg-red-400 rounded-full"></span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Employee Details -->
+        <div class="p-4">
+            <div class="space-y-3">
+                <div class="flex items-center text-sm">
+                    <i class="fas fa-briefcase text-coffee-500 w-5"></i>
+                    <span class="text-gray-600 dark:text-gray-400 ml-2">{{ employee.position }}</span>
+                </div>
+                <div class="flex items-center text-sm">
+                    <i class="fas fa-building text-coffee-500 w-5"></i>
+                    <span class="text-gray-600 dark:text-gray-400 ml-2">{{ employee.get_department_display }}</span>
+                </div>
+                <div class="flex items-center text-sm">
+                    <i class="fas fa-envelope text-coffee-500 w-5"></i>
+                    <span class="text-gray-600 dark:text-gray-400 ml-2 truncate">{{ employee.user.email }}</span>
+                </div>
+                <div class="flex items-center text-sm">
+                    <i class="fas fa-calendar text-coffee-500 w-5"></i>
+                    <span class="text-gray-600 dark:text-gray-400 ml-2">{{ employee.hire_date|date:"d/m/Y" }}</span>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex space-x-2 mt-4">
+                <a href="{% url 'accounts:employee_detail' employee.pk %}" 
+                   class="flex-1 bg-coffee-100 hover:bg-coffee-200 dark:bg-coffee-800 dark:hover:bg-coffee-700 text-coffee-700 dark:text-coffee-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 text-center">
+                    <i class="fas fa-eye mr-1"></i>
+                    Ver
+                </a>
+                <a href="{% url 'accounts:employee_update' employee.pk %}" 
+                   class="flex-1 bg-coffee-600 hover:bg-coffee-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 text-center">
+                    <i class="fas fa-edit mr-1"></i>
+                    Editar
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="flex justify-center mt-8">
+    <nav class="flex items-center space-x-2">
+        {% if page_obj.has_previous %}
+            <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.department %}department={{ request.GET.department }}&{% endif %}{% if request.GET.is_active %}is_active={{ request.GET.is_active }}&{% endif %}page={{ page_obj.previous_page_number }}" 
+               class="px-3 py-2 text-sm font-medium text-coffee-600 dark:text-coffee-400 bg-white dark:bg-gray-800 border border-coffee-300 dark:border-coffee-600 rounded-lg hover:bg-coffee-50 dark:hover:bg-coffee-900">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <span class="px-3 py-2 text-sm font-medium text-white bg-coffee-600 border border-coffee-600 rounded-lg">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.department %}department={{ request.GET.department }}&{% endif %}{% if request.GET.is_active %}is_active={{ request.GET.is_active }}&{% endif %}page={{ num }}" 
+                   class="px-3 py-2 text-sm font-medium text-coffee-600 dark:text-coffee-400 bg-white dark:bg-gray-800 border border-coffee-300 dark:border-coffee-600 rounded-lg hover:bg-coffee-50 dark:hover:bg-coffee-900">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+            <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.department %}department={{ request.GET.department }}&{% endif %}{% if request.GET.is_active %}is_active={{ request.GET.is_active }}&{% endif %}page={{ page_obj.next_page_number }}" 
+               class="px-3 py-2 text-sm font-medium text-coffee-600 dark:text-coffee-400 bg-white dark:bg-gray-800 border border-coffee-300 dark:border-coffee-600 rounded-lg hover:bg-coffee-50 dark:hover:bg-coffee-900">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}
+
+{% else %}
+<!-- Empty State -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700 p-12 text-center">
+    <div class="w-24 h-24 bg-coffee-100 dark:bg-coffee-900 rounded-full flex items-center justify-center mx-auto mb-6">
+        <i class="fas fa-users text-coffee-600 dark:text-coffee-400 text-3xl"></i>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Nenhum funcionário encontrado</h3>
+    <p class="text-gray-600 dark:text-gray-400 mb-6">Comece adicionando funcionários à sua equipe.</p>
+    <a href="{% url 'accounts:employee_create' %}" 
+       class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200 inline-flex items-center space-x-2">
+        <i class="fas fa-plus"></i>
+        <span>Adicionar Primeiro Funcionário</span>
+    </a>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form on filter change
+    const filterSelects = document.querySelectorAll('select[name="department"], select[name="is_active"]');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            this.closest('form').submit();
+        });
+    });
+    
+    // Search input debounce
+    const searchInput = document.querySelector('input[name="search"]');
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            if (this.value.length >= 3 || this.value.length === 0) {
+                this.closest('form').submit();
+            }
+        }, 500);
+    });
+    
+    // Card hover effects
+    const cards = document.querySelectorAll('.employee-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-4px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
+{% endblock %}

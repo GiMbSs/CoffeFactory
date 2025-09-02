@@ -1,0 +1,772 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if supplier.pk %}Editar{{ else }}Novo{% endif %} Fornecedor - Coffee Factory Management System
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    .dark .form-card {
+        background: rgba(31, 41, 55, 0.9);
+        border: 1px solid rgba(75, 85, 99, 0.2);
+    }
+    .gradient-header {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+    }
+    .section-divider {
+        border-left: 4px solid #8B4513;
+    }
+    .dark .section-divider {
+        border-left: 4px solid #D2691E;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .required-field::after {
+        content: " *";
+        color: #EF4444;
+    }
+    .char-counter {
+        font-size: 0.75rem;
+        color: #6B7280;
+    }
+    .invalid-field {
+        border-color: #EF4444 !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div x-data="supplierForm()">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <nav class="flex mb-4" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <a href="{% url 'suppliers:list' %}" class="text-gray-700 dark:text-gray-300 hover:text-coffee-600 dark:hover:text-coffee-400">
+                                <i class="fas fa-truck mr-2"></i>
+                                Fornecedores
+                            </a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-gray-400 mx-3"></i>
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {% if supplier.pk %}Editar Fornecedor{% else %}Novo Fornecedor{% endif %}
+                                </span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    <i class="fas fa-{% if supplier.pk %}edit{% else %}plus{% endif %} text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    {% if supplier.pk %}Editar Fornecedor{% else %}Novo Fornecedor{% endif %}
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    {% if supplier.pk %}
+                        Atualize as informações do fornecedor {{ supplier.get_display_name }}
+                    {% else %}
+                        Preencha os dados para cadastrar um novo fornecedor
+                    {% endif %}
+                </p>
+            </div>
+            <div class="mt-4 lg:mt-0">
+                <a href="{% url 'suppliers:list' %}" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" @submit="validateForm" class="space-y-8">
+        {% csrf_token %}
+        
+        <!-- Basic Information -->
+        <div class="form-card rounded-xl p-6 shadow-lg">
+            <div class="gradient-header rounded-lg p-4 text-white mb-6">
+                <h2 class="text-xl font-bold flex items-center">
+                    <i class="fas fa-info-circle mr-3"></i>
+                    Informações Básicas
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Name -->
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 required-field">
+                        Nome/Razão Social
+                    </label>
+                    <input type="text" 
+                           name="{{ form.name.name }}" 
+                           id="{{ form.name.id_for_label }}"
+                           value="{{ form.name.value|default:'' }}"
+                           maxlength="200"
+                           x-model="formData.name"
+                           @input="updateCharCount('name', $event.target.value); validateField('name')"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                           required>
+                    <div class="flex justify-between mt-1">
+                        {% if form.name.errors %}
+                            <span class="text-red-500 text-sm">{{ form.name.errors.0 }}</span>
+                        {% else %}
+                            <span></span>
+                        {% endif %}
+                        <span class="char-counter" x-text="`${charCounts.name}/200`"></span>
+                    </div>
+                </div>
+
+                <!-- Trade Name -->
+                <div class="form-group">
+                    <label for="{{ form.trade_name.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Nome Fantasia
+                    </label>
+                    <input type="text" 
+                           name="{{ form.trade_name.name }}" 
+                           id="{{ form.trade_name.id_for_label }}"
+                           value="{{ form.trade_name.value|default:'' }}"
+                           maxlength="200"
+                           x-model="formData.trade_name"
+                           @input="updateCharCount('trade_name', $event.target.value)"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    <div class="flex justify-between mt-1">
+                        {% if form.trade_name.errors %}
+                            <span class="text-red-500 text-sm">{{ form.trade_name.errors.0 }}</span>
+                        {% else %}
+                            <span></span>
+                        {% endif %}
+                        <span class="char-counter" x-text="`${charCounts.trade_name}/200`"></span>
+                    </div>
+                </div>
+
+                <!-- Code -->
+                <div class="form-group">
+                    <label for="{{ form.code.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 required-field">
+                        Código
+                    </label>
+                    <input type="text" 
+                           name="{{ form.code.name }}" 
+                           id="{{ form.code.id_for_label }}"
+                           value="{{ form.code.value|default:'' }}"
+                           maxlength="20"
+                           x-model="formData.code"
+                           @input="updateCharCount('code', $event.target.value); validateField('code')"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                           required>
+                    <div class="flex justify-between mt-1">
+                        {% if form.code.errors %}
+                            <span class="text-red-500 text-sm">{{ form.code.errors.0 }}</span>
+                        {% else %}
+                            <span class="text-gray-500 dark:text-gray-400 text-sm">Código único para identificação</span>
+                        {% endif %}
+                        <span class="char-counter" x-text="`${charCounts.code}/20`"></span>
+                    </div>
+                </div>
+
+                <!-- Supplier Type -->
+                <div class="form-group">
+                    <label for="{{ form.supplier_type.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 required-field">
+                        Tipo de Fornecedor
+                    </label>
+                    <select name="{{ form.supplier_type.name }}" 
+                            id="{{ form.supplier_type.id_for_label }}"
+                            x-model="formData.supplier_type"
+                            @change="toggleFields()"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                            required>
+                        <option value="">Selecione...</option>
+                        <option value="company" {% if form.supplier_type.value == 'company' %}selected{% endif %}>Pessoa Jurídica</option>
+                        <option value="individual" {% if form.supplier_type.value == 'individual' %}selected{% endif %}>Pessoa Física</option>
+                    </select>
+                    {% if form.supplier_type.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.supplier_type.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- CNPJ/CPF -->
+                <div class="form-group">
+                    <label for="{{ form.cnpj_cpf.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <span x-text="formData.supplier_type === 'company' ? 'CNPJ' : 'CPF'">CNPJ/CPF</span>
+                    </label>
+                    <input type="text" 
+                           name="{{ form.cnpj_cpf.name }}" 
+                           id="{{ form.cnpj_cpf.id_for_label }}"
+                           value="{{ form.cnpj_cpf.value|default:'' }}"
+                           x-model="formData.cnpj_cpf"
+                           @input="formatDocument($event)"
+                           :placeholder="formData.supplier_type === 'company' ? '00.000.000/0000-00' : '000.000.000-00'"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    {% if form.cnpj_cpf.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.cnpj_cpf.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- State Registration -->
+                <div class="form-group" x-show="formData.supplier_type === 'company'">
+                    <label for="{{ form.state_registration.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Inscrição Estadual
+                    </label>
+                    <input type="text" 
+                           name="{{ form.state_registration.name }}" 
+                           id="{{ form.state_registration.id_for_label }}"
+                           value="{{ form.state_registration.value|default:'' }}"
+                           x-model="formData.state_registration"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    {% if form.state_registration.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.state_registration.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Status -->
+                <div class="form-group">
+                    <label class="flex items-center">
+                        <input type="checkbox" 
+                               name="{{ form.is_active.name }}" 
+                               id="{{ form.is_active.id_for_label }}"
+                               {% if form.is_active.value %}checked{% endif %}
+                               x-model="formData.is_active"
+                               class="w-4 h-4 text-coffee-600 bg-gray-100 border-gray-300 rounded focus:ring-coffee-500 dark:focus:ring-coffee-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                        <span class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Fornecedor Ativo</span>
+                    </label>
+                    {% if form.is_active.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.is_active.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="form-card rounded-xl p-6 shadow-lg">
+            <div class="section-divider pl-4 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-address-card text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    Informações de Contato
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Contact Person -->
+                <div class="form-group">
+                    <label for="{{ form.contact_person.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Pessoa de Contato
+                    </label>
+                    <input type="text" 
+                           name="{{ form.contact_person.name }}" 
+                           id="{{ form.contact_person.id_for_label }}"
+                           value="{{ form.contact_person.value|default:'' }}"
+                           maxlength="100"
+                           x-model="formData.contact_person"
+                           @input="updateCharCount('contact_person', $event.target.value)"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    <div class="flex justify-between mt-1">
+                        {% if form.contact_person.errors %}
+                            <span class="text-red-500 text-sm">{{ form.contact_person.errors.0 }}</span>
+                        {% else %}
+                            <span></span>
+                        {% endif %}
+                        <span class="char-counter" x-text="`${charCounts.contact_person}/100`"></span>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        E-mail
+                    </label>
+                    <input type="email" 
+                           name="{{ form.email.name }}" 
+                           id="{{ form.email.id_for_label }}"
+                           value="{{ form.email.value|default:'' }}"
+                           x-model="formData.email"
+                           @input="validateField('email')"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    {% if form.email.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.email.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Phone -->
+                <div class="form-group">
+                    <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Telefone
+                    </label>
+                    <input type="tel" 
+                           name="{{ form.phone.name }}" 
+                           id="{{ form.phone.id_for_label }}"
+                           value="{{ form.phone.value|default:'' }}"
+                           x-model="formData.phone"
+                           @input="formatPhone($event)"
+                           placeholder="(00) 0000-0000"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    {% if form.phone.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.phone.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Mobile Phone -->
+                <div class="form-group">
+                    <label for="{{ form.mobile.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Celular
+                    </label>
+                    <input type="tel" 
+                           name="{{ form.mobile.name }}" 
+                           id="{{ form.mobile.id_for_label }}"
+                           value="{{ form.mobile.value|default:'' }}"
+                           x-model="formData.mobile"
+                           @input="formatMobile($event)"
+                           placeholder="(00) 00000-0000"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    {% if form.mobile.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.mobile.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Website -->
+                <div class="form-group md:col-span-2">
+                    <label for="{{ form.website.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Website
+                    </label>
+                    <input type="url" 
+                           name="{{ form.website.name }}" 
+                           id="{{ form.website.id_for_label }}"
+                           value="{{ form.website.value|default:'' }}"
+                           x-model="formData.website"
+                           placeholder="https://exemplo.com"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    {% if form.website.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.website.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Address Information -->
+        <div class="form-card rounded-xl p-6 shadow-lg">
+            <div class="section-divider pl-4 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-map-marker-alt text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    Endereço
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- ZIP Code -->
+                <div class="form-group">
+                    <label for="{{ form.postal_code.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        CEP
+                    </label>
+                    <input type="text" 
+                           name="{{ form.postal_code.name }}" 
+                           id="{{ form.postal_code.id_for_label }}"
+                           value="{{ form.postal_code.value|default:'' }}"
+                           x-model="formData.postal_code"
+                           @input="formatZipCode($event)"
+                           @blur="searchCEP()"
+                           placeholder="00000-000"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    {% if form.postal_code.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.postal_code.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Address -->
+                <div class="form-group md:col-span-2">
+                    <label for="{{ form.address.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Endereço
+                    </label>
+                    <input type="text" 
+                           name="{{ form.address.name }}" 
+                           id="{{ form.address.id_for_label }}"
+                           value="{{ form.address.value|default:'' }}"
+                           maxlength="200"
+                           x-model="formData.address"
+                           @input="updateCharCount('address', $event.target.value)"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    <div class="flex justify-between mt-1">
+                        {% if form.address.errors %}
+                            <span class="text-red-500 text-sm">{{ form.address.errors.0 }}</span>
+                        {% else %}
+                            <span></span>
+                        {% endif %}
+                        <span class="char-counter" x-text="`${charCounts.address}/200`"></span>
+                    </div>
+                </div>
+
+                <!-- Number -->
+                <div class="form-group">
+                    <label for="{{ form.address_number.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Número
+                    </label>
+                    <input type="text" 
+                           name="{{ form.address_number.name }}" 
+                           id="{{ form.address_number.id_for_label }}"
+                           value="{{ form.address_number.value|default:'' }}"
+                           maxlength="10"
+                           x-model="formData.address_number"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    {% if form.address_number.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.address_number.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Complement -->
+                <div class="form-group">
+                    <label for="{{ form.address_complement.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Complemento
+                    </label>
+                    <input type="text" 
+                           name="{{ form.address_complement.name }}" 
+                           id="{{ form.address_complement.id_for_label }}"
+                           value="{{ form.address_complement.value|default:'' }}"
+                           maxlength="50"
+                           x-model="formData.address_complement"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    {% if form.address_complement.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.address_complement.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Neighborhood -->
+                <div class="form-group">
+                    <label for="{{ form.neighborhood.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Bairro
+                    </label>
+                    <input type="text" 
+                           name="{{ form.neighborhood.name }}" 
+                           id="{{ form.neighborhood.id_for_label }}"
+                           value="{{ form.neighborhood.value|default:'' }}"
+                           maxlength="100"
+                           x-model="formData.neighborhood"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    {% if form.neighborhood.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.neighborhood.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- City -->
+                <div class="form-group">
+                    <label for="{{ form.city.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Cidade
+                    </label>
+                    <input type="text" 
+                           name="{{ form.city.name }}" 
+                           id="{{ form.city.id_for_label }}"
+                           value="{{ form.city.value|default:'' }}"
+                           maxlength="100"
+                           x-model="formData.city"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    {% if form.city.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.city.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- State -->
+                <div class="form-group">
+                    <label for="{{ form.state.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Estado
+                    </label>
+                    <select name="{{ form.state.name }}" 
+                            id="{{ form.state.id_for_label }}"
+                            x-model="formData.state"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                        <option value="">Selecione...</option>
+                        <option value="AC" {% if form.state.value == 'AC' %}selected{% endif %}>Acre</option>
+                        <option value="AL" {% if form.state.value == 'AL' %}selected{% endif %}>Alagoas</option>
+                        <option value="AP" {% if form.state.value == 'AP' %}selected{% endif %}>Amapá</option>
+                        <option value="AM" {% if form.state.value == 'AM' %}selected{% endif %}>Amazonas</option>
+                        <option value="BA" {% if form.state.value == 'BA' %}selected{% endif %}>Bahia</option>
+                        <option value="CE" {% if form.state.value == 'CE' %}selected{% endif %}>Ceará</option>
+                        <option value="DF" {% if form.state.value == 'DF' %}selected{% endif %}>Distrito Federal</option>
+                        <option value="ES" {% if form.state.value == 'ES' %}selected{% endif %}>Espírito Santo</option>
+                        <option value="GO" {% if form.state.value == 'GO' %}selected{% endif %}>Goiás</option>
+                        <option value="MA" {% if form.state.value == 'MA' %}selected{% endif %}>Maranhão</option>
+                        <option value="MT" {% if form.state.value == 'MT' %}selected{% endif %}>Mato Grosso</option>
+                        <option value="MS" {% if form.state.value == 'MS' %}selected{% endif %}>Mato Grosso do Sul</option>
+                        <option value="MG" {% if form.state.value == 'MG' %}selected{% endif %}>Minas Gerais</option>
+                        <option value="PA" {% if form.state.value == 'PA' %}selected{% endif %}>Pará</option>
+                        <option value="PB" {% if form.state.value == 'PB' %}selected{% endif %}>Paraíba</option>
+                        <option value="PR" {% if form.state.value == 'PR' %}selected{% endif %}>Paraná</option>
+                        <option value="PE" {% if form.state.value == 'PE' %}selected{% endif %}>Pernambuco</option>
+                        <option value="PI" {% if form.state.value == 'PI' %}selected{% endif %}>Piauí</option>
+                        <option value="RJ" {% if form.state.value == 'RJ' %}selected{% endif %}>Rio de Janeiro</option>
+                        <option value="RN" {% if form.state.value == 'RN' %}selected{% endif %}>Rio Grande do Norte</option>
+                        <option value="RS" {% if form.state.value == 'RS' %}selected{% endif %}>Rio Grande do Sul</option>
+                        <option value="RO" {% if form.state.value == 'RO' %}selected{% endif %}>Rondônia</option>
+                        <option value="RR" {% if form.state.value == 'RR' %}selected{% endif %}>Roraima</option>
+                        <option value="SC" {% if form.state.value == 'SC' %}selected{% endif %}>Santa Catarina</option>
+                        <option value="SP" {% if form.state.value == 'SP' %}selected{% endif %}>São Paulo</option>
+                        <option value="SE" {% if form.state.value == 'SE' %}selected{% endif %}>Sergipe</option>
+                        <option value="TO" {% if form.state.value == 'TO' %}selected{% endif %}>Tocantins</option>
+                    </select>
+                    {% if form.state.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.state.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Information -->
+        <div class="form-card rounded-xl p-6 shadow-lg">
+            <div class="section-divider pl-4 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-dollar-sign text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    Informações Financeiras
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Credit Limit -->
+                <div class="form-group">
+                    <label for="{{ form.credit_limit.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Limite de Crédito
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-gray-500 dark:text-gray-400">R$</span>
+                        <input type="number" 
+                               name="{{ form.credit_limit.name }}" 
+                               id="{{ form.credit_limit.id_for_label }}"
+                               value="{{ form.credit_limit.value|default:'' }}"
+                               step="0.01"
+                               min="0"
+                               x-model="formData.credit_limit"
+                               class="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    </div>
+                    {% if form.credit_limit.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.credit_limit.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Payment Terms -->
+                <div class="form-group">
+                    <label for="{{ form.payment_terms.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Condições de Pagamento
+                    </label>
+                    <input type="text" 
+                           name="{{ form.payment_terms.name }}" 
+                           id="{{ form.payment_terms.id_for_label }}"
+                           value="{{ form.payment_terms.value|default:'' }}"
+                           maxlength="100"
+                           x-model="formData.payment_terms"
+                           placeholder="Ex: 30/60/90 dias"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    {% if form.payment_terms.errors %}
+                        <span class="text-red-500 text-sm mt-1 block">{{ form.payment_terms.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-card rounded-xl p-6 shadow-lg">
+            <div class="section-divider pl-4 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-sticky-note text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                    Observações
+                </h2>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Observações Gerais
+                </label>
+                <textarea name="{{ form.notes.name }}" 
+                          id="{{ form.notes.id_for_label }}"
+                          rows="4"
+                          maxlength="500"
+                          x-model="formData.notes"
+                          @input="updateCharCount('notes', $event.target.value)"
+                          placeholder="Informações adicionais sobre o fornecedor..."
+                          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none">{{ form.notes.value|default:'' }}</textarea>
+                <div class="flex justify-between mt-1">
+                    {% if form.notes.errors %}
+                        <span class="text-red-500 text-sm">{{ form.notes.errors.0 }}</span>
+                    {% else %}
+                        <span></span>
+                    {% endif %}
+                    <span class="char-counter" x-text="`${charCounts.notes}/500`"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-4 pt-6">
+            <a href="{% url 'suppliers:list' %}" class="px-6 py-3 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors">
+                Cancelar
+            </a>
+            <button type="submit" 
+                    :disabled="!isFormValid"
+                    :class="{ 'opacity-50 cursor-not-allowed': !isFormValid }"
+                    class="px-6 py-3 bg-coffee-600 hover:bg-coffee-700 text-white font-medium rounded-lg transition-colors flex items-center">
+                <i class="fas fa-save mr-2"></i>
+                {% if supplier.pk %}Atualizar Fornecedor{% else %}Salvar Fornecedor{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function supplierForm() {
+    return {
+        formData: {
+            name: '{{ form.name.value|default:"" }}',
+            trade_name: '{{ form.trade_name.value|default:"" }}',
+            code: '{{ form.code.value|default:"" }}',
+            supplier_type: '{{ form.supplier_type.value|default:"" }}',
+            cnpj_cpf: '{{ form.cnpj_cpf.value|default:"" }}',
+            state_registration: '{{ form.state_registration.value|default:"" }}',
+            is_active: {% if form.is_active.value %}true{% else %}false{% endif %},
+            contact_person: '{{ form.contact_person.value|default:"" }}',
+            email: '{{ form.email.value|default:"" }}',
+            phone: '{{ form.phone.value|default:"" }}',
+            mobile: '{{ form.mobile.value|default:"" }}',
+            website: '{{ form.website.value|default:"" }}',
+            postal_code: '{{ form.postal_code.value|default:"" }}',
+            address: '{{ form.address.value|default:"" }}',
+            address_number: '{{ form.address_number.value|default:"" }}',
+            address_complement: '{{ form.address_complement.value|default:"" }}',
+            neighborhood: '{{ form.neighborhood.value|default:"" }}',
+            city: '{{ form.city.value|default:"" }}',
+            state: '{{ form.state.value|default:"" }}',
+            credit_limit: '{{ form.credit_limit.value|default:"" }}',
+            payment_terms: '{{ form.payment_terms.value|default:"" }}',
+            notes: '{{ form.notes.value|default:"" }}'
+        },
+        charCounts: {
+            name: '{{ form.name.value|default:""|length }}',
+            trade_name: '{{ form.trade_name.value|default:""|length }}',
+            code: '{{ form.code.value|default:""|length }}',
+            contact_person: '{{ form.contact_person.value|default:""|length }}',
+            address: '{{ form.address.value|default:""|length }}',
+            notes: '{{ form.notes.value|default:""|length }}'
+        },
+        
+        get isFormValid() {
+            return this.formData.name.trim() !== '' && 
+                   this.formData.code.trim() !== '' && 
+                   this.formData.supplier_type !== '';
+        },
+
+        updateCharCount(field, value) {
+            this.charCounts[field] = value.length;
+        },
+
+        toggleFields() {
+            // Additional logic for showing/hiding fields based on supplier type
+        },
+
+        validateField(field) {
+            const element = document.getElementById(`id_${field}`);
+            if (element) {
+                if (field === 'email' && this.formData.email) {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(this.formData.email)) {
+                        element.classList.add('invalid-field');
+                    } else {
+                        element.classList.remove('invalid-field');
+                    }
+                }
+            }
+        },
+
+        formatDocument(event) {
+            let value = event.target.value.replace(/\D/g, '');
+            if (this.formData.supplier_type === 'company') {
+                // CNPJ format: 00.000.000/0000-00
+                value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+                value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+                value = value.replace(/(\d{4})(\d)/, '$1-$2');
+            } else {
+                // CPF format: 000.000.000-00
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+                value = value.replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4');
+            }
+            event.target.value = value;
+            this.formData.cnpj_cpf = value;
+        },
+
+        formatPhone(event) {
+            let value = event.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+            value = value.replace(/(\d{4})(\d)/, '$1-$2');
+            event.target.value = value;
+            this.formData.phone = value;
+        },
+
+        formatMobile(event) {
+            let value = event.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            event.target.value = value;
+            this.formData.mobile = value;
+        },
+
+        formatZipCode(event) {
+            let value = event.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{5})(\d)/, '$1-$2');
+            event.target.value = value;
+            this.formData.postal_code = value;
+        },
+
+        async searchCEP() {
+            const cep = this.formData.postal_code.replace(/\D/g, '');
+            if (cep.length === 8) {
+                try {
+                    const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                    const data = await response.json();
+                    
+                    if (!data.erro) {
+                        this.formData.address = data.logradouro || '';
+                        this.formData.neighborhood = data.bairro || '';
+                        this.formData.city = data.localidade || '';
+                        this.formData.state = data.uf || '';
+                        
+                        // Update form fields
+                        document.getElementById('id_address').value = this.formData.address;
+                        document.getElementById('id_neighborhood').value = this.formData.neighborhood;
+                        document.getElementById('id_city').value = this.formData.city;
+                        document.getElementById('id_state').value = this.formData.state;
+                    }
+                } catch (error) {
+                    console.log('Erro ao buscar CEP:', error);
+                }
+            }
+        },
+
+        validateForm(event) {
+            if (!this.isFormValid) {
+                event.preventDefault();
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return false;
+            }
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 5000);
+});
+</script>
+{% endblock %}

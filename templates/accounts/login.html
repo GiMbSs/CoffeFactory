@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Login - Coffee Factory Management System</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% load static %}{% static 'img/favicon.ico' %}">
+    
+    <!-- TailwindCSS via CDN with custom config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'coffee': {
+                            50: '#fdf7f0',
+                            100: '#fbeee1',
+                            200: '#f6dcc2',
+                            300: '#efc199',
+                            400: '#e6a06e',
+                            500: '#dd844c',
+                            600: '#cf6e3e',
+                            700: '#ac5837',
+                            800: '#8a4735',
+                            900: '#703c2e',
+                        },
+                        'primary': {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'serif': ['Playfair Display', 'serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'bounce-gentle': 'bounceGentle 2s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        bounceGentle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' },
+                        },
+                    },
+                    backdropBlur: {
+                        'xs': '2px',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Alpine.js for interactive components -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-coffee-900 via-coffee-800 to-coffee-700 relative overflow-hidden">
+    {% load static %}
+    
+    <!-- Background Elements -->
+    <div class="absolute inset-0 overflow-hidden">
+        <!-- Coffee Bean Pattern -->
+        <div class="absolute top-10 left-10 w-8 h-8 text-coffee-500/10 animate-bounce-gentle">
+            <i class="fas fa-coffee text-2xl"></i>
+        </div>
+        <div class="absolute top-32 right-20 w-6 h-6 text-coffee-400/10 animate-pulse-slow">
+            <i class="fas fa-coffee text-xl"></i>
+        </div>
+        <div class="absolute bottom-20 left-16 w-10 h-10 text-coffee-600/10 animate-bounce-gentle" style="animation-delay: 1s;">
+            <i class="fas fa-coffee text-3xl"></i>
+        </div>
+        <div class="absolute bottom-40 right-10 w-7 h-7 text-coffee-500/10 animate-pulse-slow" style="animation-delay: 2s;">
+            <i class="fas fa-coffee text-xl"></i>
+        </div>
+        
+        <!-- Gradient Overlays -->
+        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-coffee-500/5 to-transparent"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-radial from-coffee-600/20 to-transparent blur-3xl"></div>
+        <div class="absolute top-0 left-0 w-96 h-96 bg-gradient-radial from-coffee-400/10 to-transparent blur-3xl"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="relative min-h-screen flex items-center justify-center p-4" 
+         x-data="loginForm()" 
+         x-init="init()">
+        
+        <!-- Login Card -->
+        <div class="w-full max-w-md animate-fade-in">
+            <!-- Glassmorphism Card -->
+            <div class="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl border border-white/20 p-8 relative overflow-hidden">
+                <!-- Card Background Pattern -->
+                <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"></div>
+                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-radial from-coffee-400/10 to-transparent blur-2xl"></div>
+                
+                <!-- Content -->
+                <div class="relative z-10">
+                    <!-- Logo/Brand Section -->
+                    <div class="text-center mb-8 animate-slide-up">
+                        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-coffee-400 to-coffee-600 rounded-full shadow-lg mb-4">
+                            <i class="fas fa-coffee text-3xl text-white"></i>
+                        </div>
+                        <h1 class="text-3xl font-serif font-bold text-white mb-2">Coffee Factory</h1>
+                        <p class="text-coffee-100/80 text-sm font-medium">Management System</p>
+                        <div class="w-24 h-1 bg-gradient-to-r from-coffee-400 to-coffee-600 rounded-full mx-auto mt-3"></div>
+                    </div>
+
+                    <!-- Welcome Text -->
+                    <div class="text-center mb-6 animate-slide-up" style="animation-delay: 0.2s;">
+                        <h2 class="text-xl font-semibold text-white mb-1">Bem-vindo de volta!</h2>
+                        <p class="text-coffee-100/70 text-sm">Entre com suas credenciais para continuar</p>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form method="post" action="{% url 'accounts:login' %}" @submit="handleSubmit" class="space-y-6 animate-slide-up" style="animation-delay: 0.4s;">
+                        {% csrf_token %}
+                        
+                        <!-- Messages -->
+                        {% if messages %}
+                            <div class="space-y-2">
+                                {% for message in messages %}
+                                <div class="flex items-center p-3 rounded-xl text-sm font-medium
+                                    {% if message.tags == 'error' %}bg-red-500/10 border border-red-500/20 text-red-200{% endif %}
+                                    {% if message.tags == 'success' %}bg-green-500/10 border border-green-500/20 text-green-200{% endif %}
+                                    {% if message.tags == 'info' %}bg-blue-500/10 border border-blue-500/20 text-blue-200{% endif %}
+                                    {% if message.tags == 'warning' %}bg-yellow-500/10 border border-yellow-500/20 text-yellow-200{% endif %}">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    {{ message }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Form Errors -->
+                        {% if form.non_field_errors %}
+                            <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
+                                {% for error in form.non_field_errors %}
+                                <div class="flex items-center text-red-200 text-sm font-medium">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    {{ error }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Email Field -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-coffee-100/90">
+                                <i class="fas fa-envelope mr-2 text-coffee-400"></i>Email
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i class="fas fa-at text-coffee-300/60"></i>
+                                </div>
+                                <input type="email" 
+                                       name="{{ form.username.name }}" 
+                                       value="{{ form.username.value|default:'' }}"
+                                       class="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-coffee-200/50 focus:outline-none focus:ring-2 focus:ring-coffee-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                                       placeholder="seu@email.com"
+                                       x-model="formData.email"
+                                       @blur="validateEmail"
+                                       :class="{ 'border-red-400 focus:ring-red-400': errors.email, 'border-green-400 focus:ring-green-400': validFields.email }"
+                                       required>
+                                <!-- Validation Icon -->
+                                <div class="absolute inset-y-0 right-0 pr-4 flex items-center">
+                                    <i x-show="validFields.email" class="fas fa-check text-green-400"></i>
+                                    <i x-show="errors.email" class="fas fa-times text-red-400"></i>
+                                </div>
+                            </div>
+                            <!-- Error Message -->
+                            <p x-show="errors.email" x-text="errors.email" class="text-red-300 text-xs mt-1 flex items-center">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                            </p>
+                            {% if form.username.errors %}
+                                {% for error in form.username.errors %}
+                                <p class="text-red-300 text-xs mt-1 flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                </p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-coffee-100/90">
+                                <i class="fas fa-lock mr-2 text-coffee-400"></i>Senha
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i class="fas fa-key text-coffee-300/60"></i>
+                                </div>
+                                <input :type="showPassword ? 'text' : 'password'" 
+                                       name="{{ form.password.name }}" 
+                                       class="w-full pl-12 pr-12 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-coffee-200/50 focus:outline-none focus:ring-2 focus:ring-coffee-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                                       placeholder="••••••••"
+                                       x-model="formData.password"
+                                       @blur="validatePassword"
+                                       :class="{ 'border-red-400 focus:ring-red-400': errors.password, 'border-green-400 focus:ring-green-400': validFields.password }"
+                                       required>
+                                <!-- Toggle Password Visibility -->
+                                <button type="button" 
+                                        @click="showPassword = !showPassword"
+                                        class="absolute inset-y-0 right-0 pr-4 flex items-center text-coffee-300/60 hover:text-coffee-200 transition-colors">
+                                    <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                                </button>
+                            </div>
+                            <!-- Error Message -->
+                            <p x-show="errors.password" x-text="errors.password" class="text-red-300 text-xs mt-1 flex items-center">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                            </p>
+                            {% if form.password.errors %}
+                                {% for error in form.password.errors %}
+                                <p class="text-red-300 text-xs mt-1 flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                </p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Remember Me & Forgot Password -->
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center">
+                                <input type="checkbox" 
+                                       name="remember_me"
+                                       class="w-4 h-4 bg-white/10 border border-white/20 rounded focus:ring-2 focus:ring-coffee-400 text-coffee-500 transition-all duration-300">
+                                <span class="ml-2 text-sm text-coffee-100/80">Lembrar-me</span>
+                            </label>
+                            <a href="#" class="text-sm text-coffee-400 hover:text-coffee-300 transition-colors font-medium">
+                                Esqueci minha senha
+                            </a>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" 
+                                :disabled="isLoading"
+                                class="w-full bg-gradient-to-r from-coffee-500 to-coffee-600 hover:from-coffee-600 hover:to-coffee-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center space-x-2">
+                            <!-- Loading State -->
+                            <div x-show="isLoading" class="flex items-center space-x-2">
+                                <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                <span>Entrando...</span>
+                            </div>
+                            <!-- Normal State -->
+                            <div x-show="!isLoading" class="flex items-center space-x-2">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <span>Entrar no Sistema</span>
+                            </div>
+                        </button>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="relative my-6 animate-slide-up" style="animation-delay: 0.6s;">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-white/20"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-3 bg-gradient-to-r from-transparent via-coffee-800 to-transparent text-coffee-100/60">
+                                Sistema seguro e confiável
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Footer Info -->
+                    <div class="text-center text-xs text-coffee-100/50 animate-slide-up" style="animation-delay: 0.8s;">
+                        <p class="flex items-center justify-center space-x-2">
+                            <i class="fas fa-shield-alt text-coffee-400"></i>
+                            <span>Seus dados estão protegidos</span>
+                        </p>
+                        <p class="mt-2">© 2024 Coffee Factory Management System</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alpine.js Component -->
+    <script>
+        function loginForm() {
+            return {
+                formData: {
+                    email: '',
+                    password: ''
+                },
+                errors: {
+                    email: '',
+                    password: ''
+                },
+                validFields: {
+                    email: false,
+                    password: false
+                },
+                isLoading: false,
+                showPassword: false,
+
+                init() {
+                    // Auto-focus email field on page load
+                    this.$nextTick(() => {
+                        this.$el.querySelector('input[type="email"]').focus();
+                    });
+                },
+
+                validateEmail() {
+                    const email = this.formData.email;
+                    
+                    if (!email) {
+                        this.errors.email = 'Email é obrigatório';
+                        this.validFields.email = false;
+                        return false;
+                    }
+                    
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(email)) {
+                        this.errors.email = 'Email inválido';
+                        this.validFields.email = false;
+                        return false;
+                    }
+                    
+                    this.errors.email = '';
+                    this.validFields.email = true;
+                    return true;
+                },
+
+                validatePassword() {
+                    const password = this.formData.password;
+                    
+                    if (!password) {
+                        this.errors.password = 'Senha é obrigatória';
+                        this.validFields.password = false;
+                        return false;
+                    }
+                    
+                    if (password.length < 6) {
+                        this.errors.password = 'Senha muito curta';
+                        this.validFields.password = false;
+                        return false;
+                    }
+                    
+                    this.errors.password = '';
+                    this.validFields.password = true;
+                    return true;
+                },
+
+                handleSubmit(event) {
+                    // Validate all fields
+                    const emailValid = this.validateEmail();
+                    const passwordValid = this.validatePassword();
+                    
+                    if (!emailValid || !passwordValid) {
+                        event.preventDefault();
+                        return;
+                    }
+                    
+                    // Show loading state
+                    this.isLoading = true;
+                    
+                    // Form will submit normally
+                }
+            }
+        }
+    </script>
+</body>
+</html>

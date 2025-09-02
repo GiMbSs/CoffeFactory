@@ -1,0 +1,478 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ supplier.get_display_name }} - Fornecedores - Coffee Factory Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    .dark .detail-card {
+        background: rgba(31, 41, 55, 0.9);
+        border: 1px solid rgba(75, 85, 99, 0.2);
+    }
+    .gradient-header {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+    }
+    .info-section {
+        border-left: 4px solid #8B4513;
+    }
+    .dark .info-section {
+        border-left: 4px solid #D2691E;
+    }
+    .tab-content {
+        min-height: 400px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div x-data="{ activeTab: 'general', showEditModal: false }">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <nav class="flex mb-4" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <a href="{% url 'suppliers:list' %}" class="text-gray-700 dark:text-gray-300 hover:text-coffee-600 dark:hover:text-coffee-400">
+                                <i class="fas fa-truck mr-2"></i>
+                                Fornecedores
+                            </a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-gray-400 mx-3"></i>
+                                <span class="text-gray-500 dark:text-gray-400">{{ supplier.get_display_name }}</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    {{ supplier.get_display_name }}
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Código: {{ supplier.code }} • 
+                    {% if supplier.supplier_type == 'company' %}Pessoa Jurídica{% else %}Pessoa Física{% endif %}
+                </p>
+            </div>
+            <div class="mt-4 lg:mt-0 flex flex-col sm:flex-row gap-3">
+                <a href="{% url 'suppliers:update' supplier.pk %}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200">
+                    <i class="fas fa-edit mr-2"></i>
+                    Editar
+                </a>
+                <button onclick="window.print()" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg shadow-sm transition-all duration-200">
+                    <i class="fas fa-print mr-2"></i>
+                    Imprimir
+                </button>
+                <a href="{% url 'suppliers:list' %}" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Card -->
+    <div class="detail-card rounded-xl p-6 shadow-lg mb-8">
+        <div class="gradient-header rounded-lg p-6 text-white mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4">
+                        {% if supplier.supplier_type == 'company' %}
+                            <i class="fas fa-building text-2xl"></i>
+                        {% else %}
+                            <i class="fas fa-user text-2xl"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold">{{ supplier.get_display_name }}</h2>
+                        <p class="text-white text-opacity-90">{{ supplier.code }}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    {% if supplier.is_active %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            Ativo
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                            <i class="fas fa-times-circle mr-1"></i>
+                            Inativo
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Info Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            {% if supplier.cnpj_cpf %}
+            <div class="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <i class="fas fa-id-card text-coffee-600 dark:text-coffee-400 text-2xl mb-2"></i>
+                <p class="text-sm text-gray-500 dark:text-gray-400">CNPJ/CPF</p>
+                <p class="font-semibold text-gray-900 dark:text-white">{{ supplier.cnpj_cpf }}</p>
+            </div>
+            {% endif %}
+
+            {% if supplier.phone %}
+            <div class="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <i class="fas fa-phone text-coffee-600 dark:text-coffee-400 text-2xl mb-2"></i>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Telefone</p>
+                <p class="font-semibold text-gray-900 dark:text-white">{{ supplier.phone }}</p>
+            </div>
+            {% endif %}
+
+            {% if supplier.email %}
+            <div class="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <i class="fas fa-envelope text-coffee-600 dark:text-coffee-400 text-2xl mb-2"></i>
+                <p class="text-sm text-gray-500 dark:text-gray-400">E-mail</p>
+                <p class="font-semibold text-gray-900 dark:text-white">{{ supplier.email }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="detail-card rounded-xl shadow-lg mb-8">
+        <div class="border-b border-gray-200 dark:border-gray-700">
+            <nav class="flex space-x-8 px-6" aria-label="Tabs">
+                <button @click="activeTab = 'general'" :class="{ 'border-coffee-500 text-coffee-600 dark:text-coffee-400': activeTab === 'general', 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300': activeTab !== 'general' }" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Informações Gerais
+                </button>
+                <button @click="activeTab = 'contact'" :class="{ 'border-coffee-500 text-coffee-600 dark:text-coffee-400': activeTab === 'contact', 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300': activeTab !== 'contact' }" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                    <i class="fas fa-address-card mr-2"></i>
+                    Contato
+                </button>
+                <button @click="activeTab = 'address'" :class="{ 'border-coffee-500 text-coffee-600 dark:text-coffee-400': activeTab === 'address', 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300': activeTab !== 'address' }" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                    <i class="fas fa-map-marker-alt mr-2"></i>
+                    Endereço
+                </button>
+                <button @click="activeTab = 'financial'" :class="{ 'border-coffee-500 text-coffee-600 dark:text-coffee-400': activeTab === 'financial', 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300': activeTab !== 'financial' }" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                    <i class="fas fa-dollar-sign mr-2"></i>
+                    Financeiro
+                </button>
+            </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="p-6 tab-content">
+            <!-- General Information Tab -->
+            <div x-show="activeTab === 'general'" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="info-section pl-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Dados Básicos</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Nome</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.name|default:"-" }}</p>
+                            </div>
+                            {% if supplier.trade_name %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Nome Fantasia</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.trade_name }}</p>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Código</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.code }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Tipo</label>
+                                <p class="text-gray-900 dark:text-white">
+                                    {% if supplier.supplier_type == 'company' %}
+                                        <i class="fas fa-building mr-1"></i>Pessoa Jurídica
+                                    {% else %}
+                                        <i class="fas fa-user mr-1"></i>Pessoa Física
+                                    {% endif %}
+                                </p>
+                            </div>
+                            {% if supplier.cnpj_cpf %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    {% if supplier.supplier_type == 'company' %}CNPJ{% else %}CPF{% endif %}
+                                </label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.cnpj_cpf }}</p>
+                            </div>
+                            {% endif %}
+                            {% if supplier.state_registration %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Inscrição Estadual</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.state_registration }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="info-section pl-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Status & Observações</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</label>
+                                <p class="text-gray-900 dark:text-white">
+                                    {% if supplier.is_active %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                                            <i class="fas fa-check-circle mr-1"></i>Ativo
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">
+                                            <i class="fas fa-times-circle mr-1"></i>Inativo
+                                        </span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Data de Cadastro</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.created_at|date:"d/m/Y H:i" }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Última Atualização</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.updated_at|date:"d/m/Y H:i" }}</p>
+                            </div>
+                            {% if supplier.notes %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Observações</label>
+                                <p class="text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">{{ supplier.notes|linebreaks }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information Tab -->
+            <div x-show="activeTab === 'contact'" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="info-section pl-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Informações de Contato</h3>
+                        <div class="space-y-3">
+                            {% if supplier.contact_person %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Pessoa de Contato</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.contact_person }}</p>
+                            </div>
+                            {% endif %}
+                            {% if supplier.phone %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Telefone</label>
+                                <p class="text-gray-900 dark:text-white">
+                                    <a href="tel:{{ supplier.phone }}" class="text-coffee-600 dark:text-coffee-400 hover:underline">
+                                        <i class="fas fa-phone mr-1"></i>{{ supplier.phone }}
+                                    </a>
+                                </p>
+                            </div>
+                            {% endif %}
+                            {% if supplier.mobile %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Celular</label>
+                                <p class="text-gray-900 dark:text-white">
+                                    <a href="tel:{{ supplier.mobile }}" class="text-coffee-600 dark:text-coffee-400 hover:underline">
+                                        <i class="fas fa-mobile-alt mr-1"></i>{{ supplier.mobile }}
+                                    </a>
+                                </p>
+                            </div>
+                            {% endif %}
+                            {% if supplier.email %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">E-mail</label>
+                                <p class="text-gray-900 dark:text-white">
+                                    <a href="mailto:{{ supplier.email }}" class="text-coffee-600 dark:text-coffee-400 hover:underline">
+                                        <i class="fas fa-envelope mr-1"></i>{{ supplier.email }}
+                                    </a>
+                                </p>
+                            </div>
+                            {% endif %}
+                            {% if supplier.website %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Website</label>
+                                <p class="text-gray-900 dark:text-white">
+                                    <a href="{{ supplier.website }}" target="_blank" class="text-coffee-600 dark:text-coffee-400 hover:underline">
+                                        <i class="fas fa-globe mr-1"></i>{{ supplier.website }}
+                                    </a>
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="info-section pl-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Ações Rápidas</h3>
+                        <div class="space-y-3">
+                            {% if supplier.email %}
+                            <a href="mailto:{{ supplier.email }}" class="block w-full px-4 py-2 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors">
+                                <i class="fas fa-envelope mr-2"></i>Enviar E-mail
+                            </a>
+                            {% endif %}
+                            {% if supplier.mobile %}
+                            <a href="tel:{{ supplier.mobile }}" class="block w-full px-4 py-2 bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-100 dark:hover:bg-green-800 transition-colors">
+                                <i class="fas fa-mobile-alt mr-2"></i>Ligar Celular
+                            </a>
+                            {% endif %}
+                            {% if supplier.website %}
+                            <a href="{{ supplier.website }}" target="_blank" class="block w-full px-4 py-2 bg-purple-50 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-800 transition-colors">
+                                <i class="fas fa-globe mr-2"></i>Visitar Website
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Tab -->
+            <div x-show="activeTab === 'address'" class="space-y-6">
+                <div class="info-section pl-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Endereço Completo</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-3">
+                            {% if supplier.address %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Endereço</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.address }}</p>
+                            </div>
+                            {% endif %}
+                            {% if supplier.address_number %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Número</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.address_number }}</p>
+                            </div>
+                            {% endif %}
+                            {% if supplier.address_complement %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Complemento</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.address_complement }}</p>
+                            </div>
+                            {% endif %}
+                            {% if supplier.neighborhood %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Bairro</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.neighborhood }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="space-y-3">
+                            {% if supplier.city %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Cidade</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.city }}</p>
+                            </div>
+                            {% endif %}
+                            {% if supplier.state %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.state }}</p>
+                            </div>
+                            {% endif %}
+                            {% if supplier.postal_code %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">CEP</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.postal_code }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if supplier.full_address %}
+                    <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Endereço Completo</label>
+                        <p class="text-gray-900 dark:text-white mt-1">{{ supplier.full_address }}</p>
+                        <a href="https://maps.google.com/?q={{ supplier.full_address|urlencode }}" target="_blank" class="inline-flex items-center mt-2 text-coffee-600 dark:text-coffee-400 hover:underline">
+                            <i class="fas fa-map-marked-alt mr-1"></i>Ver no Google Maps
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Financial Tab -->
+            <div x-show="activeTab === 'financial'" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="info-section pl-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Informações Financeiras</h3>
+                        <div class="space-y-3">
+                            {% if supplier.credit_limit %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Limite de Crédito</label>
+                                <p class="text-gray-900 dark:text-white">R$ {{ supplier.credit_limit|floatformat:2 }}</p>
+                            </div>
+                            {% endif %}
+                            {% if supplier.payment_terms %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Condições de Pagamento</label>
+                                <p class="text-gray-900 dark:text-white">{{ supplier.payment_terms }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="info-section pl-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Resumo Financeiro</h3>
+                        <div class="space-y-4">
+                            <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-blue-600 dark:text-blue-400">Total de Compras</p>
+                                        <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">R$ 0,00</p>
+                                    </div>
+                                    <i class="fas fa-shopping-cart text-blue-500 text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-green-600 dark:text-green-400">Valor Pago</p>
+                                        <p class="text-2xl font-bold text-green-700 dark:text-green-300">R$ 0,00</p>
+                                    </div>
+                                    <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="bg-red-50 dark:bg-red-900 p-4 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-red-600 dark:text-red-400">Saldo Devedor</p>
+                                        <p class="text-2xl font-bold text-red-700 dark:text-red-300">R$ 0,00</p>
+                                    </div>
+                                    <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="detail-card rounded-xl p-6 shadow-lg">
+        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">
+            <i class="fas fa-history text-coffee-600 dark:text-coffee-400 mr-2"></i>
+            Atividades Recentes
+        </h3>
+        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+            <i class="fas fa-inbox text-4xl mb-4"></i>
+            <p>Nenhuma atividade registrada</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 5000);
+});
+</script>
+{% endblock %}

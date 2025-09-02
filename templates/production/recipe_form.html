@@ -1,0 +1,620 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar{% else %}Nova{% endif %} Receita - Coffee Factory Management System
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        transition: all 0.3s ease;
+    }
+    .ingredient-item {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    .ingredient-item:hover {
+        background-color: rgba(139, 69, 19, 0.05);
+        border-color: rgba(139, 69, 19, 0.2);
+    }
+    .ingredient-item.drag-over {
+        border-color: #8B4513;
+        background-color: rgba(139, 69, 19, 0.1);
+    }
+    .cost-calculator {
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(210, 105, 30, 0.1) 100%);
+    }
+    .step-counter {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex items-center space-x-4">
+        <a href="{% url 'production:recipe_list' %}" 
+           class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 transition-colors">
+            <i class="fas fa-arrow-left text-xl"></i>
+        </a>
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                <i class="fas fa-book text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                {% if form.instance.pk %}Editar Receita{% else %}Nova Receita{% endif %}
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                {% if form.instance.pk %}
+                    Edite os dados da receita {{ form.instance.name }}
+                {% else %}
+                    Crie uma nova receita de produção
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Form Container -->
+<div x-data="recipeForm()" class="max-w-6xl mx-auto">
+    <form method="post" @submit.prevent="submitForm">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Form -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Basic Information -->
+                <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                        <i class="fas fa-info-circle text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                        Informações Básicas
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Recipe Name -->
+                        <div class="md:col-span-2">
+                            <label for="id_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Nome da Receita <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ form.name.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Code -->
+                        <div>
+                            <label for="id_code" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Código <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.code }}
+                            {% if form.code.errors %}
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ form.code.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Version -->
+                        <div>
+                            <label for="id_version" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Versão <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.version }}
+                            {% if form.version.errors %}
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ form.version.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Product -->
+                        <div>
+                            <label for="id_product" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Produto Final <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.product }}
+                            {% if form.product.errors %}
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ form.product.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Yield Quantity -->
+                        <div>
+                            <label for="id_yield_quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Rendimento <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.yield_quantity }}
+                            {% if form.yield_quantity.errors %}
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ form.yield_quantity.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Estimated Time -->
+                        <div>
+                            <label for="id_estimated_time_minutes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Tempo Estimado (minutos) <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.estimated_time_minutes }}
+                            {% if form.estimated_time_minutes.errors %}
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ form.estimated_time_minutes.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Complexity -->
+                        <div>
+                            <label for="id_complexity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Complexidade <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.complexity }}
+                            {% if form.complexity.errors %}
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ form.complexity.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Status -->
+                        <div>
+                            <label for="id_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Status <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ form.status.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="md:col-span-2">
+                            <label for="id_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Descrição
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ form.description.errors.0 }}
+                            </div>
+                            {% endif %}
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Descrição geral da receita e observações importantes
+                            </p>
+                        </div>
+                        
+                        <!-- Instructions -->
+                        <div class="md:col-span-2">
+                            <label for="id_instructions" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Instruções de Preparo <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.instructions }}
+                            {% if form.instructions.errors %}
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ form.instructions.errors.0 }}
+                            </div>
+                            {% endif %}
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Instruções passo a passo do preparo. Use uma linha para cada etapa.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Ingredients/Materials -->
+                <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-boxes text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                            Materiais e Ingredientes
+                        </h2>
+                        <button type="button" @click="addIngredient()" 
+                                class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105">
+                            <i class="fas fa-plus mr-2"></i>
+                            Adicionar Material
+                        </button>
+                    </div>
+                    
+                    <div id="ingredients-container" class="space-y-4">
+                        <template x-for="(ingredient, index) in ingredients" :key="ingredient.id">
+                            <div class="ingredient-item p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <!-- Material Selection -->
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Material <span class="text-red-500">*</span>
+                                        </label>
+                                        <select x-model="ingredient.material" 
+                                                @change="updateIngredientInfo(index)"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                            <option value="">Selecione um material</option>
+                                            {% for material in materials %}
+                                            <option value="{{ material.id }}" 
+                                                    data-name="{{ material.name }}"
+                                                    data-unit="{{ material.unit_of_measure.abbreviation }}"
+                                                    data-cost="{{ material.cost_per_unit|default:0 }}"
+                                                    data-stock="{{ material.current_stock|default:0 }}">
+                                                {{ material.name }} ({{ material.code }})
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Quantity -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Quantidade <span class="text-red-500">*</span>
+                                        </label>
+                                        <div class="relative">
+                                            <input type="number" 
+                                                   x-model="ingredient.quantity" 
+                                                   @input="calculateTotalCost()"
+                                                   step="0.01" 
+                                                   min="0"
+                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                            <span x-text="ingredient.unit" 
+                                                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400"></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Actions -->
+                                    <div class="flex items-end">
+                                        <button type="button" @click="removeIngredient(index)" 
+                                                class="w-full bg-red-100 dark:bg-red-800 hover:bg-red-200 dark:hover:bg-red-700 text-red-800 dark:text-red-200 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                                            <i class="fas fa-trash mr-2"></i>
+                                            Remover
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Material Info -->
+                                <div x-show="ingredient.material" class="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                        <div>
+                                            <span class="font-medium text-gray-700 dark:text-gray-300">Estoque Atual:</span>
+                                            <span x-text="ingredient.stock + ' ' + ingredient.unit" class="text-gray-600 dark:text-gray-400 ml-2"></span>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium text-gray-700 dark:text-gray-300">Custo Unitário:</span>
+                                            <span x-text="'R$ ' + parseFloat(ingredient.cost || 0).toFixed(2)" class="text-gray-600 dark:text-gray-400 ml-2"></span>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium text-gray-700 dark:text-gray-300">Custo Total:</span>
+                                            <span x-text="'R$ ' + (parseFloat(ingredient.cost || 0) * parseFloat(ingredient.quantity || 0)).toFixed(2)" 
+                                                  class="text-coffee-600 dark:text-coffee-400 font-semibold ml-2"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Notes -->
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Observações
+                                    </label>
+                                    <input type="text" 
+                                           x-model="ingredient.notes" 
+                                           placeholder="Observações sobre este material"
+                                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                                </div>
+                            </div>
+                        </template>
+                        
+                        <!-- Empty State -->
+                        <div x-show="ingredients.length === 0" class="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-boxes text-gray-400 text-2xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Nenhum material adicionado</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">Adicione os materiais necessários para esta receita</p>
+                            <button type="button" @click="addIngredient()" 
+                                    class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                <i class="fas fa-plus mr-2"></i>
+                                Adicionar Primeiro Material
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Instructions -->
+                <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                        <i class="fas fa-list-ol text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                        Instruções de Preparo
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="id_instructions" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Modo de Preparo
+                            </label>
+                            {{ form.instructions }}
+                            {% if form.instructions.errors %}
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ form.instructions.errors.0 }}
+                            </div>
+                            {% endif %}
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Descreva o passo a passo do preparo. Use uma linha para cada etapa.
+                            </p>
+                        </div>
+                        
+                        <!-- Step Counter -->
+                        <div class="step-counter p-4 rounded-lg text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-lg font-semibold">Etapas Identificadas</p>
+                                    <p class="text-sm opacity-90">Número de passos no preparo</p>
+                                </div>
+                                <div class="text-3xl font-bold" id="step-count">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Cost Calculator -->
+                <div class="cost-calculator rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-calculator text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                        Calculadora de Custos
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-400">Total de Materiais:</span>
+                            <span class="font-semibold text-gray-900 dark:text-white" x-text="ingredients.length"></span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-400">Custo dos Materiais:</span>
+                            <span class="font-semibold text-gray-900 dark:text-white" x-text="'R$ ' + totalCost.toFixed(2)"></span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-400">Rendimento:</span>
+                            <span class="font-semibold text-gray-900 dark:text-white" x-text="yieldQuantity + ' un.'"></span>
+                        </div>
+                        
+                        <div class="border-t border-coffee-200 dark:border-coffee-700 pt-4">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium text-gray-900 dark:text-white">Custo por Unidade:</span>
+                                <span class="font-bold text-coffee-600 dark:text-coffee-400" x-text="'R$ ' + costPerUnit.toFixed(2)"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Validation Summary -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-check-circle text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                        Validação
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-circle text-xs" :class="validationStatus.basicInfo ? 'text-green-500' : 'text-gray-300'"></i>
+                            <span class="text-sm" :class="validationStatus.basicInfo ? 'text-green-700 dark:text-green-400' : 'text-gray-500'">
+                                Informações básicas
+                            </span>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-circle text-xs" :class="validationStatus.materials ? 'text-green-500' : 'text-gray-300'"></i>
+                            <span class="text-sm" :class="validationStatus.materials ? 'text-green-700 dark:text-green-400' : 'text-gray-500'">
+                                Materiais adicionados
+                            </span>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-circle text-xs" :class="validationStatus.quantities ? 'text-green-500' : 'text-gray-300'"></i>
+                            <span class="text-sm" :class="validationStatus.quantities ? 'text-green-700 dark:text-green-400' : 'text-gray-500'">
+                                Quantidades definidas
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ações</h3>
+                    
+                    <div class="space-y-3">
+                        <button type="submit" 
+                                class="w-full bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+                            <i class="fas fa-save mr-2"></i>
+                            {% if form.instance.pk %}Atualizar Receita{% else %}Salvar Receita{% endif %}
+                        </button>
+                        
+                        <a href="{% url 'production:recipe_list' %}" 
+                           class="block w-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-4 py-3 rounded-lg font-medium text-center transition-colors">
+                            <i class="fas fa-times mr-2"></i>
+                            Cancelar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function recipeForm() {
+    return {
+        ingredients: [],
+        totalCost: 0,
+        yieldQuantity: 1,
+        costPerUnit: 0,
+        validationStatus: {
+            basicInfo: false,
+            materials: false,
+            quantities: false
+        },
+        
+        init() {
+            this.loadExistingIngredients();
+            this.setupFormWatchers();
+            this.calculateTotalCost();
+            this.updateStepCount();
+        },
+        
+        loadExistingIngredients() {
+            // Load existing ingredients if editing
+            {% if form.instance.pk %}
+            this.ingredients = [
+                {% for item in form.instance.recipe_items.all %}
+                {
+                    id: Date.now() + Math.random(),
+                    material: '{{ item.material.id }}',
+                    quantity: '{{ item.quantity }}',
+                    notes: '{{ item.notes|default:"" }}',
+                    name: '{{ item.material.name }}',
+                    unit: '{{ item.material.unit_of_measure.abbreviation }}',
+                    cost: '{{ item.material.cost_per_unit|default:0 }}',
+                    stock: '{{ item.material.current_stock|default:0 }}'
+                },
+                {% endfor %}
+            ];
+            {% endif %}
+        },
+        
+        setupFormWatchers() {
+            // Watch yield quantity changes
+            const yieldInput = document.getElementById('id_yield_quantity');
+            if (yieldInput) {
+                yieldInput.addEventListener('input', (e) => {
+                    this.yieldQuantity = parseFloat(e.target.value) || 1;
+                    this.calculateTotalCost();
+                });
+                this.yieldQuantity = parseFloat(yieldInput.value) || 1;
+            }
+            
+            // Watch instructions for step count
+            const instructionsTextarea = document.getElementById('id_instructions');
+            if (instructionsTextarea) {
+                instructionsTextarea.addEventListener('input', () => {
+                    this.updateStepCount();
+                });
+            }
+        },
+        
+        addIngredient() {
+            this.ingredients.push({
+                id: Date.now() + Math.random(),
+                material: '',
+                quantity: '',
+                notes: '',
+                name: '',
+                unit: '',
+                cost: 0,
+                stock: 0
+            });
+        },
+        
+        removeIngredient(index) {
+            this.ingredients.splice(index, 1);
+            this.calculateTotalCost();
+            this.validateForm();
+        },
+        
+        updateIngredientInfo(index) {
+            const ingredient = this.ingredients[index];
+            const materialSelect = document.querySelector(`select[x-model="ingredient.material"]`);
+            const selectedOption = materialSelect.querySelector(`option[value="${ingredient.material}"]`);
+            
+            if (selectedOption) {
+                ingredient.name = selectedOption.dataset.name || '';
+                ingredient.unit = selectedOption.dataset.unit || '';
+                ingredient.cost = parseFloat(selectedOption.dataset.cost) || 0;
+                ingredient.stock = parseFloat(selectedOption.dataset.stock) || 0;
+                
+                this.calculateTotalCost();
+                this.validateForm();
+            }
+        },
+        
+        calculateTotalCost() {
+            this.totalCost = this.ingredients.reduce((total, ingredient) => {
+                const cost = parseFloat(ingredient.cost) || 0;
+                const quantity = parseFloat(ingredient.quantity) || 0;
+                return total + (cost * quantity);
+            }, 0);
+            
+            this.costPerUnit = this.yieldQuantity > 0 ? this.totalCost / this.yieldQuantity : 0;
+        },
+        
+        updateStepCount() {
+            const instructionsTextarea = document.getElementById('id_instructions');
+            if (instructionsTextarea) {
+                const steps = instructionsTextarea.value.split('\n').filter(line => line.trim() !== '');
+                document.getElementById('step-count').textContent = steps.length;
+            }
+        },
+        
+        validateForm() {
+            // Basic info validation
+            const name = document.getElementById('id_name')?.value;
+            const code = document.getElementById('id_code')?.value;
+            const product = document.getElementById('id_product')?.value;
+            this.validationStatus.basicInfo = !!(name && code && product);
+            
+            // Materials validation
+            this.validationStatus.materials = this.ingredients.length > 0;
+            
+            // Quantities validation
+            this.validationStatus.quantities = this.ingredients.every(ingredient => 
+                ingredient.material && ingredient.quantity && parseFloat(ingredient.quantity) > 0
+            );
+        },
+        
+        submitForm() {
+            // Prepare ingredients data
+            const formData = new FormData();
+            
+            // Add form fields
+            const formElements = document.querySelectorAll('input, select, textarea');
+            formElements.forEach(element => {
+                if (element.name && element.value) {
+                    formData.append(element.name, element.value);
+                }
+            });
+            
+            // Add ingredients data
+            formData.append('ingredients_data', JSON.stringify(this.ingredients));
+            
+            // Add CSRF token
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            
+            // Submit form
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = "{% url 'production:recipe_list' %}";
+                } else {
+                    alert('Erro ao salvar receita. Verifique os dados e tente novamente.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Erro de comunicação. Tente novamente.');
+            });
+        }
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Excluir {{ employee.user.get_full_name }} - Funcionários - Coffee Factory Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .warning-animation {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: .5;
+        }
+    }
+    .danger-card {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
+        border: 2px solid rgba(239, 68, 68, 0.2);
+    }
+    .employee-preview {
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(101, 67, 33, 0.05) 100%);
+        border: 2px solid rgba(139, 69, 19, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex items-center space-x-4">
+        <a href="{% url 'accounts:employee_detail' employee.pk %}" 
+           class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 transition-colors">
+            <i class="fas fa-arrow-left text-xl"></i>
+        </a>
+        <div>
+            <h1 class="text-3xl font-bold text-red-600 dark:text-red-400 mb-2 flex items-center">
+                <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400 mr-3 warning-animation"></i>
+                Confirmar Exclusão
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                Esta ação não pode ser desfeita. Confirme se realmente deseja excluir este funcionário.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="max-w-4xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Employee Information -->
+        <div class="employee-preview rounded-xl shadow-lg p-8">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-user text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                Dados do Funcionário
+            </h2>
+            
+            <!-- Employee Avatar and Basic Info -->
+            <div class="flex items-center space-x-4 mb-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-coffee-500 to-coffee-600 rounded-full flex items-center justify-center text-white text-xl font-semibold">
+                    {{ employee.user.first_name.0 }}{{ employee.user.last_name.0 }}
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{ employee.user.get_full_name }}
+                    </h3>
+                    <p class="text-coffee-600 dark:text-coffee-400 font-medium">
+                        {{ employee.position }}
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        ID: {{ employee.employee_id }}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Employee Details -->
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Email
+                        </label>
+                        <p class="text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-700 px-3 py-2 rounded-lg border border-coffee-200 dark:border-coffee-700">
+                            {{ employee.user.email }}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Telefone
+                        </label>
+                        <p class="text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-700 px-3 py-2 rounded-lg border border-coffee-200 dark:border-coffee-700">
+                            {{ employee.user.phone|default:"Não informado" }}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Departamento
+                        </label>
+                        <p class="text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-700 px-3 py-2 rounded-lg border border-coffee-200 dark:border-coffee-700">
+                            {{ employee.get_department_display }}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Tipo de Emprego
+                        </label>
+                        <p class="text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-700 px-3 py-2 rounded-lg border border-coffee-200 dark:border-coffee-700">
+                            {{ employee.get_employment_type_display }}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Data de Contratação
+                        </label>
+                        <p class="text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-700 px-3 py-2 rounded-lg border border-coffee-200 dark:border-coffee-700">
+                            {{ employee.hire_date|date:"d/m/Y" }}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Status
+                        </label>
+                        <p class="text-sm bg-white dark:bg-gray-700 px-3 py-2 rounded-lg border border-coffee-200 dark:border-coffee-700">
+                            {% if employee.is_active %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    Ativo
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">
+                                    <i class="fas fa-times-circle mr-1"></i>
+                                    Inativo
+                                </span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Danger Zone -->
+        <div class="danger-card rounded-xl shadow-lg p-8">
+            <h2 class="text-xl font-semibold text-red-600 dark:text-red-400 mb-6 flex items-center">
+                <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400 mr-3"></i>
+                Zona de Perigo
+            </h2>
+            
+            <!-- Warning Message -->
+            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-6">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-exclamation-triangle text-red-500 mt-1"></i>
+                    <div>
+                        <h3 class="text-sm font-semibold text-red-800 dark:text-red-200 mb-2">
+                            Atenção! Esta ação é irreversível
+                        </h3>
+                        <ul class="text-sm text-red-700 dark:text-red-300 space-y-1">
+                            <li>• Todos os dados do funcionário serão perdidos</li>
+                            <li>• Histórico de atividades será removido</li>
+                            <li>• Dados relacionados podem ser afetados</li>
+                            <li>• Esta ação não pode ser desfeita</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Confirmation Form -->
+            <form method="post" x-data="deleteConfirmation()">
+                {% csrf_token %}
+                
+                <!-- Confirmation Checkbox -->
+                <div class="mb-6">
+                    <label class="flex items-start space-x-3 cursor-pointer">
+                        <input type="checkbox" 
+                               x-model="confirmed" 
+                               class="mt-1 h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                            Eu entendo que esta ação é irreversível e confirmo que desejo excluir permanentemente o funcionário
+                            <strong class="text-red-600 dark:text-red-400">{{ employee.user.get_full_name }}</strong>
+                            e todos os seus dados relacionados.
+                        </span>
+                    </label>
+                </div>
+                
+                <!-- Type Confirmation -->
+                <div class="mb-6">
+                    <label for="type-confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Para confirmar, digite "EXCLUIR" (em maiúsculas):
+                    </label>
+                    <input type="text" 
+                           id="type-confirmation"
+                           x-model="typeConfirmation"
+                           class="w-full px-4 py-3 border border-red-300 dark:border-red-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+                           placeholder="Digite EXCLUIR">
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="{% url 'accounts:employee_detail' employee.pk %}" 
+                       class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200 text-center flex items-center justify-center space-x-2">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Cancelar</span>
+                    </a>
+                    
+                    <button type="submit" 
+                            x-bind:disabled="!canDelete"
+                            x-bind:class="canDelete ? 'bg-red-600 hover:bg-red-700 cursor-pointer' : 'bg-gray-400 cursor-not-allowed'"
+                            class="w-full sm:w-auto text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-2 disabled:opacity-50">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>Excluir Funcionário</span>
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Additional Safety Information -->
+            <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                    <i class="fas fa-info-circle text-coffee-600 dark:text-coffee-400 mr-2"></i>
+                    Alternativas à Exclusão
+                </h4>
+                <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    <li>• Considere <strong>desativar</strong> o funcionário em vez de excluir</li>
+                    <li>• Mantenha um histórico arquivado para auditorias</li>
+                    <li>• Transfira dados importantes antes da exclusão</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function deleteConfirmation() {
+    return {
+        confirmed: false,
+        typeConfirmation: '',
+        
+        get canDelete() {
+            return this.confirmed && this.typeConfirmation === 'EXCLUIR';
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Prevent accidental form submission
+    const form = document.querySelector('form');
+    const deleteButton = document.querySelector('button[type="submit"]');
+    
+    form.addEventListener('submit', function(e) {
+        const confirmation = confirm(
+            'ÚLTIMA CONFIRMAÇÃO: Você tem certeza absoluta de que deseja excluir este funcionário? Esta ação NÃO pode ser desfeita!'
+        );
+        
+        if (!confirmation) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Show loading state
+        deleteButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Excluindo...';
+        deleteButton.disabled = true;
+    });
+    
+    // Add warning on page leave if form was modified
+    let formModified = false;
+    const inputs = form.querySelectorAll('input[type="checkbox"], input[type="text"]');
+    
+    inputs.forEach(input => {
+        input.addEventListener('change', () => {
+            formModified = true;
+        });
+    });
+    
+    window.addEventListener('beforeunload', function(e) {
+        if (formModified) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+    
+    // Focus management
+    const typeInput = document.getElementById('type-confirmation');
+    typeInput.addEventListener('paste', function(e) {
+        // Prevent pasting to ensure manual typing
+        e.preventDefault();
+        alert('Por segurança, você deve digitar "EXCLUIR" manualmente.');
+    });
+});
+</script>
+{% endblock %}

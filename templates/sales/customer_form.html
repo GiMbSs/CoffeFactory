@@ -1,0 +1,650 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar Cliente{% else %}Novo Cliente{% endif %} - Coffee Factory Management System
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.02) 0%, rgba(210, 105, 30, 0.02) 100%);
+        transition: all 0.3s ease;
+    }
+    .form-section:hover {
+        box-shadow: 0 4px 12px rgba(139, 69, 19, 0.1);
+    }
+    .required-asterisk {
+        color: #ef4444;
+    }
+    .field-help {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+    .address-group {
+        background: rgba(139, 69, 19, 0.05);
+        border: 1px solid rgba(139, 69, 19, 0.1);
+    }
+    .financial-group {
+        background: rgba(34, 197, 94, 0.05);
+        border: 1px solid rgba(34, 197, 94, 0.1);
+    }
+    .toggle-section {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .toggle-section:hover {
+        background-color: rgba(139, 69, 19, 0.1);
+    }
+    .section-content {
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                <i class="fas fa-{% if form.instance.pk %}user-edit{% else %}user-plus{% endif %} text-coffee-600 dark:text-coffee-400 mr-3"></i>
+                {% if form.instance.pk %}Editar Cliente{% else %}Novo Cliente{% endif %}
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                {% if form.instance.pk %}
+                    Atualize as informações do cliente {{ form.instance.get_display_name }}
+                {% else %}
+                    Cadastre um novo cliente no sistema
+                {% endif %}
+            </p>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{% url 'sales:customer_list' %}" 
+               class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Voltar
+            </a>
+            {% if form.instance.pk %}
+            <a href="{% url 'sales:customer_detail' form.instance.pk %}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 flex items-center">
+                <i class="fas fa-eye mr-2"></i>
+                Ver Detalhes
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Form -->
+<form method="post" class="space-y-8" novalidate>
+    {% csrf_token %}
+    
+    {% if form.non_field_errors %}
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div class="flex">
+            <i class="fas fa-exclamation-triangle text-red-400 mt-1 mr-3"></i>
+            <div>
+                <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+                    Erro na validação
+                </h3>
+                <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+                    {{ form.non_field_errors }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Basic Information -->
+    <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center mb-6">
+            <div class="p-2 rounded-full bg-coffee-100 dark:bg-coffee-900 mr-3">
+                <i class="fas fa-id-card text-coffee-600 dark:text-coffee-400"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Informações Básicas</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Customer Type -->
+            <div class="md:col-span-2">
+                <label for="{{ form.customer_type.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.customer_type.label }}
+                    {% if form.customer_type.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                {{ form.customer_type }}
+                {% if form.customer_type.help_text %}
+                <p class="field-help mt-1 dark:text-gray-400">{{ form.customer_type.help_text }}</p>
+                {% endif %}
+                {% if form.customer_type.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.customer_type.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Code -->
+            <div>
+                <label for="{{ form.code.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.code.label }}
+                    {% if form.code.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                {{ form.code }}
+                {% if form.code.help_text %}
+                <p class="field-help mt-1 dark:text-gray-400">{{ form.code.help_text }}</p>
+                {% endif %}
+                {% if form.code.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.code.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Status -->
+            <div>
+                <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.status.label }}
+                    {% if form.status.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                {{ form.status }}
+                {% if form.status.help_text %}
+                <p class="field-help mt-1 dark:text-gray-400">{{ form.status.help_text }}</p>
+                {% endif %}
+                {% if form.status.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.status.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Names and Documents -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <!-- Name -->
+            <div>
+                <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.name.label }}
+                    {% if form.name.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                {{ form.name }}
+                {% if form.name.help_text %}
+                <p class="field-help mt-1 dark:text-gray-400">{{ form.name.help_text }}</p>
+                {% endif %}
+                {% if form.name.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.name.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Trade Name -->
+            <div>
+                <label for="{{ form.trade_name.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.trade_name.label }}
+                    {% if form.trade_name.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                {{ form.trade_name }}
+                {% if form.trade_name.help_text %}
+                <p class="field-help mt-1 dark:text-gray-400">{{ form.trade_name.help_text }}</p>
+                {% endif %}
+                {% if form.trade_name.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.trade_name.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Document Number -->
+            <div>
+                <label for="{{ form.document_number.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.document_number.label }}
+                    {% if form.document_number.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                {{ form.document_number }}
+                {% if form.document_number.help_text %}
+                <p class="field-help mt-1 dark:text-gray-400">{{ form.document_number.help_text }}</p>
+                {% endif %}
+                {% if form.document_number.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.document_number.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- State Registration -->
+            <div>
+                <label for="{{ form.state_registration.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.state_registration.label }}
+                    {% if form.state_registration.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                {{ form.state_registration }}
+                {% if form.state_registration.help_text %}
+                <p class="field-help mt-1 dark:text-gray-400">{{ form.state_registration.help_text }}</p>
+                {% endif %}
+                {% if form.state_registration.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.state_registration.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center mb-6">
+            <div class="p-2 rounded-full bg-blue-100 dark:bg-blue-900 mr-3">
+                <i class="fas fa-phone text-blue-600 dark:text-blue-400"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Informações de Contato</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Email -->
+            <div>
+                <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.email.label }}
+                    {% if form.email.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                {{ form.email }}
+                {% if form.email.help_text %}
+                <p class="field-help mt-1 dark:text-gray-400">{{ form.email.help_text }}</p>
+                {% endif %}
+                {% if form.email.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.email.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Phone -->
+            <div>
+                <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.phone.label }}
+                    {% if form.phone.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                {{ form.phone }}
+                {% if form.phone.help_text %}
+                <p class="field-help mt-1 dark:text-gray-400">{{ form.phone.help_text }}</p>
+                {% endif %}
+                {% if form.phone.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.phone.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Contact Person -->
+            <div>
+                <label for="{{ form.contact_person.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.contact_person.label }}
+                    {% if form.contact_person.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                {{ form.contact_person }}
+                {% if form.contact_person.help_text %}
+                <p class="field-help mt-1 dark:text-gray-400">{{ form.contact_person.help_text }}</p>
+                {% endif %}
+                {% if form.contact_person.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.contact_person.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Website -->
+            <div>
+                <label for="{{ form.website.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.website.label }}
+                    {% if form.website.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                {{ form.website }}
+                {% if form.website.help_text %}
+                <p class="field-help mt-1 dark:text-gray-400">{{ form.website.help_text }}</p>
+                {% endif %}
+                {% if form.website.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.website.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Address Information -->
+    <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700">
+        <div class="toggle-section p-6 rounded-t-xl" onclick="toggleSection('addressSection')">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="p-2 rounded-full bg-yellow-100 dark:bg-yellow-900 mr-3">
+                        <i class="fas fa-map-marker-alt text-yellow-600 dark:text-yellow-400"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Endereço</h2>
+                </div>
+                <i id="addressToggle" class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+            </div>
+        </div>
+        
+        <div id="addressContent" class="section-content address-group p-6 rounded-b-xl">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- CEP -->
+                <div>
+                    <label for="{{ form.postal_code.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.postal_code.label }}
+                        {% if form.postal_code.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                    </label>
+                    {{ form.postal_code }}
+                    {% if form.postal_code.help_text %}
+                    <p class="field-help mt-1 dark:text-gray-400">{{ form.postal_code.help_text }}</p>
+                    {% endif %}
+                    {% if form.postal_code.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.postal_code.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- State -->
+                <div>
+                    <label for="{{ form.state.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.state.label }}
+                        {% if form.state.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                    </label>
+                    {{ form.state }}
+                    {% if form.state.help_text %}
+                    <p class="field-help mt-1 dark:text-gray-400">{{ form.state.help_text }}</p>
+                    {% endif %}
+                    {% if form.state.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.state.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- City -->
+                <div>
+                    <label for="{{ form.city.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.city.label }}
+                        {% if form.city.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                    </label>
+                    {{ form.city }}
+                    {% if form.city.help_text %}
+                    <p class="field-help mt-1 dark:text-gray-400">{{ form.city.help_text }}</p>
+                    {% endif %}
+                    {% if form.city.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.city.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
+                <!-- Street -->
+                <div class="md:col-span-2">
+                    <label for="{{ form.street.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.street.label }}
+                        {% if form.street.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                    </label>
+                    {{ form.street }}
+                    {% if form.street.help_text %}
+                    <p class="field-help mt-1 dark:text-gray-400">{{ form.street.help_text }}</p>
+                    {% endif %}
+                    {% if form.street.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.street.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Number -->
+                <div>
+                    <label for="{{ form.number.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.number.label }}
+                        {% if form.number.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                    </label>
+                    {{ form.number }}
+                    {% if form.number.help_text %}
+                    <p class="field-help mt-1 dark:text-gray-400">{{ form.number.help_text }}</p>
+                    {% endif %}
+                    {% if form.number.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.number.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Complement -->
+                <div>
+                    <label for="{{ form.complement.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.complement.label }}
+                        {% if form.complement.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                    </label>
+                    {{ form.complement }}
+                    {% if form.complement.help_text %}
+                    <p class="field-help mt-1 dark:text-gray-400">{{ form.complement.help_text }}</p>
+                    {% endif %}
+                    {% if form.complement.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.complement.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Neighborhood -->
+            <div class="mt-6">
+                <label for="{{ form.neighborhood.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ form.neighborhood.label }}
+                    {% if form.neighborhood.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                </label>
+                {{ form.neighborhood }}
+                {% if form.neighborhood.help_text %}
+                <p class="field-help mt-1 dark:text-gray-400">{{ form.neighborhood.help_text }}</p>
+                {% endif %}
+                {% if form.neighborhood.errors %}
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ form.neighborhood.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Information -->
+    <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700">
+        <div class="toggle-section p-6 rounded-t-xl" onclick="toggleSection('financialSection')">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="p-2 rounded-full bg-green-100 dark:bg-green-900 mr-3">
+                        <i class="fas fa-dollar-sign text-green-600 dark:text-green-400"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Informações Financeiras</h2>
+                </div>
+                <i id="financialToggle" class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+            </div>
+        </div>
+        
+        <div id="financialContent" class="section-content financial-group p-6 rounded-b-xl hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Credit Limit -->
+                <div>
+                    <label for="{{ form.credit_limit.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.credit_limit.label }}
+                        {% if form.credit_limit.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                    </label>
+                    {{ form.credit_limit }}
+                    {% if form.credit_limit.help_text %}
+                    <p class="field-help mt-1 dark:text-gray-400">{{ form.credit_limit.help_text }}</p>
+                    {% endif %}
+                    {% if form.credit_limit.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.credit_limit.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Current Debt -->
+                <div>
+                    <label for="{{ form.current_debt.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.current_debt.label }}
+                        {% if form.current_debt.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                    </label>
+                    {{ form.current_debt }}
+                    {% if form.current_debt.help_text %}
+                    <p class="field-help mt-1 dark:text-gray-400">{{ form.current_debt.help_text }}</p>
+                    {% endif %}
+                    {% if form.current_debt.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.current_debt.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Payment Terms -->
+                <div>
+                    <label for="{{ form.payment_terms.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.payment_terms.label }}
+                        {% if form.payment_terms.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                    </label>
+                    {{ form.payment_terms }}
+                    {% if form.payment_terms.help_text %}
+                    <p class="field-help mt-1 dark:text-gray-400">{{ form.payment_terms.help_text }}</p>
+                    {% endif %}
+                    {% if form.payment_terms.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ form.payment_terms.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center mb-6">
+            <div class="p-2 rounded-full bg-purple-100 dark:bg-purple-900 mr-3">
+                <i class="fas fa-sticky-note text-purple-600 dark:text-purple-400"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Observações</h2>
+        </div>
+        
+        <div>
+            <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {{ form.notes.label }}
+                {% if form.notes.field.required %}<span class="required-asterisk">*</span>{% endif %}
+            </label>
+            {{ form.notes }}
+            {% if form.notes.help_text %}
+            <p class="field-help mt-1 dark:text-gray-400">{{ form.notes.help_text }}</p>
+            {% endif %}
+            {% if form.notes.errors %}
+            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                {{ form.notes.errors.0 }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+                <i class="fas fa-info-circle mr-1"></i>
+                Os campos marcados com <span class="required-asterisk">*</span> são obrigatórios
+            </div>
+            
+            <div class="flex space-x-3">
+                <a href="{% url 'sales:customer_list' %}" 
+                   class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancelar
+                </a>
+                <button type="submit" 
+                        class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+                    <i class="fas fa-save mr-2"></i>
+                    {% if form.instance.pk %}Atualizar Cliente{% else %}Salvar Cliente{% endif %}
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+function toggleSection(sectionId) {
+    const content = document.getElementById(sectionId === 'addressSection' ? 'addressContent' : 'financialContent');
+    const toggle = document.getElementById(sectionId === 'addressSection' ? 'addressToggle' : 'financialToggle');
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        toggle.classList.add('rotate-180');
+    } else {
+        content.classList.add('hidden');
+        toggle.classList.remove('rotate-180');
+    }
+}
+
+// Customer type specific fields visibility
+document.addEventListener('DOMContentLoaded', function() {
+    const customerTypeField = document.getElementById('{{ form.customer_type.id_for_label }}');
+    const tradeNameField = document.getElementById('{{ form.trade_name.id_for_label }}').closest('div');
+    const stateRegistrationField = document.getElementById('{{ form.state_registration.id_for_label }}').closest('div');
+    
+    function toggleFields() {
+        const isCompany = customerTypeField.value === 'company';
+        
+        if (isCompany) {
+            tradeNameField.style.display = 'block';
+            stateRegistrationField.style.display = 'block';
+        } else {
+            tradeNameField.style.display = 'none';
+            stateRegistrationField.style.display = 'none';
+        }
+    }
+    
+    customerTypeField.addEventListener('change', toggleFields);
+    toggleFields(); // Initial call
+});
+
+// CEP lookup functionality
+document.getElementById('{{ form.postal_code.id_for_label }}').addEventListener('blur', function() {
+    const cep = this.value.replace(/\D/g, '');
+    
+    if (cep.length === 8) {
+        fetch(`https://viacep.com.br/ws/${cep}/json/`)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.erro) {
+                    document.getElementById('{{ form.street.id_for_label }}').value = data.logradouro || '';
+                    document.getElementById('{{ form.neighborhood.id_for_label }}').value = data.bairro || '';
+                    document.getElementById('{{ form.city.id_for_label }}').value = data.localidade || '';
+                    document.getElementById('{{ form.state.id_for_label }}').value = data.uf || '';
+                }
+            })
+            .catch(error => {
+                console.log('Erro ao buscar CEP:', error);
+            });
+    }
+});
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const requiredFields = document.querySelectorAll('[required]');
+    let hasErrors = false;
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            hasErrors = true;
+            field.classList.add('border-red-500');
+        } else {
+            field.classList.remove('border-red-500');
+        }
+    });
+    
+    if (hasErrors) {
+        e.preventDefault();
+        alert('Por favor, preencha todos os campos obrigatórios.');
+    }
+});
+</script>
+{% endblock %}
