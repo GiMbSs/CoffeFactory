@@ -11,7 +11,7 @@
             </button>
             
             <!-- Page title -->
-            <div class="hidden sm:block">
+            <div class="block">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
                     {% block page_title %}
                         {% if request.resolver_match.app_name == 'core' %}
@@ -32,8 +32,8 @@
                             Coffee Factory
                         {% endif %}
                     {% endblock %}
-                </p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 hidden md:block">
+                </h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
                     {% now "l, j \d\e F \d\e Y" %}
                 </p>
             </div>

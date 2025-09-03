@@ -11,7 +11,7 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{% load static %}{% static 'img/favicon.ico' %}">
     
-    <!-- TailwindCSS via CDN with custom config -->
+    <!-- TailwindCSS via CDN with custom config (Development only) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -50,6 +50,8 @@
                     animation: {
                         'slide-in': 'slideIn 0.2s ease-out',
                         'fade-in': 'fadeIn 0.2s ease-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                        'scale-in': 'scaleIn 0.3s ease-out',
                     },
                     keyframes: {
                         slideIn: {
@@ -59,6 +61,14 @@
                         fadeIn: {
                             '0%': { opacity: '0' },
                             '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.95)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
                         }
                     }
                 }
@@ -72,7 +82,8 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Alpine.js for interactive components -->
+    <!-- Alpine.js for interactive components with Collapse plugin -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <!-- Custom CSS -->

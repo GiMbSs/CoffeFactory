@@ -25,9 +25,23 @@ html {
     scroll-behavior: smooth;
 }
 
-/* Custom focus styles */
+/* Custom focus styles for accessibility */
 .focus-visible\:ring-primary:focus-visible {
     @apply ring-2 ring-primary-500 ring-offset-2;
+}
+
+/* Enhanced focus indicators */
+*:focus-visible {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
+}
+
+/* Skip link for accessibility */
+.skip-link {
+    @apply absolute -top-10 left-0 z-50 px-4 py-2 bg-primary-600 text-white rounded-br-lg transition-transform transform -translate-y-full;
+}
+
+.skip-link:focus {
+    @apply translate-y-0;
 }
 
 /* Custom form styles */
@@ -45,6 +59,53 @@ html {
 
 .form-checkbox {
     @apply h-4 w-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:bg-gray-700 transition-colors duration-200;
+}
+
+/* Mobile-first responsive utilities */
+@media (max-width: 640px) {
+    .mobile-full-width {
+        @apply w-full;
+    }
+    
+    .mobile-text-center {
+        @apply text-center;
+    }
+    
+    .mobile-hidden {
+        @apply hidden;
+    }
+    
+    .mobile-spacing {
+        @apply px-4 py-2;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .stats-card {
+        @apply border-2 border-gray-900 dark:border-white;
+    }
+    
+    .form-input, .form-select, .form-textarea {
+        @apply border-2 border-gray-900 dark:border-white;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .coffee-bean-float {
+        animation: none;
+    }
+    
+    .pulse-glow {
+        animation: none;
+    }
 }
 
 .form-radio {

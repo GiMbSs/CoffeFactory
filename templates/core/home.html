@@ -36,45 +36,45 @@
 
 {% block content %}
 <!-- Hero Section -->
-<div class="hero-gradient rounded-2xl shadow-2xl p-8 mb-8 relative overflow-hidden">
+<div class="hero-gradient rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 mb-6 lg:mb-8 relative overflow-hidden">
     <!-- Background Pattern -->
     <div class="absolute inset-0 opacity-10">
-        <div class="absolute top-10 left-10 coffee-bean-float">
-            <i class="fas fa-coffee text-4xl text-white"></i>
+        <div class="absolute top-5 lg:top-10 left-5 lg:left-10 coffee-bean-float">
+            <i class="fas fa-coffee text-2xl lg:text-4xl text-white"></i>
         </div>
-        <div class="absolute top-20 right-20 coffee-bean-float" style="animation-delay: 2s;">
-            <i class="fas fa-coffee text-3xl text-white"></i>
+        <div class="absolute top-10 lg:top-20 right-10 lg:right-20 coffee-bean-float" style="animation-delay: 2s;">
+            <i class="fas fa-coffee text-xl lg:text-3xl text-white"></i>
         </div>
-        <div class="absolute bottom-16 left-1/4 coffee-bean-float" style="animation-delay: 4s;">
-            <i class="fas fa-coffee text-5xl text-white"></i>
+        <div class="absolute bottom-8 lg:bottom-16 left-1/4 coffee-bean-float" style="animation-delay: 4s;">
+            <i class="fas fa-coffee text-3xl lg:text-5xl text-white"></i>
         </div>
-        <div class="absolute bottom-20 right-16 coffee-bean-float" style="animation-delay: 1s;">
-            <i class="fas fa-coffee text-2xl text-white"></i>
+        <div class="absolute bottom-10 lg:bottom-20 right-8 lg:right-16 coffee-bean-float" style="animation-delay: 1s;">
+            <i class="fas fa-coffee text-sm lg:text-2xl text-white"></i>
         </div>
     </div>
     
     <div class="relative z-10">
         <div class="text-center">
-            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 animate-fade-in">
+            <h1 class="text-3xl sm:text-4xl lg:text-6xl font-bold text-white mb-4 animate-fade-in">
                 Bem-vindo ao
                 <span class="bg-gradient-to-r from-yellow-300 to-yellow-500 bg-clip-text text-transparent">
                     Coffee Factory
                 </span>
             </h1>
-            <p class="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto animate-slide-up">
+            <p class="text-lg sm:text-xl lg:text-2xl text-white/90 mb-6 lg:mb-8 max-w-3xl mx-auto animate-slide-up px-4">
                 Sistema completo de gestão para sua fábrica de café. Controle produção, estoque, vendas e muito mais em uma plataforma integrada.
             </p>
             
             <!-- CTA Buttons -->
-            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up" style="animation-delay: 0.3s;">
+            <div class="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center items-center animate-slide-up px-4" style="animation-delay: 0.3s;">
                 <a href="{% url 'core:dashboard' %}" 
-                   class="inline-flex items-center px-8 py-4 bg-white text-coffee-900 font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 pulse-glow">
-                    <i class="fas fa-chart-line mr-3"></i>
+                   class="w-full sm:w-auto inline-flex items-center justify-center px-6 lg:px-8 py-3 lg:py-4 bg-white text-coffee-900 font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 pulse-glow">
+                    <i class="fas fa-chart-line mr-2 lg:mr-3"></i>
                     Acessar Dashboard
                 </a>
                 <a href="#features" 
-                   class="inline-flex items-center px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-coffee-900 transition-all duration-300">
-                    <i class="fas fa-info-circle mr-3"></i>
+                   class="w-full sm:w-auto inline-flex items-center justify-center px-6 lg:px-8 py-3 lg:py-4 bg-transparent border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-coffee-900 transition-all duration-300">
+                    <i class="fas fa-info-circle mr-2 lg:mr-3"></i>
                     Saiba Mais
                 </a>
             </div>
@@ -83,37 +83,37 @@
 </div>
 
 <!-- Quick Stats -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-    <div class="stats-card rounded-xl p-6 text-center text-white">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full mb-4">
-            <i class="fas fa-industry text-2xl"></i>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8 lg:mb-12">
+    <div class="stats-card rounded-xl p-4 lg:p-6 text-center text-white">
+        <div class="inline-flex items-center justify-center w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full mb-3 lg:mb-4">
+            <i class="fas fa-industry text-lg lg:text-2xl"></i>
         </div>
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Produção</h3>
-        <p class="text-gray-600 dark:text-gray-400">Controle total da linha de produção</p>
+        <h3 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white mb-2">Produção</h3>
+        <p class="text-sm lg:text-base text-gray-600 dark:text-gray-400">Controle total da linha de produção</p>
     </div>
     
-    <div class="stats-card rounded-xl p-6 text-center text-white">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full mb-4">
-            <i class="fas fa-boxes text-2xl"></i>
+    <div class="stats-card rounded-xl p-4 lg:p-6 text-center text-white">
+        <div class="inline-flex items-center justify-center w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full mb-3 lg:mb-4">
+            <i class="fas fa-boxes text-lg lg:text-2xl"></i>
         </div>
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Estoque</h3>
-        <p class="text-gray-600 dark:text-gray-400">Gestão inteligente de inventário</p>
+        <h3 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white mb-2">Estoque</h3>
+        <p class="text-sm lg:text-base text-gray-600 dark:text-gray-400">Gestão inteligente de inventário</p>
     </div>
     
-    <div class="stats-card rounded-xl p-6 text-center text-white">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full mb-4">
-            <i class="fas fa-chart-bar text-2xl"></i>
+    <div class="stats-card rounded-xl p-4 lg:p-6 text-center text-white">
+        <div class="inline-flex items-center justify-center w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full mb-3 lg:mb-4">
+            <i class="fas fa-chart-bar text-lg lg:text-2xl"></i>
         </div>
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Vendas</h3>
-        <p class="text-gray-600 dark:text-gray-400">Acompanhe suas vendas em tempo real</p>
+        <h3 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white mb-2">Vendas</h3>
+        <p class="text-sm lg:text-base text-gray-600 dark:text-gray-400">Acompanhe suas vendas em tempo real</p>
     </div>
     
-    <div class="stats-card rounded-xl p-6 text-center text-white">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full mb-4">
-            <i class="fas fa-dollar-sign text-2xl"></i>
+    <div class="stats-card rounded-xl p-4 lg:p-6 text-center text-white">
+        <div class="inline-flex items-center justify-center w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full mb-3 lg:mb-4">
+            <i class="fas fa-dollar-sign text-lg lg:text-2xl"></i>
         </div>
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Financeiro</h3>
-        <p class="text-gray-600 dark:text-gray-400">Controle financeiro completo</p>
+        <h3 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white mb-2">Financeiro</h3>
+        <p class="text-sm lg:text-base text-gray-600 dark:text-gray-400">Controle financeiro completo</p>
     </div>
 </div>
 

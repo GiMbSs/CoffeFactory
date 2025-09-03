@@ -183,6 +183,7 @@
                                 <input type="email" 
                                        name="{{ form.username.name }}" 
                                        value="{{ form.username.value|default:'' }}"
+                                       autocomplete="email"
                                        class="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-coffee-200/50 focus:outline-none focus:ring-2 focus:ring-coffee-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
                                        placeholder="seu@email.com"
                                        x-model="formData.email"
@@ -219,6 +220,7 @@
                                 </div>
                                 <input :type="showPassword ? 'text' : 'password'" 
                                        name="{{ form.password.name }}" 
+                                       autocomplete="current-password"
                                        class="w-full pl-12 pr-12 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-coffee-200/50 focus:outline-none focus:ring-2 focus:ring-coffee-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
                                        placeholder="••••••••"
                                        x-model="formData.password"

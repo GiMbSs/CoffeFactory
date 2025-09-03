@@ -49,23 +49,25 @@
 
 {% block content %}
 <!-- Page Header -->
-<div class="mb-8">
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-        <div class="flex items-center space-x-4">
+<div class="mb-6 lg:mb-8">
+    <div class="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex items-start space-x-3 lg:space-x-4">
             <a href="{% url 'accounts:employee_list' %}" 
-               class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 transition-colors">
-                <i class="fas fa-arrow-left text-xl"></i>
+               class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 transition-colors mt-1">
+                <i class="fas fa-arrow-left text-lg lg:text-xl"></i>
             </a>
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
-                    <i class="fas fa-user-plus text-coffee-600 dark:text-coffee-400 mr-3"></i>
-                    {% if form.instance.pk %}
-                        Editar Funcionário
-                    {% else %}
-                        Novo Funcionário
-                    {% endif %}
+            <div class="min-w-0 flex-1">
+                <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                    <i class="fas fa-user-plus text-coffee-600 dark:text-coffee-400 mr-2 lg:mr-3 text-xl lg:text-2xl"></i>
+                    <span class="truncate">
+                        {% if form.instance.pk %}
+                            Editar Funcionário
+                        {% else %}
+                            Novo Funcionário
+                        {% endif %}
+                    </span>
                 </h1>
-                <p class="text-gray-600 dark:text-gray-400">
+                <p class="text-sm lg:text-base text-gray-600 dark:text-gray-400">
                     {% if form.instance.pk %}
                         Atualize as informações do funcionário
                     {% else %}
@@ -74,36 +76,55 @@
                 </p>
             </div>
         </div>
-        <div class="flex items-center space-x-4 mt-4 lg:mt-0">
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-                <i class="fas fa-info-circle mr-1"></i>
-                Campos obrigatórios marcados com *
-            </span>
+        <div class="flex items-center space-x-2 text-xs lg:text-sm text-gray-600 dark:text-gray-400 bg-coffee-50 dark:bg-coffee-900/20 px-3 py-2 rounded-lg">
+            <i class="fas fa-info-circle text-coffee-600 dark:text-coffee-400"></i>
+            <span>Campos obrigatórios marcados com *</span>
         </div>
     </div>
 </div>
 
 <!-- Form Container -->
-<div class="max-w-4xl mx-auto">
+<div class="max-w-5xl mx-auto">
     <!-- Progress Steps -->
-    <div class="mb-8">
-        <div class="flex items-center justify-center space-x-4">
-            <div class="step-indicator active flex items-center justify-center w-10 h-10 rounded-full border-2 border-coffee-300 text-coffee-600 font-semibold">
+    <div class="mb-6 lg:mb-8">
+        <!-- Mobile: Simplified Progress -->
+        <div class="flex lg:hidden items-center justify-center space-x-2 mb-4">
+            <div class="step-indicator active flex items-center justify-center w-8 h-8 rounded-full bg-coffee-600 text-white text-sm font-semibold">
                 1
             </div>
-            <div class="w-16 h-1 bg-coffee-200 dark:bg-coffee-700"></div>
-            <div class="step-indicator flex items-center justify-center w-10 h-10 rounded-full border-2 border-gray-300 text-gray-500 font-semibold">
+            <div class="w-8 h-1 bg-coffee-200 dark:bg-coffee-700"></div>
+            <div class="step-indicator flex items-center justify-center w-8 h-8 rounded-full border-2 border-gray-300 text-gray-500 text-sm font-semibold">
                 2
             </div>
-            <div class="w-16 h-1 bg-gray-200 dark:bg-gray-700"></div>
-            <div class="step-indicator flex items-center justify-center w-10 h-10 rounded-full border-2 border-gray-300 text-gray-500 font-semibold">
+            <div class="w-8 h-1 bg-gray-200 dark:bg-gray-700"></div>
+            <div class="step-indicator flex items-center justify-center w-8 h-8 rounded-full border-2 border-gray-300 text-gray-500 text-sm font-semibold">
                 3
             </div>
         </div>
-        <div class="flex justify-center mt-4 space-x-20">
-            <span class="text-sm font-medium text-coffee-600 dark:text-coffee-400">Dados Pessoais</span>
-            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Emprego</span>
-            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Contato</span>
+        <div class="flex lg:hidden justify-center">
+            <span class="text-xs font-medium text-coffee-600 dark:text-coffee-400">Etapa 1 de 3: Dados Pessoais</span>
+        </div>
+        
+        <!-- Desktop: Full Progress -->
+        <div class="hidden lg:block">
+            <div class="flex items-center justify-center space-x-4">
+                <div class="step-indicator active flex items-center justify-center w-10 h-10 rounded-full border-2 border-coffee-300 text-coffee-600 font-semibold">
+                    1
+                </div>
+                <div class="w-16 h-1 bg-coffee-200 dark:bg-coffee-700"></div>
+                <div class="step-indicator flex items-center justify-center w-10 h-10 rounded-full border-2 border-gray-300 text-gray-500 font-semibold">
+                    2
+                </div>
+                <div class="w-16 h-1 bg-gray-200 dark:bg-gray-700"></div>
+                <div class="step-indicator flex items-center justify-center w-10 h-10 rounded-full border-2 border-gray-300 text-gray-500 font-semibold">
+                    3
+                </div>
+            </div>
+            <div class="flex justify-center mt-4 space-x-20">
+                <span class="text-sm font-medium text-coffee-600 dark:text-coffee-400">Dados Pessoais</span>
+                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Emprego</span>
+                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Contato</span>
+            </div>
         </div>
     </div>
 
@@ -112,13 +133,13 @@
         
         <!-- Step 1: Personal Information -->
         <div x-show="currentStep === 1" class="form-step">
-            <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-coffee-200 dark:border-coffee-700">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                    <i class="fas fa-user text-coffee-600 dark:text-coffee-400 mr-3"></i>
+            <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 lg:p-8 border border-coffee-200 dark:border-coffee-700">
+                <h2 class="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white mb-4 lg:mb-6 flex items-center">
+                    <i class="fas fa-user text-coffee-600 dark:text-coffee-400 mr-2 lg:mr-3"></i>
                     Dados Pessoais
                 </h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                     <!-- First Name -->
                     <div>
                         <label for="{{ form.first_name.id_for_label }}" 
@@ -129,8 +150,9 @@
                                name="{{ form.first_name.name }}" 
                                id="{{ form.first_name.id_for_label }}"
                                value="{{ form.first_name.value|default:'' }}"
-                               class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                               class="w-full px-3 lg:px-4 py-2.5 lg:py-3 text-sm lg:text-base border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
                                placeholder="Digite o primeiro nome"
+                               autocomplete="given-name"
                                required>
                         {% if form.first_name.errors %}
                             <div class="mt-2 text-sm text-red-600 dark:text-red-400">
@@ -149,8 +171,9 @@
                                name="{{ form.last_name.name }}" 
                                id="{{ form.last_name.id_for_label }}"
                                value="{{ form.last_name.value|default:'' }}"
-                               class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                               class="w-full px-3 lg:px-4 py-2.5 lg:py-3 text-sm lg:text-base border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
                                placeholder="Digite o sobrenome"
+                               autocomplete="family-name"
                                required>
                         {% if form.last_name.errors %}
                             <div class="mt-2 text-sm text-red-600 dark:text-red-400">
@@ -169,8 +192,9 @@
                                name="{{ form.email.name }}" 
                                id="{{ form.email.id_for_label }}"
                                value="{{ form.email.value|default:'' }}"
-                               class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                               class="w-full px-3 lg:px-4 py-2.5 lg:py-3 text-sm lg:text-base border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
                                placeholder="funcionario@empresa.com"
+                               autocomplete="email"
                                required>
                         {% if form.email.errors %}
                             <div class="mt-2 text-sm text-red-600 dark:text-red-400">
@@ -189,8 +213,9 @@
                                name="{{ form.username.name }}" 
                                id="{{ form.username.id_for_label }}"
                                value="{{ form.username.value|default:'' }}"
-                               class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                               class="w-full px-3 lg:px-4 py-2.5 lg:py-3 text-sm lg:text-base border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
                                placeholder="nome.usuario"
+                               autocomplete="username"
                                required>
                         {% if form.username.errors %}
                             <div class="mt-2 text-sm text-red-600 dark:text-red-400">
@@ -209,8 +234,9 @@
                                name="{{ form.phone.name }}" 
                                id="{{ form.phone.id_for_label }}"
                                value="{{ form.phone.value|default:'' }}"
-                               class="w-full px-4 py-3 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
-                               placeholder="(11) 99999-9999">
+                               class="w-full px-3 lg:px-4 py-2.5 lg:py-3 text-sm lg:text-base border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-colors"
+                               placeholder="(11) 99999-9999"
+                               autocomplete="tel">
                         {% if form.phone.errors %}
                             <div class="mt-2 text-sm text-red-600 dark:text-red-400">
                                 {{ form.phone.errors.0 }}
@@ -220,10 +246,10 @@
                 </div>
                 
                 <!-- Navigation -->
-                <div class="flex justify-end mt-8">
+                <div class="flex justify-end mt-6 lg:mt-8">
                     <button type="button" 
                             @click="nextStep()" 
-                            class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2">
+                            class="w-full sm:w-auto bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-2">
                         <span>Próximo</span>
                         <i class="fas fa-arrow-right"></i>
                     </button>
