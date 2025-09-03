@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load coffee_tags %}
+
+{% block title %}{{ title }} - {{ company_info.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center mb-6">
+            <i class="fas fa-question-circle text-coffee-600 dark:text-coffee-400 text-2xl mr-4"></i>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ title }}</h1>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Seção Início Rápido -->
+            <div class="lg:col-span-2">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Início Rápido</h2>
+                <div class="space-y-4">
+                    <div class="bg-coffee-50 dark:bg-coffee-900/20 p-4 rounded-lg border border-coffee-200 dark:border-coffee-700">
+                        <h3 class="font-medium text-gray-900 dark:text-white mb-2">
+                            <i class="fas fa-play-circle text-coffee-600 mr-2"></i>
+                            Primeiros Passos
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-3">
+                            Aprenda como usar o sistema Coffee Factory Management.
+                        </p>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center text-gray-700 dark:text-gray-300">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Cadastrar materiais e produtos
+                            </li>
+                            <li class="flex items-center text-gray-700 dark:text-gray-300">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Criar ordens de produção
+                            </li>
+                            <li class="flex items-center text-gray-700 dark:text-gray-300">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Gerenciar vendas e clientes
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                        <h3 class="font-medium text-gray-900 dark:text-white mb-2">
+                            <i class="fas fa-lightbulb text-blue-600 mr-2"></i>
+                            Dicas Importantes
+                        </h3>
+                        <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                            <li>• Mantenha sempre o estoque atualizado</li>
+                            <li>• Configure alertas de estoque baixo</li>
+                            <li>• Monitore o fluxo de caixa regularmente</li>
+                            <li>• Use os relatórios para tomar decisões</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Menu de Navegação -->
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Links Úteis</h2>
+                <div class="space-y-3">
+                    <a href="{% safe_url 'core:documentation' %}" class="block p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                        <div class="flex items-center">
+                            <i class="fas fa-book text-coffee-600 mr-3"></i>
+                            <span class="font-medium text-gray-900 dark:text-white">Documentação</span>
+                        </div>
+                    </a>
+                    
+                    <a href="{% safe_url 'core:support' %}" class="block p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                        <div class="flex items-center">
+                            <i class="fas fa-headset text-coffee-600 mr-3"></i>
+                            <span class="font-medium text-gray-900 dark:text-white">Suporte</span>
+                        </div>
+                    </a>
+                    
+                    <a href="{% safe_url 'core:settings' %}" class="block p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                        <div class="flex items-center">
+                            <i class="fas fa-cog text-coffee-600 mr-3"></i>
+                            <span class="font-medium text-gray-900 dark:text-white">Configurações</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex justify-between items-center">
+                <a href="{% safe_url 'core:dashboard' %}" class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 font-medium flex items-center">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Voltar ao Dashboard
+                </a>
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    Precisa de mais ajuda? Entre em contato com o suporte.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

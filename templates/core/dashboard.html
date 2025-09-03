@@ -7,6 +7,16 @@
 <!-- Chart.js CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.css">
 <style>
+    /* Fix scrolling and layout issues */
+    body {
+        overflow-x: hidden;
+    }
+    
+    .main-content {
+        min-height: 100vh;
+        overflow-y: auto;
+    }
+    
     .gradient-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
@@ -35,10 +45,16 @@
         transform: translateX(8px);
         transition: transform 0.2s ease-in-out;
     }
+    
+    /* Ensure proper spacing and scrollability */
+    .dashboard-content {
+        padding-bottom: 2rem;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="dashboard-content">
 <!-- Page Header -->
 <div class="mb-8">
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -78,10 +94,12 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Ordens de Produção</p>
-                <p class="text-3xl font-bold text-gray-900 dark:text-white">12</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ production_orders|default:"0" }}</p>
                 <div class="flex items-center mt-2">
-                    <span class="text-sm text-green-600 dark:text-green-400 font-medium">+8%</span>
-                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">vs mês anterior</span>
+                    <span class="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                        {{ active_production|default:"0" }} ativa{{ active_production|pluralize }}
+                    </span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">em produção</span>
                 </div>
             </div>
             <div class="bg-gradient-to-br from-coffee-500 to-coffee-600 w-14 h-14 rounded-lg flex items-center justify-center">
@@ -91,10 +109,10 @@
         <div class="mt-4">
             <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
                 <span>Capacidade utilizada</span>
-                <span>75%</span>
+                <span>{{ production_capacity_used|floatformat:0|default:"0" }}%</span>
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div class="bg-coffee-600 dark:bg-coffee-500 h-2 rounded-full" style="width: 75%"></div>
+                <div class="bg-coffee-600 dark:bg-coffee-500 h-2 rounded-full" style="width: {{ production_capacity_used|default:0 }}%"></div>
             </div>
         </div>
     </div>
@@ -104,10 +122,18 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Produtos em Estoque</p>
-                <p class="text-3xl font-bold text-gray-900 dark:text-white">2,847</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ total_products|default:"0" }}</p>
                 <div class="flex items-center mt-2">
-                    <span class="text-sm text-red-600 dark:text-red-400 font-medium">-3%</span>
-                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">vs semana anterior</span>
+                    {% if products_low_stock > 0 %}
+                    <span class="text-sm text-red-600 dark:text-red-400 font-medium">
+                        {{ products_low_stock }} baixo{{ products_low_stock|pluralize }}
+                    </span>
+                    {% else %}
+                    <span class="text-sm text-green-600 dark:text-green-400 font-medium">
+                        Estoque OK
+                    </span>
+                    {% endif %}
+                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">produtos</span>
                 </div>
             </div>
             <div class="bg-gradient-to-br from-coffee-500 to-coffee-600 dark:from-coffee-400 dark:to-coffee-500 w-14 h-14 rounded-lg flex items-center justify-center">
@@ -115,10 +141,17 @@
             </div>
         </div>
         <div class="mt-4">
+            {% if products_low_stock > 0 %}
             <div class="flex items-center text-xs text-amber-600 dark:text-amber-400">
                 <i class="fas fa-exclamation-triangle mr-1"></i>
-                <span>5 produtos com estoque baixo</span>
+                <span>{{ products_low_stock }} produto{{ products_low_stock|pluralize }} com estoque baixo</span>
             </div>
+            {% else %}
+            <div class="flex items-center text-xs text-green-600 dark:text-green-400">
+                <i class="fas fa-check-circle mr-1"></i>
+                <span>Todos os produtos com estoque adequado</span>
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -127,9 +160,15 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Vendas do Mês</p>
-                <p class="text-3xl font-bold text-gray-900 dark:text-white">R$ 89.4K</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">R$ {{ this_month_sales|floatformat:2|default:"0,00" }}</p>
                 <div class="flex items-center mt-2">
-                    <span class="text-sm text-green-600 dark:text-green-400 font-medium">+12%</span>
+                    {% if sales_growth > 0 %}
+                    <span class="text-sm text-green-600 dark:text-green-400 font-medium">+{{ sales_growth|floatformat:1 }}%</span>
+                    {% elif sales_growth < 0 %}
+                    <span class="text-sm text-red-600 dark:text-red-400 font-medium">{{ sales_growth|floatformat:1 }}%</span>
+                    {% else %}
+                    <span class="text-sm text-gray-600 dark:text-gray-400 font-medium">0%</span>
+                    {% endif %}
                     <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">vs mês anterior</span>
                 </div>
             </div>
@@ -140,10 +179,10 @@
         <div class="mt-4">
             <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
                 <span>Meta mensal</span>
-                <span>89%</span>
+                <span>{{ sales_goal_percentage|floatformat:0|default:"0" }}%</span>
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div class="bg-coffee-600 dark:bg-coffee-500 h-2 rounded-full" style="width: 89%"></div>
+                <div class="bg-coffee-600 dark:bg-coffee-500 h-2 rounded-full" style="width: {{ sales_goal_percentage|default:0 }}%"></div>
             </div>
         </div>
     </div>
@@ -153,10 +192,16 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Fluxo de Caixa</p>
-                <p class="text-3xl font-bold text-gray-900 dark:text-white">R$ 142K</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">R$ {{ cash_flow|floatformat:2|default:"0,00" }}</p>
                 <div class="flex items-center mt-2">
-                    <span class="text-sm text-green-600 dark:text-green-400 font-medium">+5%</span>
-                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">vs mês anterior</span>
+                    {% if cash_flow > 0 %}
+                    <span class="text-sm text-green-600 dark:text-green-400 font-medium">Positivo</span>
+                    {% elif cash_flow < 0 %}
+                    <span class="text-sm text-red-600 dark:text-red-400 font-medium">Negativo</span>
+                    {% else %}
+                    <span class="text-sm text-gray-600 dark:text-gray-400 font-medium">Equilibrado</span>
+                    {% endif %}
+                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">fluxo atual</span>
                 </div>
             </div>
             <div class="bg-gradient-to-br from-coffee-700 to-coffee-800 dark:from-coffee-600 dark:to-coffee-700 w-14 h-14 rounded-lg flex items-center justify-center">
@@ -166,10 +211,10 @@
         <div class="mt-4">
             <div class="grid grid-cols-2 gap-2 text-xs">
                 <div class="text-green-600 dark:text-green-400">
-                    <i class="fas fa-arrow-up mr-1"></i>R$ 65K receber
+                    <i class="fas fa-arrow-up mr-1"></i>R$ {{ accounts_receivable|floatformat:2|default:"0,00" }} receber
                 </div>
                 <div class="text-red-600 dark:text-red-400">
-                    <i class="fas fa-arrow-down mr-1"></i>R$ 23K pagar
+                    <i class="fas fa-arrow-down mr-1"></i>R$ {{ accounts_payable|floatformat:2|default:"0,00" }} pagar
                 </div>
             </div>
         </div>
@@ -267,61 +312,71 @@
             Atividades Recentes
         </h3>
         <div class="space-y-4">
-            <div class="activity-item flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
-                <div class="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
-                    <i class="fas fa-check text-green-600 dark:text-green-400 text-xs"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                        Ordem de produção #OP-2024-089 concluída
-                    </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Café Espresso Premium - 500kg " há 2 horas
-                    </p>
-                </div>
-            </div>
-
+            <!-- Recent Sales Orders -->
+            {% for order in recent_orders %}
             <div class="activity-item flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
                 <div class="flex-shrink-0 w-8 h-8 bg-coffee-100 dark:bg-coffee-900/20 rounded-full flex items-center justify-center">
                     <i class="fas fa-shopping-cart text-coffee-600 dark:text-coffee-400 text-xs"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium text-gray-900 dark:text-white">
-                        Nova venda registrada - Pedido #V-2024-456
+                        Nova venda registrada - {{ order.order_number }}
                     </p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Cliente: Café Central " R$ 2.847,50 " há 3 horas
+                        Cliente: {{ order.customer.name }} • R$ {{ order.total_amount|floatformat:2 }} • {{ order.created_at|timesince }} atrás
                     </p>
                 </div>
             </div>
+            {% empty %}
+            <div class="activity-item flex items-start space-x-3 p-3 rounded-lg">
+                <div class="flex-shrink-0 w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                    <i class="fas fa-info-circle text-gray-400 text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Nenhuma atividade de vendas recente
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
 
+            <!-- Recent Production Orders -->
+            {% for production in recent_production %}
             <div class="activity-item flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
-                <div class="flex-shrink-0 w-8 h-8 bg-coffee-200 dark:bg-coffee-800/20 rounded-full flex items-center justify-center">
-                    <i class="fas fa-exclamation-triangle text-coffee-500 dark:text-coffee-400 text-xs"></i>
+                <div class="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+                    {% if production.status == 'completed' %}
+                    <i class="fas fa-check text-green-600 dark:text-green-400 text-xs"></i>
+                    {% else %}
+                    <i class="fas fa-industry text-blue-600 dark:text-blue-400 text-xs"></i>
+                    {% endif %}
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium text-gray-900 dark:text-white">
-                        Estoque baixo detectado
+                        {% if production.status == 'completed' %}
+                        Ordem de produção {{ production.order_number }} concluída
+                        {% else %}
+                        Ordem de produção {{ production.order_number }} em andamento
+                        {% endif %}
                     </p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Grãos Arábica Premium - 45kg restantes " há 4 horas
+                        {% if production.recipe.product %}{{ production.recipe.product.name }}{% else %}Produto não especificado{% endif %} • {{ production.created_at|timesince }} atrás
                     </p>
                 </div>
             </div>
-
-            <div class="activity-item flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
-                <div class="flex-shrink-0 w-8 h-8 bg-coffee-300 dark:bg-coffee-700/20 rounded-full flex items-center justify-center">
-                    <i class="fas fa-truck text-coffee-700 dark:text-coffee-500 text-xs"></i>
+            {% empty %}
+            {% if not recent_orders %}
+            <div class="activity-item flex items-start space-x-3 p-3 rounded-lg">
+                <div class="flex-shrink-0 w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                    <i class="fas fa-info-circle text-gray-400 text-xs"></i>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                        Entrega programada confirmada
-                    </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Fornecedor: Café do Vale " Chegada: amanhã às 14h " há 5 horas
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Nenhuma atividade de produção recente
                     </p>
                 </div>
             </div>
+            {% endif %}
+            {% endfor %}
         </div>
         <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
             <a href="#" class="text-sm text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 font-medium flex items-center">
@@ -338,73 +393,31 @@
             Alertas e Notificações
         </h3>
         <div class="space-y-4">
-            <!-- Critical Alert -->
-            <div class="border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-r-lg">
+            {% for notification in notifications %}
+            <!-- Dynamic Alert -->
+            <div class="border-l-4 {% if notification.type == 'warning' %}border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20{% elif notification.type == 'error' %}border-red-500 bg-red-50 dark:bg-red-900/20{% elif notification.type == 'success' %}border-green-500 bg-green-50 dark:bg-green-900/20{% else %}border-blue-500 bg-blue-50 dark:bg-blue-900/20{% endif %} p-4 rounded-r-lg">
                 <div class="flex items-start">
                     <div class="flex-shrink-0">
-                        <i class="fas fa-exclamation-circle text-red-500 dark:text-red-400"></i>
+                        <i class="{{ notification.icon }} {% if notification.type == 'warning' %}text-yellow-500 dark:text-yellow-400{% elif notification.type == 'error' %}text-red-500 dark:text-red-400{% elif notification.type == 'success' %}text-green-500 dark:text-green-400{% else %}text-blue-500 dark:text-blue-400{% endif %}"></i>
                     </div>
                     <div class="ml-3 flex-1">
-                        <h4 class="text-sm font-medium text-red-800 dark:text-red-200">
-                            Estoque Crítico
+                        <h4 class="text-sm font-medium {% if notification.type == 'warning' %}text-yellow-800 dark:text-yellow-200{% elif notification.type == 'error' %}text-red-800 dark:text-red-200{% elif notification.type == 'success' %}text-green-800 dark:text-green-200{% else %}text-blue-800 dark:text-blue-200{% endif %}">
+                            {{ notification.title }}
                         </h4>
-                        <p class="text-sm text-red-700 dark:text-red-300 mt-1">
-                            3 produtos com estoque abaixo do mínimo
+                        <p class="text-sm {% if notification.type == 'warning' %}text-yellow-700 dark:text-yellow-300{% elif notification.type == 'error' %}text-red-700 dark:text-red-300{% elif notification.type == 'success' %}text-green-700 dark:text-green-300{% else %}text-blue-700 dark:text-blue-300{% endif %} mt-1">
+                            {{ notification.message }}
                         </p>
+                        {% if notification.url %}
                         <div class="mt-2">
-                            <a href="{% url 'inventory:product_list' %}" class="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium">
-                                Verificar estoque
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Warning Alert -->
-            <div class="border-l-4 border-coffee-500 bg-coffee-50 dark:bg-coffee-900/20 p-4 rounded-r-lg">
-                <div class="flex items-start">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-clock text-yellow-500 dark:text-yellow-400"></i>
-                    </div>
-                    <div class="ml-3 flex-1">
-                        <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                            Vencimentos Próximos
-                        </h4>
-                        <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                            5 contas a pagar vencem em 3 dias
-                        </p>
-                        <div class="mt-2">
-                            <a href="{% url 'financial:accounts_payable' %}" class="text-xs text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 font-medium">
-                                Ver contas a pagar
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Info Alert -->
-            <div class="border-l-4 border-coffee-600 bg-coffee-100 dark:bg-coffee-800/20 p-4 rounded-r-lg">
-                <div class="flex items-start">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-info-circle text-blue-500 dark:text-blue-400"></i>
-                    </div>
-                    <div class="ml-3 flex-1">
-                        <h4 class="text-sm font-medium text-blue-800 dark:text-blue-200">
-                            Meta de Vendas
-                        </h4>
-                        <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                            89% da meta mensal alcançada
-                        </p>
-                        <div class="mt-2">
-                            <a href="{% url 'sales:dashboard' %}" class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+                            <a href="{% url notification.url %}" class="text-xs {% if notification.type == 'warning' %}text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300{% elif notification.type == 'error' %}text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300{% elif notification.type == 'success' %}text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300{% else %}text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300{% endif %} font-medium">
                                 Ver detalhes
                             </a>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-
-            <!-- Success Alert -->
+            {% empty %}
             <div class="border-l-4 border-green-500 bg-green-50 dark:bg-green-900/20 p-4 rounded-r-lg">
                 <div class="flex items-start">
                     <div class="flex-shrink-0">
@@ -412,19 +425,15 @@
                     </div>
                     <div class="ml-3 flex-1">
                         <h4 class="text-sm font-medium text-green-800 dark:text-green-200">
-                            Produção Eficiente
+                            Tudo em Ordem
                         </h4>
                         <p class="text-sm text-green-700 dark:text-green-300 mt-1">
-                            Capacidade otimizada em 95% esta semana
+                            Não há alertas no momento
                         </p>
-                        <div class="mt-2">
-                            <a href="{% url 'production:dashboard' %}" class="text-xs text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium">
-                                Ver produção
-                            </a>
-                        </div>
                     </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
 
         <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -432,9 +441,15 @@
                 <a href="#" class="text-sm text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 font-medium">
                     Ver todas as notificações
                 </a>
+                {% if notification_count > 0 %}
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                    8 não lidas
+                    {{ notification_count }} não lida{{ notification_count|pluralize }}
                 </span>
+                {% else %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    Tudo OK
+                </span>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -453,15 +468,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const textColor = isDarkMode ? '#e5e7eb' : '#374151';
     const gridColor = isDarkMode ? '#374151' : '#e5e7eb';
 
-    // Sales Chart
+    // Sales Chart - Using dynamic data from backend
     const salesCtx = document.getElementById('salesChart').getContext('2d');
+    
+    // Get data from Django context (would be passed via view)
+    const salesLabels = {{ sales_chart_labels|safe|default:"['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set']" }};
+    const salesData = {{ sales_chart_data|safe|default:"[65000, 72000, 68000, 89000, 85000, 92000, 87000, 94000, 89400]" }};
+    
     new Chart(salesCtx, {
         type: 'line',
         data: {
-            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'],
+            labels: salesLabels,
             datasets: [{
                 label: 'Vendas (R$)',
-                data: [65000, 72000, 68000, 89000, 85000, 92000, 87000, 94000, 89400],
+                data: salesData,
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 borderWidth: 3,
@@ -517,14 +537,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Production Chart
+    // Production Chart - Using dynamic data from backend
     const productionCtx = document.getElementById('productionChart').getContext('2d');
+    
+    // Get production data from Django context (would be passed via view)  
+    const productionLabels = {{ production_chart_labels|safe|default:"['Café Espresso', 'Café Premium', 'Café Orgânico', 'Café Descafeinado', 'Café Especial']" }};
+    const productionData = {{ production_chart_data|safe|default:"[35, 25, 20, 12, 8]" }};
+    
     new Chart(productionCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Café Espresso', 'Café Premium', 'Café Orgânico', 'Café Descafeinado', 'Café Especial'],
+            labels: productionLabels,
             datasets: [{
-                data: [35, 25, 20, 12, 8],
+                data: productionData,
                 backgroundColor: [
                     '#3b82f6',
                     '#10b981',
@@ -593,4 +618,5 @@ function updateKPIs() {
 // Update KPIs every 30 seconds (in production, this would be real data)
 setInterval(updateKPIs, 30000);
 </script>
+</div>
 {% endblock %}

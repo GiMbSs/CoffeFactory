@@ -1,5 +1,6 @@
 <!-- Sidebar -->
-<nav class="bg-white dark:bg-gray-900 w-64 min-h-screen border-r border-coffee-200 dark:border-coffee-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40"
+{% load coffee_tags %}
+<nav class="bg-white dark:bg-gray-900 w-64 h-full border-r border-coffee-200 dark:border-coffee-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40"
      :class="{ 'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen }"
      x-data="{ activeMenu: '{{ request.resolver_match.app_name }}' }">
      
@@ -10,8 +11,8 @@
                 <i class="fas fa-coffee text-white text-xl"></i>
             </div>
             <div>
-                <h1 class="text-xl font-bold text-coffee-900 dark:text-white">Coffee Factory</h1>
-                <p class="text-xs text-coffee-500 dark:text-coffee-400">Management System</p>
+                <h1 class="text-xl font-bold text-coffee-900 dark:text-white">{{ company_info.name }}</h1>
+                <p class="text-xs text-coffee-500 dark:text-coffee-400">{{ company_info.tagline }}</p>
             </div>
         </div>
         <!-- Mobile close button -->
@@ -214,15 +215,15 @@
                 Relatórios
             </h3>
             <div class="space-y-1">
-                <a href="#" class="group flex items-center px-3 py-2 text-sm text-coffee-600 dark:text-coffee-400 rounded-md hover:bg-coffee-50 dark:hover:bg-coffee-800 hover:text-coffee-900 dark:hover:text-white transition-all duration-200">
+                <a href="{% safe_url 'sales:reports' %}" class="group flex items-center px-3 py-2 text-sm text-coffee-600 dark:text-coffee-400 rounded-md hover:bg-coffee-50 dark:hover:bg-coffee-800 hover:text-coffee-900 dark:hover:text-white transition-all duration-200">
                     <i class="fas fa-chart-bar mr-3 w-5 text-center group-hover:scale-110 transition-transform"></i>
                     Relatório de Vendas
                 </a>
-                <a href="#" class="group flex items-center px-3 py-2 text-sm text-coffee-600 dark:text-coffee-400 rounded-md hover:bg-coffee-50 dark:hover:bg-coffee-800 hover:text-coffee-900 dark:hover:text-white transition-all duration-200">
+                <a href="{% safe_url 'inventory:reports' %}" class="group flex items-center px-3 py-2 text-sm text-coffee-600 dark:text-coffee-400 rounded-md hover:bg-coffee-50 dark:hover:bg-coffee-800 hover:text-coffee-900 dark:hover:text-white transition-all duration-200">
                     <i class="fas fa-box mr-3 w-5 text-center group-hover:scale-110 transition-transform"></i>
                     Relatório de Estoque
                 </a>
-                <a href="#" class="group flex items-center px-3 py-2 text-sm text-coffee-600 dark:text-coffee-400 rounded-md hover:bg-coffee-50 dark:hover:bg-coffee-800 hover:text-coffee-900 dark:hover:text-white transition-all duration-200">
+                <a href="{% safe_url 'financial:reports' %}" class="group flex items-center px-3 py-2 text-sm text-coffee-600 dark:text-coffee-400 rounded-md hover:bg-coffee-50 dark:hover:bg-coffee-800 hover:text-coffee-900 dark:hover:text-white transition-all duration-200">
                     <i class="fas fa-money-bill-wave mr-3 w-5 text-center group-hover:scale-110 transition-transform"></i>
                     Relatório Financeiro
                 </a>

@@ -29,10 +29,57 @@ class FinancialDashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         
         # Get financial statistics
-        context['stats'] = {
-            'total_receivables': AccountsReceivable.objects.filter(status='pending').count(),
-            'total_payables': AccountsPayable.objects.filter(status='pending').count(),
-        }
+        today = timezone.now().date()
+        this_month_start = today.replace(day=1)
+        
+        # Accounts Receivable
+        pending_receivables = AccountsReceivable.objects.filter(status='pending')
+        total_receivables_amount = pending_receivables.aggregate(
+            total=Sum('original_amount')
+        )['total'] or Decimal('0')
+        
+        # Accounts Payable
+        pending_payables = AccountsPayable.objects.filter(status='pending')
+        total_payables_amount = pending_payables.aggregate(
+            total=Sum('original_amount')
+        )['total'] or Decimal('0')
+        
+        # Cash Flow
+        cash_flow = total_receivables_amount - total_payables_amount
+        
+        # Recent payments (both in and out)
+        recent_receivable_payments = AccountsReceivablePayment.objects.select_related(
+            'accounts_receivable', 'accounts_receivable__customer'
+        ).order_by('-payment_date')[:5]
+        
+        recent_payable_payments = AccountsPayablePayment.objects.select_related(
+            'accounts_payable', 'accounts_payable__supplier'
+        ).order_by('-payment_date')[:5]
+        
+        # Overdue items
+        overdue_receivables = AccountsReceivable.objects.filter(
+            due_date__lt=today,
+            status='pending'
+        ).count()
+        
+        overdue_payables = AccountsPayable.objects.filter(
+            due_date__lt=today,
+            status='pending'
+        ).count()
+        
+        context.update({
+            'stats': {
+                'total_receivables': pending_receivables.count(),
+                'total_payables': pending_payables.count(),
+                'total_receivables_amount': total_receivables_amount,
+                'total_payables_amount': total_payables_amount,
+                'cash_flow': cash_flow,
+                'overdue_receivables': overdue_receivables,
+                'overdue_payables': overdue_payables,
+            },
+            'recent_receivable_payments': recent_receivable_payments,
+            'recent_payable_payments': recent_payable_payments,
+        })
         
         return context
 

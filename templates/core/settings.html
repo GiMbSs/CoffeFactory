@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load coffee_tags %}
+
+{% block title %}{{ title }} - {{ company_info.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center mb-6">
+            <i class="fas fa-cog text-coffee-600 dark:text-coffee-400 text-2xl mr-4"></i>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ title }}</h1>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Sistema</h2>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Meta Mensal de Vendas:</span>
+                        <span class="font-medium">R$ {% system_config 'monthly_sales_goal' 50000 %}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Capacidade Máxima de Materiais:</span>
+                        <span class="font-medium">{% system_config 'max_materials_capacity' 100 %}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Capacidade Máxima de Produtos:</span>
+                        <span class="font-medium">{% system_config 'max_products_capacity' 50 %}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Empresa</h2>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Nome:</span>
+                        <span class="font-medium">{{ company_info.name }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Slogan:</span>
+                        <span class="font-medium">{{ company_info.tagline }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Versão do Sistema:</span>
+                        <span class="font-medium">{{ system_version }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex justify-end space-x-4">
+                <a href="{% safe_url 'core:dashboard' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    Voltar
+                </a>
+                <button class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Salvar Configurações
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

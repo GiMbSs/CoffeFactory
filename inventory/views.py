@@ -197,6 +197,65 @@ class ProductListView(LoginRequiredMixin, ListView):
     model = Product
     template_name = 'inventory/product_list.html'
     context_object_name = 'products'
+    paginate_by = 20
+    
+    def get_queryset(self):
+        queryset = Product.objects.select_related('category').filter(is_active=True)
+        
+        # Filtros
+        search = self.request.GET.get('search')
+        category = self.request.GET.get('category')
+        status = self.request.GET.get('status')
+        
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) | 
+                Q(description__icontains=search) |
+                Q(sku__icontains=search)
+            )
+        
+        if category:
+            queryset = queryset.filter(category_id=category)
+        
+        if status:
+            if status == 'active':
+                queryset = queryset.filter(is_active=True)
+            elif status == 'inactive':
+                queryset = queryset.filter(is_active=False)
+        
+        return queryset.order_by('name')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Categories for filter
+        context['categories'] = Category.objects.filter(
+            category_type='product', is_active=True
+        ).order_by('name')
+        
+        # Statistics
+        all_products = Product.objects.all()
+        active_products = all_products.filter(is_active=True)
+        
+        # Calculate low stock products
+        low_stock_products = []
+        for product in active_products:
+            if product.current_stock <= product.minimum_stock:
+                low_stock_products.append(product)
+        
+        context['active_count'] = active_products.count()
+        context['low_stock_count'] = len(low_stock_products)
+        context['total_value'] = sum(
+            product.current_stock * product.sale_price 
+            for product in active_products
+        )
+        
+        # Filter parameters for form persistence
+        context['search'] = self.request.GET.get('search', '')
+        context['selected_category'] = self.request.GET.get('category', '')
+        context['selected_status'] = self.request.GET.get('status', '')
+        
+        return context
 
 
 class ProductDetailView(LoginRequiredMixin, DetailView):
@@ -272,3 +331,36 @@ class InventoryStatsView(LoginRequiredMixin, View):
         }
         
         return JsonResponse(stats)
+
+
+class InventoryReportsView(LoginRequiredMixin, TemplateView):
+    """Relatórios de estoque."""
+    template_name = 'inventory/reports.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Relatórios de Estoque'
+        
+        # Relatórios disponíveis
+        context['reports'] = [
+            {
+                'title': 'Estoque Baixo',
+                'description': 'Materiais com estoque abaixo do mínimo',
+                'icon': 'warning',
+                'url': '#'
+            },
+            {
+                'title': 'Movimentações',
+                'description': 'Histórico de movimentações de estoque',
+                'icon': 'transfer',
+                'url': '#'
+            },
+            {
+                'title': 'Valuation',
+                'description': 'Valorização do estoque atual',
+                'icon': 'money',
+                'url': '#'
+            }
+        ]
+        
+        return context

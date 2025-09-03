@@ -22,6 +22,9 @@ urlpatterns = [
     path('customers/<uuid:pk>/', views.CustomerDetailView.as_view(), name='customer_detail'),
     path('customers/<uuid:pk>/edit/', views.CustomerUpdateView.as_view(), name='customer_edit'),
     
+    # Reports
+    path('reports/', views.SalesReportsView.as_view(), name='reports'),
+    
     # AJAX endpoints
     path('api/orders/status-update/', views.SalesOrderStatusUpdateView.as_view(), name='sales_order_status_update'),
 ]

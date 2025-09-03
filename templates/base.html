@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{% block title %}Coffee Factory Management System{% endblock %}</title>
+    <title>{% block title %}{{ company_info.name }} {{ company_info.tagline }}{% endblock %}</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{% load static %}{% static 'img/favicon.ico' %}">
@@ -109,13 +109,13 @@
     </div>
 
     <!-- Main Container -->
-    <div class="flex h-screen">
+    <div class="flex min-h-screen">
         
         <!-- Sidebar -->
         {% include 'partials/_sidebar.html' %}
         
         <!-- Main Content Area -->
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="flex-1 flex flex-col">
             
             <!-- Header -->
             {% include 'partials/_header.html' %}
@@ -149,7 +149,7 @@
             {% endif %}
             
             <!-- Page Content -->
-            <main class="flex-1 overflow-y-auto p-4 lg:p-6">
+            <main class="flex-1 p-4 lg:p-6">
                 {% block content %}{% endblock %}
             </main>
             

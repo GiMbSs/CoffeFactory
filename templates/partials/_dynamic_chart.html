@@ -1,0 +1,44 @@
+<!-- Dynamic Chart Component -->
+<div class="chart-container" style="position: relative; height: 300px;">
+    <canvas id="{{ chart_id }}"></canvas>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('{{ chart_id }}').getContext('2d');
+    
+    // Chart configuration
+    const config = {
+        type: '{{ chart_type }}',
+        data: {
+            labels: {{ labels|to_json }},
+            datasets: [{
+                data: {{ data|to_json }},
+                backgroundColor: [
+                    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+                    '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1'
+                ],
+                borderColor: [
+                    '#2563eb', '#059669', '#d97706', '#dc2626', '#7c3aed',
+                    '#0891b2', '#65a30d', '#ea580c', '#db2777', '#4f46e5'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151'
+                    }
+                }
+            },
+            ...{{ options|to_json }}
+        }
+    };
+    
+    new Chart(ctx, config);
+});
+</script>

@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load coffee_tags %}
 
-{% block title %}Dashboard de Inventário - Coffee Factory Management System{% endblock %}
+{% block title %}Dashboard de Inventário - {{ company_info.name }} {{ company_info.tagline }}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -229,45 +230,39 @@
             <div>
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Materiais Ativos</span>
-                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ stats.total_materials }}/100</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ stats.total_materials }}/{% system_config 'max_materials_capacity' 100 %}</span>
                 </div>
-                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div class="progress-bar h-2 rounded-full" style="width: 75%"></div>
-                </div>
+                {% progress_bar stats.total_materials|default_if_none_or_zero:0 100 'coffee' %}
             </div>
 
             <!-- Products Status -->
             <div>
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Produtos Ativos</span>
-                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ stats.total_products }}/50</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ stats.total_products }}/{% system_config 'max_products_capacity' 50 %}</span>
                 </div>
-                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div class="bg-green-500 h-2 rounded-full" style="width: 60%"></div>
-                </div>
+                {% progress_bar stats.total_products|default_if_none_or_zero:0 50 'success' %}
             </div>
 
             <!-- Storage Capacity -->
             <div>
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Capacidade do Estoque</span>
-                    <span class="text-sm text-gray-600 dark:text-gray-400">85%</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">{% system_config 'storage_capacity_limit' 85 %}%</span>
                 </div>
-                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div class="bg-yellow-500 h-2 rounded-full" style="width: 85%"></div>
-                </div>
+                {% progress_bar 85 100 'warning' %}
             </div>
         </div>
 
         <!-- Action Buttons -->
         <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
             <div class="flex items-center space-x-3">
-                <a href="#" 
+                <a href="{% safe_url 'inventory:reports' %}" 
                    class="flex-1 bg-coffee-100 hover:bg-coffee-200 dark:bg-coffee-800 dark:hover:bg-coffee-700 text-coffee-700 dark:text-coffee-300 py-2 px-4 rounded-lg text-sm font-medium text-center transition-colors">
                     <i class="fas fa-chart-line mr-2"></i>
                     Relatório
                 </a>
-                <a href="#" 
+                <a href="{% safe_url 'inventory:export' %}" 
                    class="flex-1 bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-blue-700 dark:text-blue-300 py-2 px-4 rounded-lg text-sm font-medium text-center transition-colors">
                     <i class="fas fa-download mr-2"></i>
                     Exportar
@@ -325,33 +320,33 @@
         </div>
         
         <div class="space-y-4">
-            <!-- Sample Movement Items -->
+            <!-- Recent Stock Movements -->
+            {% for movement in recent_movements %}
             <div class="flex items-center space-x-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div class="w-2 h-2 {% if movement.movement_type == 'in' %}bg-green-500{% elif movement.movement_type == 'out' %}bg-red-500{% else %}bg-blue-500{% endif %} rounded-full"></div>
                 <div class="flex-1">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">Entrada de Café Arábica</p>
-                    <p class="text-xs text-gray-600 dark:text-gray-400">+50 kg • Hoje, 09:30</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                        {% if movement.movement_type == 'in' %}Entrada de{% elif movement.movement_type == 'out' %}Saída de{% else %}Ajuste de{% endif %}
+                        {% if movement.material %}{{ movement.material.name }}{% elif movement.product %}{{ movement.product.name }}{% else %}Item{% endif %}
+                    </p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">
+                        {% if movement.movement_type == 'in' %}+{% elif movement.movement_type == 'out' %}-{% endif %}{{ movement.quantity }} 
+                        {% if movement.material %}{{ movement.material.unit }}{% elif movement.product %}{{ movement.product.unit }}{% else %}un{% endif %}
+                        • {{ movement.created_at|timesince }} atrás
+                    </p>
                 </div>
-                <span class="text-xs text-green-600 dark:text-green-400 font-medium">ENTRADA</span>
+                <span class="text-xs {% if movement.movement_type == 'in' %}text-green-600 dark:text-green-400{% elif movement.movement_type == 'out' %}text-red-600 dark:text-red-400{% else %}text-blue-600 dark:text-blue-400{% endif %} font-medium">
+                    {% if movement.movement_type == 'in' %}ENTRADA{% elif movement.movement_type == 'out' %}SAÍDA{% else %}AJUSTE{% endif %}
+                </span>
             </div>
-            
-            <div class="flex items-center space-x-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
-                <div class="flex-1">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">Saída de Açúcar Cristal</p>
-                    <p class="text-xs text-gray-600 dark:text-gray-400">-10 kg • Ontem, 15:45</p>
+            {% empty %}
+            <div class="flex items-center justify-center space-x-4 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div class="text-center">
+                    <i class="fas fa-info-circle text-gray-400 text-xl mb-2"></i>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Nenhuma movimentação recente</p>
                 </div>
-                <span class="text-xs text-red-600 dark:text-red-400 font-medium">SAÍDA</span>
             </div>
-            
-            <div class="flex items-center space-x-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <div class="flex-1">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">Ajuste de Leite em Pó</p>
-                    <p class="text-xs text-gray-600 dark:text-gray-400">Ajuste de inventário • Ontem, 11:20</p>
-                </div>
-                <span class="text-xs text-blue-600 dark:text-blue-400 font-medium">AJUSTE</span>
-            </div>
+            {% endfor %}
         </div>
         
         <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -375,15 +370,15 @@
             <div class="space-y-3">
                 <div class="flex justify-between items-center">
                     <span class="text-xs text-gray-600 dark:text-gray-400">Entradas</span>
-                    <span class="text-sm font-medium text-green-600 dark:text-green-400">+12 itens</span>
+                    <span class="text-sm font-medium text-green-600 dark:text-green-400">+{{ daily_summary.entries|default:0 }} itens</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-xs text-gray-600 dark:text-gray-400">Saídas</span>
-                    <span class="text-sm font-medium text-red-600 dark:text-red-400">-8 itens</span>
+                    <span class="text-sm font-medium text-red-600 dark:text-red-400">-{{ daily_summary.exits|default:0 }} itens</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-xs text-gray-600 dark:text-gray-400">Saldo</span>
-                    <span class="text-sm font-medium text-coffee-600 dark:text-coffee-400">+4 itens</span>
+                    <span class="text-sm font-medium text-coffee-600 dark:text-coffee-400">{{ daily_summary.balance|default:'+0' }} itens</span>
                 </div>
             </div>
         </div>

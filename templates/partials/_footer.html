@@ -1,4 +1,6 @@
 <!-- Footer -->
+{% load coffee_tags %}
+<footer class="bg-white dark:bg-gray-800 border-t border-coffee-200 dark:border-coffee-700 px-4 py-4 mt-auto"-- Footer -->
 <footer class="bg-white dark:bg-gray-900 border-t border-coffee-200 dark:border-coffee-700 px-4 py-3 mt-auto">
     <div class="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
         
@@ -29,16 +31,16 @@
         <div class="flex items-center space-x-4 text-sm">
             <!-- Quick links -->
             <div class="hidden sm:flex items-center space-x-3">
-                <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
+                <a href="{% safe_url 'core:support' %}" class="text-gray-500 dark:text-gray-400 hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
                     Suporte
                 </a>
                 <span class="text-gray-300 dark:text-gray-600">|</span>
-                <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
+                <a href="{% safe_url 'core:documentation' %}" class="text-gray-500 dark:text-gray-400 hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
                     Documentação
                 </a>
                 {% if user.is_staff %}
                 <span class="text-gray-300 dark:text-gray-600">|</span>
-                <a href="{% url 'api:schema' %}" class="text-gray-500 dark:text-gray-400 hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
+                <a href="{% safe_url 'api:schema' %}" class="text-gray-500 dark:text-gray-400 hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
                     API
                 </a>
                 {% endif %}
@@ -55,11 +57,11 @@
     <!-- Additional info row for mobile -->
     <div class="sm:hidden mt-2 pt-2 border-t border-coffee-200 dark:border-coffee-700">
         <div class="flex justify-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
-            <a href="#" class="hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
+            <a href="{% url 'core:support' %}" class="hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
                 Suporte
             </a>
             <span>|</span>
-            <a href="#" class="hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
+            <a href="{% url 'core:documentation' %}" class="hover:text-coffee-600 dark:hover:text-coffee-400 transition-colors">
                 Docs
             </a>
             {% if user.is_staff %}

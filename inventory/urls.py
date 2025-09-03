@@ -32,6 +32,9 @@ urlpatterns = [
     # Stock Movements
     path('stock-movements/new/', views.StockMovementCreateView.as_view(), name='stock_movement_create'),
     
+    # Reports
+    path('reports/', views.InventoryReportsView.as_view(), name='reports'),
+    
     # AJAX endpoints
     path('api/materials/stock-status/', views.MaterialStockStatusView.as_view(), name='material_stock_status'),
     path('api/stats/', views.InventoryStatsView.as_view(), name='inventory_stats'),

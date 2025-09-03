@@ -1,0 +1,10 @@
+<!-- Dynamic Progress Bar Component -->
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+    <div class="{{ color_class }} h-2 rounded-full transition-all duration-300" style="width: {{ percentage }}%"></div>
+</div>
+{% if show_percentage %}
+<div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mt-1">
+    <span>{{ current }}/{{ maximum }}</span>
+    <span>{{ percentage|floatformat:0 }}%</span>
+</div>
+{% endif %}

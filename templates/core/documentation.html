@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load coffee_tags %}
+
+{% block title %}{{ title }} - {{ company_info.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center mb-6">
+            <i class="fas fa-book text-coffee-600 dark:text-coffee-400 text-2xl mr-4"></i>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ title }}</h1>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Menu lateral -->
+            <div class="lg:col-span-1">
+                <nav class="space-y-2">
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Seções</h3>
+                    <a href="#visao-geral" class="block p-2 rounded text-coffee-600 dark:text-coffee-400 hover:bg-coffee-50 dark:hover:bg-coffee-900/20">
+                        Visão Geral
+                    </a>
+                    <a href="#inventario" class="block p-2 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        Inventário
+                    </a>
+                    <a href="#producao" class="block p-2 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        Produção
+                    </a>
+                    <a href="#vendas" class="block p-2 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        Vendas
+                    </a>
+                    <a href="#financeiro" class="block p-2 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        Financeiro
+                    </a>
+                </nav>
+            </div>
+            
+            <!-- Conteúdo -->
+            <div class="lg:col-span-3 space-y-6">
+                <!-- Visão Geral -->
+                <section id="visao-geral">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Visão Geral do Sistema</h2>
+                    <div class="prose dark:prose-invert max-w-none">
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">
+                            O Coffee Factory Management System é uma solução completa para gerenciamento de fábricas de café, 
+                            incluindo controle de estoque, produção, vendas e financeiro.
+                        </p>
+                        
+                        <div class="bg-coffee-50 dark:bg-coffee-900/20 p-4 rounded-lg border border-coffee-200 dark:border-coffee-700">
+                            <h3 class="font-medium text-gray-900 dark:text-white mb-2">Módulos Principais:</h3>
+                            <ul class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                                <li>• <strong>Dashboard:</strong> Visão geral das operações</li>
+                                <li>• <strong>Inventário:</strong> Controle de materiais e produtos</li>
+                                <li>• <strong>Produção:</strong> Gestão de ordens de produção</li>
+                                <li>• <strong>Vendas:</strong> Gerenciamento de clientes e pedidos</li>
+                                <li>• <strong>Financeiro:</strong> Controle de fluxo de caixa</li>
+                                <li>• <strong>Fornecedores:</strong> Cadastro de parceiros</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Inventário -->
+                <section id="inventario">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Módulo de Inventário</h2>
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h4 class="font-medium text-gray-900 dark:text-white mb-2">Funcionalidades:</h4>
+                            <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                                <li>• Cadastro de materiais e produtos</li>
+                                <li>• Controle de estoque em tempo real</li>
+                                <li>• Alertas de estoque baixo</li>
+                                <li>• Movimentações de entrada e saída</li>
+                                <li>• Relatórios de valorização</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Produção -->
+                <section id="producao">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Módulo de Produção</h2>
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h4 class="font-medium text-gray-900 dark:text-white mb-2">Funcionalidades:</h4>
+                            <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                                <li>• Criação de ordens de produção</li>
+                                <li>• Gestão de receitas e ingredientes</li>
+                                <li>• Controle de status de produção</li>
+                                <li>• Planejamento de capacidade</li>
+                                <li>• Relatórios de eficiência</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex justify-between">
+                <a href="{% safe_url 'core:dashboard' %}" class="text-coffee-600 dark:text-coffee-400 hover:text-coffee-700 dark:hover:text-coffee-300 font-medium flex items-center">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Voltar ao Dashboard
+                </a>
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    Última atualização: {{ "now"|date:"d/m/Y" }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

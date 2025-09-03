@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load coffee_tags %}
+
+{% block title %}{{ title }} - {{ company_info.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+        <div class="flex items-center mb-6">
+            <i class="fas fa-headset text-coffee-600 dark:text-coffee-400 text-2xl mr-4"></i>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ title }}</h1>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Contato -->
+            <div class="space-y-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Entre em Contato</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <i class="fas fa-envelope text-coffee-600 mr-3"></i>
+                        <div>
+                            <div class="font-medium text-gray-900 dark:text-white">Email</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">suporte@coffeefactory.com</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <i class="fas fa-phone text-coffee-600 mr-3"></i>
+                        <div>
+                            <div class="font-medium text-gray-900 dark:text-white">Telefone</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">(11) 1234-5678</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <i class="fas fa-clock text-coffee-600 mr-3"></i>
+                        <div>
+                            <div class="font-medium text-gray-900 dark:text-white">Horário</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Seg-Sex, 8h às 18h</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FAQ -->
+            <div class="space-y-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Perguntas Frequentes</h2>
+                <div class="space-y-3">
+                    <div class="bg-coffee-50 dark:bg-coffee-900/20 p-3 rounded-lg border border-coffee-200 dark:border-coffee-700">
+                        <h3 class="font-medium text-gray-900 dark:text-white mb-1">Como resetar minha senha?</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Entre em contato com o administrador do sistema.</p>
+                    </div>
+                    
+                    <div class="bg-coffee-50 dark:bg-coffee-900/20 p-3 rounded-lg border border-coffee-200 dark:border-coffee-700">
+                        <h3 class="font-medium text-gray-900 dark:text-white mb-1">Como exportar relatórios?</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Use o botão "Exportar" em cada seção de relatórios.</p>
+                    </div>
+                    
+                    <div class="bg-coffee-50 dark:bg-coffee-900/20 p-3 rounded-lg border border-coffee-200 dark:border-coffee-700">
+                        <h3 class="font-medium text-gray-900 dark:text-white mb-1">Problemas de performance?</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Verifique sua conexão ou contate o suporte técnico.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex justify-center">
+                <a href="{% safe_url 'core:dashboard' %}" class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Voltar ao Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

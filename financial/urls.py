@@ -19,4 +19,7 @@ urlpatterns = [
     
     # Payroll URLs
     path('payroll/', views.PayrollListView.as_view(), name='payroll'),
+    
+    # Reports
+    path('reports/', views.FinancialReportsView.as_view(), name='reports'),
 ]

@@ -31,22 +31,57 @@ class SalesDashboardView(LoginRequiredMixin, TemplateView):
         # Get sales statistics
         today = timezone.now().date()
         this_month_start = today.replace(day=1)
+        this_week_start = today - timedelta(days=today.weekday())
         
+        # Today's sales
+        today_sales = SalesOrder.objects.filter(
+            order_date=today,
+            status='completed'
+        ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0')
+        
+        today_orders = SalesOrder.objects.filter(order_date=today).count()
+        
+        # Monthly sales
+        monthly_sales = SalesOrder.objects.filter(
+            order_date__gte=this_month_start,
+            status='completed'
+        ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0')
+        
+        monthly_orders = SalesOrder.objects.filter(
+            order_date__gte=this_month_start
+        ).count()
+        
+        # Pending orders
+        pending_orders = SalesOrder.objects.filter(status='pending').count()
+        
+        # Active customers
+        active_customers = Customer.objects.filter(is_active=True).count()
+        
+        # Recent orders
+        recent_orders = SalesOrder.objects.select_related('customer').order_by('-created_at')[:10]
+        
+        context['metrics'] = {
+            'today_sales': today_sales,
+            'today_orders': today_orders,
+            'month_sales': monthly_sales,
+            'month_orders': monthly_orders,
+            'pending_orders': pending_orders,
+            'active_customers': active_customers,
+        }
+        
+        context['recent_orders'] = recent_orders
+        
+        # Legacy stats for backward compatibility
         context['stats'] = {
             'total_orders': SalesOrder.objects.count(),
-            'orders_today': SalesOrder.objects.filter(order_date=today).count(),
-            'active_customers': Customer.objects.filter(is_active=True).count(),
+            'orders_today': today_orders,
+            'active_customers': active_customers,
             'total_revenue': SalesOrder.objects.filter(
                 status='completed'
             ).aggregate(
                 total=Sum('total_amount')
             )['total'] or Decimal('0'),
-            'monthly_revenue': SalesOrder.objects.filter(
-                order_date__gte=this_month_start,
-                status='completed'
-            ).aggregate(
-                total=Sum('total_amount')
-            )['total'] or Decimal('0'),
+            'monthly_revenue': monthly_sales,
         }
         
         return context
