@@ -5,6 +5,23 @@
 
 {% block extra_css %}
 <style>
+    .stat-card {
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(210, 105, 30, 0.1) 100%);
+        border: 1px solid rgba(139, 69, 19, 0.2);
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px -8px rgba(139, 69, 19, 0.3);
+        border-color: rgba(139, 69, 19, 0.4);
+    }
+    .stat-icon {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
+    }
     .order-card {
         transition: all 0.3s ease;
     }
@@ -59,158 +76,163 @@
     </div>
 </div>
 
+<!-- Filters and Search -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700 mb-6 lg:mb-8 transition-all duration-200 hover:shadow-xl">
+    <div class="p-4 lg:p-6">
+        <form method="get" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-3 lg:gap-4">
+                
+                <!-- Search Field -->
+                <div class="md:col-span-2">
+                    <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Buscar Pedido
+                    </label>
+                    <div class="relative">
+                        <input type="text" 
+                               name="search" 
+                               id="search"
+                               value="{{ request.GET.search|default:'' }}"
+                               placeholder="Número do pedido, cliente..."
+                               autocomplete="off"
+                               class="w-full pl-10 pr-4 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 transition-colors duration-200"></i>
+                    </div>
+                </div>
+                
+                <!-- Status -->
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Status
+                    </label>
+                    <select name="status" id="status"
+                            class="w-full px-3 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                        <option value="">Todos os status</option>
+                        <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pendente</option>
+                        <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Confirmado</option>
+                        <option value="in_production" {% if request.GET.status == 'in_production' %}selected{% endif %}>Em Produção</option>
+                        <option value="delivered" {% if request.GET.status == 'delivered' %}selected{% endif %}>Entregue</option>
+                        <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelado</option>
+                    </select>
+                </div>
+                
+                <!-- Date From -->
+                <div>
+                    <label for="date_from" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Data Inicial
+                    </label>
+                    <input type="date" 
+                           name="date_from" 
+                           id="date_from"
+                           value="{{ request.GET.date_from|default:'' }}"
+                           class="w-full px-3 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                </div>
+                
+                <!-- Date To -->
+                <div>
+                    <label for="date_to" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Data Final
+                    </label>
+                    <input type="date" 
+                           name="date_to" 
+                           id="date_to"
+                           value="{{ request.GET.date_to|default:'' }}"
+                           class="w-full px-3 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                </div>
+            </div>
+            
+            <!-- Second Row: Action Buttons and Sort -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0 pt-4 border-t border-coffee-200 dark:border-coffee-700">
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                    <button type="submit" 
+                            class="bg-coffee-600 hover:bg-coffee-700 active:bg-coffee-800 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:ring-offset-2">
+                        <i class="fas fa-filter text-sm"></i>
+                        <span>Filtrar</span>
+                    </button>
+                    <a href="{% url 'sales:sales_order_list' %}" 
+                       class="bg-gray-500 hover:bg-gray-600 active:bg-gray-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                        <i class="fas fa-times text-sm"></i>
+                        <span>Limpar</span>
+                    </a>
+                </div>
+                
+                <!-- Sort Options -->
+                <div class="flex items-center space-x-2">
+                    <label for="sort" class="text-sm text-gray-600 dark:text-gray-400">Ordenar por:</label>
+                    <select name="sort" id="sort" onchange="this.form.submit()"
+                            class="px-3 py-2 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
+                        <option value="-order_date" {% if request.GET.sort == '-order_date' %}selected{% endif %}>Data (Mais recente)</option>
+                        <option value="order_date" {% if request.GET.sort == 'order_date' %}selected{% endif %}>Data (Mais antiga)</option>
+                        <option value="-total_amount" {% if request.GET.sort == '-total_amount' %}selected{% endif %}>Valor (Maior)</option>
+                        <option value="total_amount" {% if request.GET.sort == 'total_amount' %}selected{% endif %}>Valor (Menor)</option>
+                        <option value="customer__name" {% if request.GET.sort == 'customer__name' %}selected{% endif %}>Cliente (A-Z)</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Quick Stats -->
 <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-coffee-200 dark:border-coffee-700">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center">
-            <div class="p-2 rounded-full bg-blue-100 dark:bg-blue-900">
-                <i class="fas fa-shopping-cart text-blue-600 dark:text-blue-400"></i>
-            </div>
             <div class="ml-3">
                 <p class="text-sm text-gray-600 dark:text-gray-400">Total</p>
                 <p class="text-xl font-bold text-gray-900 dark:text-white">{{ stats.total_orders }}</p>
             </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                <i class="fas fa-shopping-cart text-xl"></i>
+            </div>
         </div>
     </div>
     
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-coffee-200 dark:border-coffee-700">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center">
-            <div class="p-2 rounded-full bg-yellow-100 dark:bg-yellow-900">
-                <i class="fas fa-clock text-yellow-600 dark:text-yellow-400"></i>
-            </div>
             <div class="ml-3">
                 <p class="text-sm text-gray-600 dark:text-gray-400">Pendentes</p>
                 <p class="text-xl font-bold text-gray-900 dark:text-white">{{ stats.pending_orders }}</p>
             </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                <i class="fas fa-clock text-xl"></i>
+            </div>
         </div>
     </div>
     
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-coffee-200 dark:border-coffee-700">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center">
-            <div class="p-2 rounded-full bg-purple-100 dark:bg-purple-900">
-                <i class="fas fa-cogs text-purple-600 dark:text-purple-400"></i>
-            </div>
             <div class="ml-3">
                 <p class="text-sm text-gray-600 dark:text-gray-400">Em Produção</p>
                 <p class="text-xl font-bold text-gray-900 dark:text-white">{{ stats.production_orders }}</p>
             </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                <i class="fas fa-cogs text-xl"></i>
+            </div>
         </div>
     </div>
     
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-coffee-200 dark:border-coffee-700">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center">
-            <div class="p-2 rounded-full bg-green-100 dark:bg-green-900">
-                <i class="fas fa-check text-green-600 dark:text-green-400"></i>
-            </div>
             <div class="ml-3">
                 <p class="text-sm text-gray-600 dark:text-gray-400">Entregues</p>
                 <p class="text-xl font-bold text-gray-900 dark:text-white">{{ stats.delivered_orders }}</p>
             </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                <i class="fas fa-check text-xl"></i>
+            </div>
         </div>
     </div>
     
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-coffee-200 dark:border-coffee-700">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center">
-            <div class="p-2 rounded-full bg-emerald-100 dark:bg-emerald-900">
-                <i class="fas fa-dollar-sign text-emerald-600 dark:text-emerald-400"></i>
-            </div>
             <div class="ml-3">
                 <p class="text-sm text-gray-600 dark:text-gray-400">Faturamento</p>
                 <p class="text-xl font-bold text-gray-900 dark:text-white">R$ {{ stats.total_revenue|floatformat:0 }}</p>
             </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                <i class="fas fa-dollar-sign text-xl"></i>
+            </div>
         </div>
     </div>
-</div>
-
-<!-- Filters -->
-<div class="filter-panel bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700 mb-8">
-    <form method="get" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <!-- Search -->
-            <div class="md:col-span-2">
-                <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Buscar Pedido
-                </label>
-                <div class="relative">
-                    <input type="text" 
-                           name="search" 
-                           id="search"
-                           value="{{ request.GET.search }}"
-                           placeholder="Número do pedido, cliente..."
-                           class="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
-                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                </div>
-            </div>
-            
-            <!-- Status -->
-            <div>
-                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Status
-                </label>
-                <select name="status" id="status"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
-                    <option value="">Todos os status</option>
-                    <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pendente</option>
-                    <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Confirmado</option>
-                    <option value="in_production" {% if request.GET.status == 'in_production' %}selected{% endif %}>Em Produção</option>
-                    <option value="delivered" {% if request.GET.status == 'delivered' %}selected{% endif %}>Entregue</option>
-                    <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelado</option>
-                </select>
-            </div>
-            
-            <!-- Date From -->
-            <div>
-                <label for="date_from" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Data Inicial
-                </label>
-                <input type="date" 
-                       name="date_from" 
-                       id="date_from"
-                       value="{{ request.GET.date_from }}"
-                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
-            </div>
-            
-            <!-- Date To -->
-            <div>
-                <label for="date_to" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Data Final
-                </label>
-                <input type="date" 
-                       name="date_to" 
-                       id="date_to"
-                       value="{{ request.GET.date_to }}"
-                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
-            </div>
-        </div>
-        
-        <div class="flex justify-between items-center">
-            <div class="flex space-x-2">
-                <button type="submit" 
-                        class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                    <i class="fas fa-search mr-2"></i>
-                    Filtrar
-                </button>
-                <a href="{% url 'sales:sales_order_list' %}" 
-                   class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors">
-                    <i class="fas fa-times mr-2"></i>
-                    Limpar
-                </a>
-            </div>
-            
-            <!-- Sort Options -->
-            <div class="flex items-center space-x-2">
-                <label for="sort" class="text-sm text-gray-600 dark:text-gray-400">Ordenar por:</label>
-                <select name="sort" id="sort" onchange="this.form.submit()"
-                        class="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                    <option value="-order_date" {% if request.GET.sort == '-order_date' %}selected{% endif %}>Data (Mais recente)</option>
-                    <option value="order_date" {% if request.GET.sort == 'order_date' %}selected{% endif %}>Data (Mais antiga)</option>
-                    <option value="-total_amount" {% if request.GET.sort == '-total_amount' %}selected{% endif %}>Valor (Maior)</option>
-                    <option value="total_amount" {% if request.GET.sort == 'total_amount' %}selected{% endif %}>Valor (Menor)</option>
-                    <option value="customer__name" {% if request.GET.sort == 'customer__name' %}selected{% endif %}>Cliente (A-Z)</option>
-                </select>
-            </div>
-        </div>
-    </form>
 </div>
 
 <!-- Orders Grid -->

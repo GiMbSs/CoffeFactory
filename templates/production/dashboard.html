@@ -5,12 +5,22 @@
 
 {% block extra_css %}
 <style>
-    .stats-card {
+    .stat-card {
         transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(210, 105, 30, 0.1) 100%);
+        border: 1px solid rgba(139, 69, 19, 0.2);
     }
-    .stats-card:hover {
+    .stat-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 20px 40px -8px rgba(139, 69, 19, 0.3);
+        border-color: rgba(139, 69, 19, 0.4);
+    }
+    .stat-icon {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
     }
     .production-chart {
         height: 300px;
@@ -82,57 +92,59 @@
 <!-- Statistics Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Total Orders -->
-    <div class="stats-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Ordens Totais</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_orders|default:0 }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Este mês</p>
             </div>
-            <div class="w-12 h-12 bg-coffee-100 dark:bg-coffee-800 rounded-lg flex items-center justify-center">
-                <i class="fas fa-clipboard-list text-coffee-600 dark:text-coffee-400 text-xl"></i>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                <i class="fas fa-clipboard-list text-xl"></i>
             </div>
         </div>
     </div>
 
     <!-- In Progress -->
-    <div class="stats-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Em Produção</p>
                 <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ in_progress_orders|default:0 }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Agora</p>
             </div>
-            <div class="w-12 h-12 bg-orange-100 dark:bg-orange-800 rounded-lg flex items-center justify-center">
-                <i class="fas fa-cogs text-orange-600 dark:text-orange-400 text-xl"></i>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                <i class="fas fa-cogs text-xl"></i>
             </div>
         </div>
     </div>
 
     <!-- Completed Today -->
-    <div class="stats-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Concluídas Hoje</p>
                 <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ completed_today|default:0 }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">{{ today|date:"d/m/Y" }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">
+                    {% now "d/m/Y" %}
+                </p>
             </div>
-            <div class="w-12 h-12 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
-                <i class="fas fa-check-circle text-green-600 dark:text-green-400 text-xl"></i>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                <i class="fas fa-check-circle text-xl"></i>
             </div>
         </div>
     </div>
 
     <!-- Active Recipes -->
-    <div class="stats-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Receitas Ativas</p>
                 <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ active_recipes|default:0 }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Disponíveis</p>
             </div>
-            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-lg flex items-center justify-center">
-                <i class="fas fa-book text-blue-600 dark:text-blue-400 text-xl"></i>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                <i class="fas fa-book text-xl"></i>
             </div>
         </div>
     </div>

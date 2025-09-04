@@ -5,19 +5,22 @@
 
 {% block extra_css %}
 <style>
-    .financial-card {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+    .stat-card {
         transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(210, 105, 30, 0.1) 100%);
+        border: 1px solid rgba(139, 69, 19, 0.2);
     }
-    .financial-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px -8px rgba(139, 69, 19, 0.3);
+        border-color: rgba(139, 69, 19, 0.4);
     }
-    .dark .financial-card {
-        background: rgba(31, 41, 55, 0.9);
-        border: 1px solid rgba(75, 85, 99, 0.2);
+    .stat-icon {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
     }
     .gradient-card-blue {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -49,7 +52,7 @@
                 </p>
             </div>
             <div class="mt-4 lg:mt-0 flex flex-col sm:flex-row gap-3">
-                <button @click="showProcessModal = true" class="inline-flex items-center px-4 py-2 bg-coffee-600 hover:bg-coffee-700 dark:bg-coffee-500 dark:hover:bg-coffee-600 text-white font-medium rounded-lg shadow-sm transition-all duration-200">
+                <button @click="showProcessModal = true" class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 flex items-center">
                     <i class="fas fa-play mr-2"></i>
                     Processar Folha
                 </button>
@@ -62,7 +65,7 @@
     </div>
 
     <!-- Period Selector -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-coffee-200 dark:border-coffee-700 p-6 mb-8">
         <div class="flex items-center justify-between">
             <div>
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Período da Folha</h3>
@@ -86,16 +89,16 @@
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="financial-card rounded-xl p-6 shadow-lg">
+        <div class="stat-card rounded-xl p-6">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
-                    <div class="gradient-card-blue p-3 rounded-lg mr-4">
-                        <i class="fas fa-users text-white text-xl"></i>
-                    </div>
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Funcionários</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">28</p>
                     </div>
+                </div>
+                <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                    <i class="fas fa-users text-xl"></i>
                 </div>
             </div>
             <div class="flex items-center text-sm">
@@ -104,16 +107,16 @@
             </div>
         </div>
 
-        <div class="financial-card rounded-xl p-6 shadow-lg">
+        <div class="stat-card rounded-xl p-6">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
-                    <div class="gradient-card-green p-3 rounded-lg mr-4">
-                        <i class="fas fa-hand-holding-usd text-white text-xl"></i>
-                    </div>
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Folha Bruta</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">R$ 95.820,00</p>
                     </div>
+                </div>
+                <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                    <i class="fas fa-money-bill-wave text-xl"></i>
                 </div>
             </div>
             <div class="flex items-center text-sm">
@@ -122,16 +125,16 @@
             </div>
         </div>
 
-        <div class="financial-card rounded-xl p-6 shadow-lg">
+        <div class="stat-card rounded-xl p-6">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
-                    <div class="gradient-card-orange p-3 rounded-lg mr-4">
-                        <i class="fas fa-percentage text-white text-xl"></i>
-                    </div>
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Descontos</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">R$ 23.950,00</p>
                     </div>
+                </div>
+                <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                    <i class="fas fa-percentage text-xl"></i>
                 </div>
             </div>
             <div class="flex items-center text-sm">
@@ -140,16 +143,16 @@
             </div>
         </div>
 
-        <div class="financial-card rounded-xl p-6 shadow-lg">
+        <div class="stat-card rounded-xl p-6">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
-                    <div class="gradient-card-coffee p-3 rounded-lg mr-4">
-                        <i class="fas fa-money-bill-wave text-white text-xl"></i>
-                    </div>
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Folha Líquida</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">R$ 71.870,00</p>
                     </div>
+                </div>
+                <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                    <i class="fas fa-money-bill-wave text-xl"></i>
                 </div>
             </div>
             <div class="flex items-center text-sm">
@@ -159,63 +162,81 @@
         </div>
     </div>
 
-    <!-- Filters Section -->
-    <div x-show="showFilters" x-collapse class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <form class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
-                <select class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                    <option>Todos</option>
-                    <option>Produção</option>
-                    <option>Administrativo</option>
-                    <option>Vendas</option>
-                    <option>Qualidade</option>
-                    <option>Logística</option>
-                </select>
-            </div>
+    <!-- Filters and Search -->
+    <div x-show="showFilters" x-collapse class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700 mb-6 lg:mb-8 transition-all duration-200">
+        <div class="p-4 lg:p-6">
+            <form class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                    
+                    <!-- Department -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
+                        <select class="w-full px-3 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                            <option>Todos</option>
+                            <option>Produção</option>
+                            <option>Administrativo</option>
+                            <option>Vendas</option>
+                            <option>Qualidade</option>
+                            <option>Logística</option>
+                        </select>
+                    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cargo</label>
-                <select class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                    <option>Todos</option>
-                    <option>Operador</option>
-                    <option>Supervisor</option>
-                    <option>Analista</option>
-                    <option>Coordenador</option>
-                    <option>Gerente</option>
-                </select>
-            </div>
+                    <!-- Position -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cargo</label>
+                        <select class="w-full px-3 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                            <option>Todos</option>
+                            <option>Operador</option>
+                            <option>Supervisor</option>
+                            <option>Analista</option>
+                            <option>Coordenador</option>
+                            <option>Gerente</option>
+                        </select>
+                    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
-                <select class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                    <option>Todos</option>
-                    <option>Ativo</option>
-                    <option>Férias</option>
-                    <option>Afastado</option>
-                    <option>Licença</option>
-                </select>
-            </div>
+                    <!-- Status -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                        <select class="w-full px-3 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                            <option>Todos</option>
+                            <option>Ativo</option>
+                            <option>Férias</option>
+                            <option>Afastado</option>
+                            <option>Licença</option>
+                        </select>
+                    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar</label>
-                <input type="text" placeholder="Nome do funcionário..." class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-            </div>
+                    <!-- Search Field -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar</label>
+                        <div class="relative">
+                            <input type="text" 
+                                   placeholder="Nome do funcionário..." 
+                                   autocomplete="off"
+                                   class="w-full pl-10 pr-4 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 transition-colors duration-200"></i>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="lg:col-span-4 flex justify-end space-x-3">
-                <button type="button" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium">
-                    Limpar
-                </button>
-                <button type="submit" class="px-6 py-2 bg-coffee-600 hover:bg-coffee-700 text-white font-medium rounded-lg transition-colors">
-                    Aplicar Filtros
-                </button>
-            </div>
-        </form>
+                <div class="flex justify-end space-x-3 pt-2 border-t border-coffee-200 dark:border-coffee-700">
+                    <button type="reset" 
+                            class="px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700">
+                        Limpar
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-2.5 bg-coffee-600 hover:bg-coffee-700 active:bg-coffee-800 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:ring-offset-2">
+                        <i class="fas fa-filter mr-2"></i>
+                        Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Payroll Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-coffee-200 dark:border-coffee-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-coffee-200 dark:border-coffee-700">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                     <i class="fas fa-list text-coffee-600 dark:text-coffee-400 mr-2"></i>
@@ -238,7 +259,7 @@
 
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-coffee-200 dark:border-gray-600">
                     <tr>
                         <th class="text-left py-3 px-6 font-medium text-gray-500 dark:text-gray-400 text-sm">Funcionário</th>
                         <th class="text-left py-3 px-6 font-medium text-gray-500 dark:text-gray-400 text-sm">Cargo</th>
@@ -403,7 +424,7 @@
         </div>
 
         <!-- Pagination -->
-        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-4 border-t border-coffee-200 dark:border-coffee-700">
             <div class="flex items-center justify-between">
                 <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
                     <span>Mostrando <span class="font-medium text-gray-900 dark:text-white">1</span> a <span class="font-medium text-gray-900 dark:text-white">10</span> de <span class="font-medium text-gray-900 dark:text-white">28</span> funcionários</span>
@@ -426,7 +447,7 @@
     <!-- Process Payroll Modal -->
     <div x-show="showProcessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full">
-            <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between p-6 border-b border-coffee-200 dark:border-coffee-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Processar Folha de Pagamento</h3>
                 <button @click="showProcessModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <i class="fas fa-times text-xl"></i>
@@ -502,7 +523,7 @@
     <!-- Payslip Modal -->
     <div x-show="showPaymentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between p-6 border-b border-coffee-200 dark:border-coffee-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Holerite - João Silva Santos</h3>
                 <button @click="showPaymentModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <i class="fas fa-times text-xl"></i>
@@ -536,15 +557,15 @@
                 <div class="mb-6">
                     <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Proventos</h4>
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                        <div class="flex justify-between items-center py-2 border-b border-coffee-200 dark:border-gray-600">
                             <span class="text-gray-700 dark:text-gray-300">Salário Base</span>
                             <span class="font-semibold text-gray-900 dark:text-white">R$ 3.200,00</span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                        <div class="flex justify-between items-center py-2 border-b border-coffee-200 dark:border-gray-600">
                             <span class="text-gray-700 dark:text-gray-300">Horas Extras (15h)</span>
                             <span class="font-semibold text-gray-900 dark:text-white">R$ 480,00</span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                        <div class="flex justify-between items-center py-2 border-b border-coffee-200 dark:border-gray-600">
                             <span class="text-gray-700 dark:text-gray-300">Adicional Noturno</span>
                             <span class="font-semibold text-gray-900 dark:text-white">R$ 0,00</span>
                         </div>
@@ -559,23 +580,23 @@
                 <div class="mb-6">
                     <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Descontos</h4>
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                        <div class="flex justify-between items-center py-2 border-b border-coffee-200 dark:border-gray-600">
                             <span class="text-gray-700 dark:text-gray-300">INSS</span>
                             <span class="font-semibold text-red-600 dark:text-red-400">R$ 294,40</span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                        <div class="flex justify-between items-center py-2 border-b border-coffee-200 dark:border-gray-600">
                             <span class="text-gray-700 dark:text-gray-300">IRRF</span>
                             <span class="font-semibold text-red-600 dark:text-red-400">R$ 183,60</span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                        <div class="flex justify-between items-center py-2 border-b border-coffee-200 dark:border-gray-600">
                             <span class="text-gray-700 dark:text-gray-300">Vale Transporte</span>
                             <span class="font-semibold text-red-600 dark:text-red-400">R$ 220,80</span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                        <div class="flex justify-between items-center py-2 border-b border-coffee-200 dark:border-gray-600">
                             <span class="text-gray-700 dark:text-gray-300">Plano de Saúde</span>
                             <span class="font-semibold text-red-600 dark:text-red-400">R$ 156,00</span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                        <div class="flex justify-between items-center py-2 border-b border-coffee-200 dark:border-gray-600">
                             <span class="text-gray-700 dark:text-gray-300">Vale Refeição</span>
                             <span class="font-semibold text-red-600 dark:text-red-400">R$ 65,20</span>
                         </div>

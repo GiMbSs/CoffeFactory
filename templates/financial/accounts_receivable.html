@@ -5,19 +5,22 @@
 
 {% block extra_css %}
 <style>
-    .financial-card {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+    .stat-card {
         transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(210, 105, 30, 0.1) 100%);
+        border: 1px solid rgba(139, 69, 19, 0.2);
     }
-    .financial-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px -8px rgba(139, 69, 19, 0.3);
+        border-color: rgba(139, 69, 19, 0.4);
     }
-    .dark .financial-card {
-        background: rgba(31, 41, 55, 0.9);
-        border: 1px solid rgba(75, 85, 99, 0.2);
+    .stat-icon {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
     }
     .gradient-card-green {
         background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
@@ -49,7 +52,7 @@
                 </p>
             </div>
             <div class="mt-4 lg:mt-0 flex flex-col sm:flex-row gap-3">
-                <a href="{% url 'financial:accounts_receivable_create' %}" class="inline-flex items-center px-4 py-2 bg-coffee-600 hover:bg-coffee-700 dark:bg-coffee-500 dark:hover:bg-coffee-600 text-white font-medium rounded-lg shadow-sm transition-all duration-200">
+                <a href="{% url 'financial:accounts_receivable_create' %}" class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 flex items-center">
                     <i class="fas fa-plus mr-2"></i>
                     Nova Conta a Receber
                 </a>
@@ -63,16 +66,16 @@
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="financial-card rounded-xl p-6 shadow-lg">
+        <div class="stat-card rounded-xl p-6">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
-                    <div class="gradient-card-green p-3 rounded-lg mr-4">
-                        <i class="fas fa-hand-holding-usd text-white text-xl"></i>
-                    </div>
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Total a Receber</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">R$ {{ total_amount|floatformat:2|default:"0,00" }}</p>
                     </div>
+                </div>
+                <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                        <i class="fas fa-hand-holding-usd text-xl"></i>
                 </div>
             </div>
             <div class="flex items-center text-sm">
@@ -80,16 +83,16 @@
             </div>
         </div>
 
-        <div class="financial-card rounded-xl p-6 shadow-lg">
+        <div class="stat-card rounded-xl p-6">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
-                    <div class="gradient-card-blue p-3 rounded-lg mr-4">
-                        <i class="fas fa-check-circle text-white text-xl"></i>
-                    </div>
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Já Recebido</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">R$ {{ total_paid|floatformat:2|default:"0,00" }}</p>
                     </div>
+                </div>
+                <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                    <i class="fas fa-check-circle text-xl"></i>
                 </div>
             </div>
             <div class="flex items-center text-sm">
@@ -97,16 +100,16 @@
             </div>
         </div>
 
-        <div class="financial-card rounded-xl p-6 shadow-lg">
+        <div class="stat-card rounded-xl p-6">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
-                    <div class="gradient-card-orange p-3 rounded-lg mr-4">
-                        <i class="fas fa-clock text-white text-xl"></i>
-                    </div>
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Vencem Hoje</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">R$ {{ due_today_amount|floatformat:2|default:"0,00" }}</p>
                     </div>
+                </div>
+                <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                    <i class="fas fa-clock text-xl"></i>
                 </div>
             </div>
             <div class="flex items-center text-sm">
@@ -115,16 +118,16 @@
             </div>
         </div>
 
-        <div class="financial-card rounded-xl p-6 shadow-lg">
+        <div class="stat-card rounded-xl p-6">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
-                    <div class="gradient-card-coffee p-3 rounded-lg mr-4">
-                        <i class="fas fa-exclamation-triangle text-white text-xl"></i>
-                    </div>
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Em Atraso</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">R$ {{ overdue_amount|floatformat:2|default:"0,00" }}</p>
                     </div>
+                </div>
+                <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                    <i class="fas fa-exclamation-triangle text-xl"></i>
                 </div>
             </div>
             <div class="flex items-center text-sm">
@@ -135,7 +138,7 @@
     </div>
 
     <!-- Filters Section -->
-    <div x-show="showFilters" x-collapse class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+    <div x-show="showFilters" x-collapse class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-coffee-200 dark:border-coffee-700 p-6 mb-6">
         <form class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
@@ -188,8 +191,8 @@
     </div>
 
     <!-- Accounts Receivable Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-coffee-200 dark:border-coffee-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-coffee-200 dark:border-coffee-700">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                     <i class="fas fa-list text-coffee-600 dark:text-coffee-400 mr-2"></i>
@@ -209,7 +212,7 @@
 
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-coffee-200 dark:border-gray-600">
                     <tr>
                         <th class="text-left py-3 px-6 font-medium text-gray-500 dark:text-gray-400 text-sm">Cliente</th>
                         <th class="text-left py-3 px-6 font-medium text-gray-500 dark:text-gray-400 text-sm">Valor Original</th>
@@ -304,7 +307,7 @@
         </div>
 
         <!-- Pagination -->
-        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-4 border-t border-coffee-200 dark:border-coffee-700">
             <div class="flex items-center justify-between">
                 <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
                     <span>Mostrando <span class="font-medium text-gray-900 dark:text-white">1</span> a <span class="font-medium text-gray-900 dark:text-white">10</span> de <span class="font-medium text-gray-900 dark:text-white">24</span> resultados</span>
@@ -327,7 +330,7 @@
     <!-- Create Modal -->
     <div x-show="showCreateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between p-6 border-b border-coffee-200 dark:border-coffee-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Nova Conta a Receber</h3>
                 <button @click="showCreateModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <i class="fas fa-times text-xl"></i>
@@ -387,7 +390,7 @@
     <!-- Payment Modal -->
     <div x-show="showPaymentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full">
-            <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between p-6 border-b border-coffee-200 dark:border-coffee-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Registrar Pagamento</h3>
                 <button @click="showPaymentModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <i class="fas fa-times text-xl"></i>

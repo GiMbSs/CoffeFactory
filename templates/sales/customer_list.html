@@ -5,6 +5,23 @@
 
 {% block extra_css %}
 <style>
+    .stat-card {
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(210, 105, 30, 0.1) 100%);
+        border: 1px solid rgba(139, 69, 19, 0.2);
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px -8px rgba(139, 69, 19, 0.3);
+        border-color: rgba(139, 69, 19, 0.4);
+    }
+    .stat-icon {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
+    }
     .customer-card {
         transition: all 0.3s ease;
     }
@@ -48,129 +65,134 @@
     </div>
 </div>
 
-<!-- Filters -->
-<div class="filter-panel bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700 mb-8">
-    <form method="get" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <!-- Search -->
-            <div class="md:col-span-2">
-                <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Buscar Cliente
-                </label>
-                <div class="relative">
-                    <input type="text" 
-                           name="search" 
-                           id="search"
-                           value="{{ request.GET.search }}"
-                           placeholder="Nome, código, CNPJ/CPF..."
-                           class="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
-                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+<!-- Filters and Search -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700 mb-6 lg:mb-8 transition-all duration-200 hover:shadow-xl">
+    <div class="p-4 lg:p-6">
+        <form method="get" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 lg:gap-4">
+                
+                <!-- Search Field -->
+                <div class="md:col-span-2">
+                    <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Buscar Cliente
+                    </label>
+                    <div class="relative">
+                        <input type="text" 
+                               name="search" 
+                               id="search"
+                               value="{{ request.GET.search|default:'' }}"
+                               placeholder="Nome, código, CNPJ/CPF..."
+                               autocomplete="off"
+                               class="w-full pl-10 pr-4 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 transition-colors duration-200"></i>
+                    </div>
+                </div>
+                
+                <!-- Customer Type -->
+                <div>
+                    <label for="customer_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Tipo
+                    </label>
+                    <select name="customer_type" id="customer_type"
+                            class="w-full px-3 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                        <option value="">Todos os tipos</option>
+                        <option value="individual" {% if request.GET.customer_type == 'individual' %}selected{% endif %}>Pessoa Física</option>
+                        <option value="company" {% if request.GET.customer_type == 'company' %}selected{% endif %}>Pessoa Jurídica</option>
+                    </select>
+                </div>
+                
+                <!-- Status -->
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Status
+                    </label>
+                    <select name="status" id="status"
+                            class="w-full px-3 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                        <option value="">Todos os status</option>
+                        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Ativo</option>
+                        <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inativo</option>
+                        <option value="blocked" {% if request.GET.status == 'blocked' %}selected{% endif %}>Bloqueado</option>
+                    </select>
                 </div>
             </div>
             
-            <!-- Customer Type -->
-            <div>
-                <label for="customer_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Tipo
-                </label>
-                <select name="customer_type" id="customer_type"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
-                    <option value="">Todos os tipos</option>
-                    <option value="individual" {% if request.GET.customer_type == 'individual' %}selected{% endif %}>Pessoa Física</option>
-                    <option value="company" {% if request.GET.customer_type == 'company' %}selected{% endif %}>Pessoa Jurídica</option>
-                </select>
+            <!-- Action Buttons and View Toggle -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0 pt-4 border-t border-coffee-200 dark:border-coffee-700">
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                    <button type="submit" 
+                            class="bg-coffee-600 hover:bg-coffee-700 active:bg-coffee-800 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:ring-offset-2">
+                        <i class="fas fa-filter text-sm"></i>
+                        <span>Filtrar</span>
+                    </button>
+                    <a href="{% url 'sales:customer_list' %}" 
+                       class="bg-gray-500 hover:bg-gray-600 active:bg-gray-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                        <i class="fas fa-times text-sm"></i>
+                        <span>Limpar</span>
+                    </a>
+                </div>
+                
+                <!-- View Toggle -->
+                <div class="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
+                    <button type="button" id="gridView" onclick="toggleView('grid')"
+                            class="px-3 py-1 rounded-md text-sm font-medium transition-colors bg-coffee-600 text-white">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button type="button" id="listView" onclick="toggleView('list')"
+                            class="px-3 py-1 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
             </div>
-            
-            <!-- Status -->
-            <div>
-                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Status
-                </label>
-                <select name="status" id="status"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-coffee-500 focus:border-transparent">
-                    <option value="">Todos os status</option>
-                    <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Ativo</option>
-                    <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inativo</option>
-                    <option value="blocked" {% if request.GET.status == 'blocked' %}selected{% endif %}>Bloqueado</option>
-                </select>
-            </div>
-        </div>
-        
-        <div class="flex justify-between items-center">
-            <div class="flex space-x-2">
-                <button type="submit" 
-                        class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                    <i class="fas fa-search mr-2"></i>
-                    Filtrar
-                </button>
-                <a href="{% url 'sales:customer_list' %}" 
-                   class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors">
-                    <i class="fas fa-times mr-2"></i>
-                    Limpar
-                </a>
-            </div>
-            
-            <!-- View Toggle -->
-            <div class="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
-                <button type="button" id="gridView" onclick="toggleView('grid')"
-                        class="px-3 py-1 rounded-md text-sm font-medium transition-colors bg-coffee-600 text-white">
-                    <i class="fas fa-th-large"></i>
-                </button>
-                <button type="button" id="listView" onclick="toggleView('list')"
-                        class="px-3 py-1 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                    <i class="fas fa-list"></i>
-                </button>
-            </div>
-        </div>
     </form>
+    </div>
 </div>
 
 <!-- Statistics Cards -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-coffee-200 dark:border-coffee-700">
-        <div class="flex items-center">
-            <div class="p-2 rounded-full bg-blue-100 dark:bg-blue-900">
-                <i class="fas fa-users text-blue-600 dark:text-blue-400"></i>
-            </div>
-            <div class="ml-3">
+    <div class="stat-card rounded-xl p-6">
+        <div class="flex items-center justify-between">
+            <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">Total</p>
                 <p class="text-xl font-bold text-gray-900 dark:text-white">{{ statistics.total_customers }}</p>
             </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                <i class="fas fa-users text-xl"></i>
+            </div>
         </div>
     </div>
     
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-coffee-200 dark:border-coffee-700">
-        <div class="flex items-center">
-            <div class="p-2 rounded-full bg-green-100 dark:bg-green-900">
-                <i class="fas fa-user-check text-green-600 dark:text-green-400"></i>
-            </div>
-            <div class="ml-3">
+    <div class="stat-card rounded-xl p-6">
+        <div class="flex items-center justify-between">
+            <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">Ativos</p>
                 <p class="text-xl font-bold text-gray-900 dark:text-white">{{ statistics.active_customers }}</p>
             </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                <i class="fas fa-user-check text-xl"></i>
+            </div>
         </div>
     </div>
     
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-coffee-200 dark:border-coffee-700">
-        <div class="flex items-center">
-            <div class="p-2 rounded-full bg-yellow-100 dark:bg-yellow-900">
-                <i class="fas fa-building text-yellow-600 dark:text-yellow-400"></i>
-            </div>
-            <div class="ml-3">
+    <div class="stat-card rounded-xl p-6">
+        <div class="flex items-center justify-between">
+            <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">Empresas</p>
                 <p class="text-xl font-bold text-gray-900 dark:text-white">{{ statistics.company_customers }}</p>
             </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                <i class="fas fa-building text-xl"></i>
+            </div>
         </div>
     </div>
     
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-coffee-200 dark:border-coffee-700">
-        <div class="flex items-center">
-            <div class="p-2 rounded-full bg-purple-100 dark:bg-purple-900">
-                <i class="fas fa-user text-purple-600 dark:text-purple-400"></i>
-            </div>
-            <div class="ml-3">
+    <div class="stat-card rounded-xl p-6">
+        <div class="flex items-center justify-between">
+            <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">Pessoas Físicas</p>
                 <p class="text-xl font-bold text-gray-900 dark:text-white">{{ statistics.individual_customers }}</p>
+            </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                <i class="fas fa-user text-xl"></i>
             </div>
         </div>
     </div>
@@ -363,28 +385,38 @@
 
 <!-- Pagination -->
 {% if customers.has_other_pages %}
-<div class="mt-8 flex items-center justify-between">
+<div class="mt-8 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
     <div class="text-sm text-gray-600 dark:text-gray-400">
         Mostrando {{ customers.start_index }} a {{ customers.end_index }} de {{ customers.paginator.count }} clientes
     </div>
     
     <nav class="flex items-center space-x-2">
         {% if customers.has_previous %}
-        <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.customer_type %}customer_type={{ request.GET.customer_type }}&{% endif %}page={{ customers.previous_page_number }}" 
-           class="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ customers.previous_page_number }}" 
+           class="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
+           title="Página anterior">
             <i class="fas fa-chevron-left"></i>
         </a>
+        {% else %}
+        <span class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-400 dark:text-gray-500 cursor-not-allowed">
+            <i class="fas fa-chevron-left"></i>
+        </span>
         {% endif %}
         
-        <span class="px-4 py-2 text-sm bg-coffee-600 text-white rounded-lg">
-            {{ customers.number }}
+        <span class="px-4 py-2 text-sm bg-coffee-600 text-white rounded-lg font-medium">
+            {{ customers.number }} de {{ customers.paginator.num_pages }}
         </span>
         
         {% if customers.has_next %}
-        <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.customer_type %}customer_type={{ request.GET.customer_type }}&{% endif %}page={{ customers.next_page_number }}" 
-           class="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ customers.next_page_number }}" 
+           class="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
+           title="Próxima página">
             <i class="fas fa-chevron-right"></i>
         </a>
+        {% else %}
+        <span class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-400 dark:text-gray-500 cursor-not-allowed">
+            <i class="fas fa-chevron-right"></i>
+        </span>
         {% endif %}
     </nav>
 </div>

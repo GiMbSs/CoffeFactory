@@ -20,6 +20,24 @@
     @apply bg-gray-500 dark:bg-gray-500;
 }
 
+/* Sidebar specific scrollbar styling */
+.sidebar-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+    @apply bg-transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+    @apply bg-coffee-300 dark:bg-coffee-700;
+    border-radius: 2px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    @apply bg-coffee-400 dark:bg-coffee-600;
+}
+
 /* Smooth scrolling */
 html {
     scroll-behavior: smooth;

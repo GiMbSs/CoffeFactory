@@ -7,6 +7,23 @@
 <!-- Chart.js CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.css">
 <style>
+    .stat-card {
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(210, 105, 30, 0.1) 100%);
+        border: 1px solid rgba(139, 69, 19, 0.2);
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px -8px rgba(139, 69, 19, 0.3);
+        border-color: rgba(139, 69, 19, 0.4);
+    }
+    .stat-icon {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
+    }
     .gradient-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
@@ -66,19 +83,19 @@
             </p>
         </div>
         <div class="mt-4 lg:mt-0 flex flex-col sm:flex-row gap-3">
-            <a href="{% url 'financial:accounts_receivable' %}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+            <a href="{% url 'financial:accounts_receivable' %}" class="bg-coffee-600 hover:bg-coffee-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 flex items-center">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                 </svg>
                 Contas a Receber
             </a>
-            <a href="{% url 'financial:accounts_payable' %}" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
+            <a href="{% url 'financial:accounts_payable' %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 flex items-center">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
                 </svg>
                 Contas a Pagar
             </a>
-            <a href="{% url 'financial:payroll' %}" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors">
+            <a href="{% url 'financial:payroll' %}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 flex items-center">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                 </svg>
@@ -91,7 +108,7 @@
 <!-- Financial Overview Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Total a Receber -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 financial-card">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Total a Receber</p>
@@ -104,16 +121,14 @@
                     <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">vs mês anterior</span>
                 </div>
             </div>
-            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                </svg>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                <i class="fas fa-chart-line text-xl"></i>
             </div>
         </div>
     </div>
 
     <!-- Total a Pagar -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 financial-card">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Total a Pagar</p>
@@ -126,16 +141,14 @@
                     <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">vs mês anterior</span>
                 </div>
             </div>
-            <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
-                </svg>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                <i class="fas fa-calculator text-xl"></i>
             </div>
         </div>
     </div>
 
     <!-- Saldo Atual -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 financial-card">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Saldo Atual</p>
@@ -148,16 +161,14 @@
                     <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">vs mês anterior</span>
                 </div>
             </div>
-            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                </svg>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                <i class="fas fa-money-bill-wave text-xl"></i>
             </div>
         </div>
     </div>
 
     <!-- Folha de Pagamento -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 financial-card">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Folha de Pagamento</p>
@@ -170,10 +181,8 @@
                     <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">vs mês anterior</span>
                 </div>
             </div>
-            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                <i class="fas fa-dollar-sign text-xl"></i>
             </div>
         </div>
     </div>
@@ -182,7 +191,7 @@
 <!-- Charts Section -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
     <!-- Cash Flow Chart -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 financial-card">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-coffee-200 dark:border-coffee-700 p-6 financial-card">
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Fluxo de Caixa</h3>
             <div class="flex space-x-2">
@@ -200,7 +209,7 @@
     </div>
 
     <!-- Revenue vs Expense Chart -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 financial-card">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-coffee-200 dark:border-coffee-700 p-6 financial-card">
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Receitas vs Despesas</h3>
             <div class="text-sm text-gray-500 dark:text-gray-400">Setembro 2024</div>
@@ -212,7 +221,7 @@
 </div>
 
 <!-- Recent Transactions -->
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 financial-card">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-coffee-200 dark:border-coffee-700 p-6 financial-card">
     <div class="flex items-center justify-between mb-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Movimentações Recentes</h3>
         <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Ver todas</a>
@@ -220,7 +229,7 @@
     
     <div class="space-y-4">
         <!-- Transaction Item -->
-        <div class="flex items-center justify-between p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 activity-item">
+        <div class="flex items-center justify-between p-4 rounded-lg border border-gray-100 dark:border-coffee-700 hover:bg-gray-50 dark:hover:bg-gray-700 activity-item">
             <div class="flex items-center space-x-4">
                 <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
                     <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,7 +247,7 @@
             </div>
         </div>
 
-        <div class="flex items-center justify-between p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 activity-item">
+        <div class="flex items-center justify-between p-4 rounded-lg border border-gray-100 dark:border-coffee-700 hover:bg-gray-50 dark:hover:bg-gray-700 activity-item">
             <div class="flex items-center space-x-4">
                 <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
                     <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -256,7 +265,7 @@
             </div>
         </div>
 
-        <div class="flex items-center justify-between p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 activity-item">
+        <div class="flex items-center justify-between p-4 rounded-lg border border-gray-100 dark:border-coffee-700 hover:bg-gray-50 dark:hover:bg-gray-700 activity-item">
             <div class="flex items-center space-x-4">
                 <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,7 +283,7 @@
             </div>
         </div>
 
-        <div class="flex items-center justify-between p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 activity-item">
+        <div class="flex items-center justify-between p-4 rounded-lg border border-gray-100 dark:border-coffee-700 hover:bg-gray-50 dark:hover:bg-gray-700 activity-item">
             <div class="flex items-center space-x-4">
                 <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
                     <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

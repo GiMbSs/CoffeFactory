@@ -5,6 +5,23 @@
 
 {% block extra_css %}
 <style>
+    .stat-card {
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(210, 105, 30, 0.1) 100%);
+        border: 1px solid rgba(139, 69, 19, 0.2);
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px -8px rgba(139, 69, 19, 0.3);
+        border-color: rgba(139, 69, 19, 0.4);
+    }
+    .stat-icon {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
+    }
     .metric-card {
         transition: all 0.3s ease;
     }
@@ -64,11 +81,8 @@
 <!-- Key Metrics -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Today's Sales -->
-    <div class="metric-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center">
-            <div class="p-3 rounded-full bg-green-100 dark:bg-green-900">
-                <i class="fas fa-dollar-sign text-green-600 dark:text-green-400 text-xl"></i>
-            </div>
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Vendas Hoje</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">R$ {{ metrics.today_sales|floatformat:2 }}</p>
@@ -77,15 +91,15 @@
                     {{ metrics.today_orders }} pedidos
                 </p>
             </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                <i class="fas fa-dollar-sign text-xl"></i>
+            </div>
         </div>
     </div>
 
     <!-- This Month -->
-    <div class="metric-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center">
-            <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900">
-                <i class="fas fa-calendar-month text-blue-600 dark:text-blue-400 text-xl"></i>
-            </div>
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Este Mês</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">R$ {{ metrics.month_sales|floatformat:2 }}</p>
@@ -94,15 +108,15 @@
                     {{ metrics.month_orders }} pedidos
                 </p>
             </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                <i class="fas fa-hourglass-half text-xl"></i>
+            </div>
         </div>
     </div>
 
     <!-- Pending Orders -->
-    <div class="metric-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center">
-            <div class="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900">
-                <i class="fas fa-clock text-yellow-600 dark:text-yellow-400 text-xl"></i>
-            </div>
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Pedidos Pendentes</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ metrics.pending_orders }}</p>
@@ -111,15 +125,15 @@
                     R$ {{ metrics.pending_amount|floatformat:2 }}
                 </p>
             </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                <i class="fas fa-clock text-xl"></i>
+            </div>
         </div>
     </div>
 
     <!-- Active Customers -->
-    <div class="metric-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
+    <div class="stat-card rounded-xl p-6">
         <div class="flex items-center">
-            <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900">
-                <i class="fas fa-users text-purple-600 dark:text-purple-400 text-xl"></i>
-            </div>
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Clientes Ativos</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ metrics.active_customers }}</p>
@@ -127,6 +141,9 @@
                     <i class="fas fa-user-plus mr-1"></i>
                     {{ metrics.new_customers_month }} novos este mês
                 </p>
+            </div>
+            <div class="stat-icon w-12 h-12 rounded-lg flex items-center justify-center text-white ml-auto">
+                <i class="fas fa-users text-xl"></i>
             </div>
         </div>
     </div>

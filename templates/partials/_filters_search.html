@@ -1,0 +1,203 @@
+<!-- ===== UNIFIED FILTERS AND SEARCH COMPONENT ===== -->
+<!-- 
+    Usage: {% include 'partials/_filters_search.html' with filters_config=filters_config %}
+    
+    filters_config structure:
+    {
+        'form_method': 'get',
+        'form_action': '',  # Optional, default current URL
+        'grid_cols': 'grid-cols-1 md:grid-cols-4',  # Responsive grid
+        'search': {
+            'name': 'search',
+            'placeholder': 'Buscar...',
+            'value': request.GET.search,
+            'label': 'Buscar',  # Optional
+            'col_span': 'md:col-span-1'  # Optional
+        },
+        'filters': [
+            {
+                'type': 'select',
+                'name': 'category',
+                'label': 'Categoria',  # Optional
+                'options': [
+                    {'value': '', 'text': 'Todas as Categorias'},
+                    {'value': 'cat1', 'text': 'Categoria 1', 'selected': False}
+                ],
+                'col_span': ''  # Optional
+            },
+            {
+                'type': 'date',
+                'name': 'date_from',
+                'label': 'Data Inicial',
+                'value': request.GET.date_from,
+                'col_span': ''
+            }
+        ],
+        'actions': {
+            'submit_text': 'Filtrar',
+            'clear_url': '/current/url/',
+            'clear_text': 'Limpar',
+            'col_span': ''  # Optional
+        }
+    }
+-->
+
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700 mb-6 lg:mb-8 transition-all duration-200 hover:shadow-xl">
+    <!-- Header Section (Optional) -->
+    {% if filters_config.header %}
+    <div class="px-4 lg:px-6 pt-4 lg:pt-6 pb-2">
+        <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <i class="fas fa-filter mr-2 text-coffee-600 dark:text-coffee-400"></i>
+                {{ filters_config.header.title|default:"Filtros e Busca" }}
+            </h3>
+            {% if filters_config.header.subtitle %}
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ filters_config.header.subtitle }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <hr class="border-coffee-200 dark:border-coffee-700">
+    {% endif %}
+
+    <!-- Filters Form -->
+    <div class="p-4 lg:p-6">
+        <form method="{{ filters_config.form_method|default:'get' }}" 
+              {% if filters_config.form_action %}action="{{ filters_config.form_action }}"{% endif %}
+              class="space-y-4">
+            
+            <!-- Main Grid Container -->
+            <div class="grid {{ filters_config.grid_cols|default:'grid-cols-1 md:grid-cols-4' }} gap-3 lg:gap-4">
+                
+                <!-- Search Field -->
+                {% if filters_config.search %}
+                <div class="relative {{ filters_config.search.col_span|default:'' }}">
+                    {% if filters_config.search.label %}
+                    <label for="search-{{ filters_config.search.name }}" 
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ filters_config.search.label }}
+                    </label>
+                    {% endif %}
+                    <div class="relative">
+                        <input type="text" 
+                               name="{{ filters_config.search.name }}" 
+                               id="search-{{ filters_config.search.name }}"
+                               value="{{ filters_config.search.value|default:'' }}"
+                               placeholder="{{ filters_config.search.placeholder|default:'Buscar...' }}" 
+                               autocomplete="off"
+                               class="w-full pl-10 pr-4 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 transition-colors duration-200"></i>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Dynamic Filters -->
+                {% for filter in filters_config.filters %}
+                <div class="{{ filter.col_span|default:'' }}">
+                    {% if filter.label %}
+                    <label for="filter-{{ filter.name }}" 
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ filter.label }}
+                    </label>
+                    {% endif %}
+                    
+                    {% if filter.type == 'select' %}
+                    <select name="{{ filter.name }}" 
+                            id="filter-{{ filter.name }}"
+                            class="w-full px-3 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                        {% for option in filter.options %}
+                        <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>
+                            {{ option.text }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    
+                    {% elif filter.type == 'date' %}
+                    <input type="date" 
+                           name="{{ filter.name }}" 
+                           id="filter-{{ filter.name }}"
+                           value="{{ filter.value|default:'' }}"
+                           class="w-full px-3 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                    
+                    {% elif filter.type == 'text' %}
+                    <input type="text" 
+                           name="{{ filter.name }}" 
+                           id="filter-{{ filter.name }}"
+                           value="{{ filter.value|default:'' }}"
+                           placeholder="{{ filter.placeholder|default:'' }}"
+                           class="w-full px-3 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                    
+                    {% elif filter.type == 'number' %}
+                    <input type="number" 
+                           name="{{ filter.name }}" 
+                           id="filter-{{ filter.name }}"
+                           value="{{ filter.value|default:'' }}"
+                           placeholder="{{ filter.placeholder|default:'' }}"
+                           {% if filter.min %}min="{{ filter.min }}"{% endif %}
+                           {% if filter.max %}max="{{ filter.max }}"{% endif %}
+                           {% if filter.step %}step="{{ filter.step }}"{% endif %}
+                           class="w-full px-3 py-2.5 border border-coffee-300 dark:border-coffee-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all duration-200 hover:border-coffee-400 dark:hover:border-coffee-500">
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                <!-- Action Buttons -->
+                {% if filters_config.actions %}
+                <div class="flex flex-col sm:flex-row {{ filters_config.actions.col_span|default:'' }} space-y-2 sm:space-y-0 sm:space-x-2">
+                    <button type="submit" 
+                            class="flex-1 bg-coffee-600 hover:bg-coffee-700 active:bg-coffee-800 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:ring-offset-2">
+                        <i class="fas fa-filter text-sm"></i>
+                        <span>{{ filters_config.actions.submit_text|default:"Filtrar" }}</span>
+                    </button>
+                    {% if filters_config.actions.clear_url %}
+                    <a href="{{ filters_config.actions.clear_url }}" 
+                       class="flex-1 bg-gray-500 hover:bg-gray-600 active:bg-gray-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                        <i class="fas fa-times text-sm"></i>
+                        <span>{{ filters_config.actions.clear_text|default:"Limpar" }}</span>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Additional Actions Row (Optional) -->
+            {% if filters_config.additional_actions %}
+            <div class="flex flex-wrap items-center justify-between pt-2 border-t border-coffee-200 dark:border-coffee-700">
+                <div class="flex flex-wrap gap-2">
+                    {% for action in filters_config.additional_actions %}
+                    <button type="button" 
+                            onclick="{{ action.onclick }}"
+                            class="px-3 py-1.5 text-xs font-medium {{ action.classes|default:'text-coffee-600 dark:text-coffee-400 hover:text-coffee-800 dark:hover:text-coffee-200 hover:bg-coffee-50 dark:hover:bg-coffee-900/20' }} rounded-md transition-all duration-200">
+                        {% if action.icon %}<i class="{{ action.icon }} mr-1"></i>{% endif %}
+                        {{ action.text }}
+                    </button>
+                    {% endfor %}
+                </div>
+                
+                {% if filters_config.results_count %}
+                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                    {{ filters_config.results_count }} resultado{{ filters_config.results_count|pluralize }}
+                </span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<!-- Enhanced UX: Auto-submit on filter change (Optional) -->
+{% if filters_config.auto_submit %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form[method="{{ filters_config.form_method|default:"get" }}"]');
+    const filterSelects = form.querySelectorAll('select[name^="filter-"], select:not([name="search"])');
+    
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            if (this.value !== '') {
+                form.submit();
+            }
+        });
+    });
+});
+</script>
+{% endif %}
