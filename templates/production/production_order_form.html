@@ -139,19 +139,6 @@
                         {% endif %}
                     </div>
                     
-                    <!-- Recipe Selection -->
-                    <div>
-                        <label for="id_recipe" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Receita <span class="text-red-500">*</span>
-                        </label>
-                        {{ form.recipe }}
-                        {% if form.recipe.errors %}
-                        <div class="mt-1 text-sm text-red-600 dark:text-red-400">
-                            {{ form.recipe.errors.0 }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    
                     <!-- Planned Quantity -->
                     <div>
                         <label for="id_planned_quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -360,13 +347,13 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Produto</label>
-                                <p class="text-lg font-semibold text-gray-900 dark:text-white" x-text="formData.product_name"></p>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Número da Ordem</label>
+                                <p class="text-lg font-semibold text-gray-900 dark:text-white" x-text="formData.order_number"></p>
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Quantidade</label>
-                                <p class="text-lg font-semibold text-gray-900 dark:text-white" x-text="formData.quantity + ' ' + formData.product_unit"></p>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Quantidade Planejada</label>
+                                <p class="text-lg font-semibold text-gray-900 dark:text-white" x-text="formData.planned_quantity + (formData.product_unit ? ' ' + formData.product_unit : '')"></p>
                             </div>
                             
                             <div>
@@ -429,20 +416,6 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Navigation -->
-                <div class="flex justify-between">
-                    <button type="button" @click="prevStep()" 
-                            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105">
-                        <i class="fas fa-arrow-left mr-2"></i>
-                        Anterior
-                    </button>
-                    <button type="submit" 
-                            class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105">
-                        <i class="fas fa-check mr-2"></i>
-                        {% if form.instance.pk %}Atualizar Ordem{% else %}Criar Ordem{% endif %}
-                    </button>
-                </div>
             </div>
         </div>
     </form>
@@ -479,23 +452,10 @@ function productionOrderForm() {
                     this.loadRecipeData(e.target.value);
                 });
             }
-            
-            // Watch for product changes
-            const productSelect = document.getElementById('id_product');
-            if (productSelect) {
-                productSelect.addEventListener('change', (e) => {
-                    this.updateProductInfo(e.target.value);
-                });
-            }
         },
         
         loadInitialData() {
             // Load current form values
-            const productSelect = document.getElementById('id_product');
-            if (productSelect && productSelect.value) {
-                this.updateProductInfo(productSelect.value);
-            }
-            
             const recipeSelect = document.getElementById('id_recipe');
             if (recipeSelect && recipeSelect.value) {
                 this.loadRecipeData(recipeSelect.value);
@@ -516,20 +476,6 @@ function productionOrderForm() {
                 })
                 .catch(error => {
                     console.error('Error loading recipe:', error);
-                });
-        },
-        
-        updateProductInfo(productId) {
-            if (!productId) return;
-            
-            fetch(`/api/products/${productId}/`)
-                .then(response => response.json())
-                .then(data => {
-                    this.formData.product_name = data.name;
-                    this.formData.product_unit = data.unit_of_measure.abbreviation;
-                })
-                .catch(error => {
-                    console.error('Error loading product:', error);
                 });
         },
         
@@ -560,11 +506,23 @@ function productionOrderForm() {
             const step = this.currentStep;
             
             if (step === 1) {
-                const requiredFields = ['id_product', 'id_quantity', 'id_priority', 'id_planned_start_date', 'id_planned_end_date'];
-                return requiredFields.every(fieldId => {
+                const requiredFields = ['id_order_number', 'id_planned_quantity', 'id_priority', 'id_planned_start_date', 'id_planned_end_date', 'id_supervisor'];
+                
+                console.log('Validating step 1...'); // Debug
+                
+                const isValid = requiredFields.every(fieldId => {
                     const field = document.getElementById(fieldId);
-                    return field && field.value.trim() !== '';
+                    const hasValue = field && field.value.trim() !== '';
+                    
+                    if (!hasValue) {
+                        console.log(`Field ${fieldId} is empty or missing`); // Debug
+                    }
+                    
+                    return hasValue;
                 });
+                
+                console.log('Step 1 validation result:', isValid); // Debug
+                return isValid;
             }
             
             return true;
@@ -579,10 +537,10 @@ function productionOrderForm() {
                 }
             });
             
-            // Get display values
-            const productSelect = document.getElementById('id_product');
-            if (productSelect) {
-                this.formData.product_name = productSelect.options[productSelect.selectedIndex]?.text || '';
+            // Get display values from recipe if available
+            if (this.selectedRecipe) {
+                this.formData.product_name = this.selectedRecipe.product?.name || '';
+                this.formData.product_unit = this.selectedRecipe.product?.unit_of_measure?.abbreviation || '';
             }
             
             const prioritySelect = document.getElementById('id_priority');

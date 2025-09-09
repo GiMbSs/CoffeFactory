@@ -233,8 +233,26 @@ class RecipeListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        # Return empty queryset for now
-        return []
+        queryset = Recipe.objects.select_related('product').all()
+        
+        # Search filter
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) |
+                Q(code__icontains=search) |
+                Q(product__name__icontains=search)
+            ).distinct()
+        
+        # Status filter
+        status = self.request.GET.get('status')
+        if status == 'active':
+            queryset = queryset.filter(status='active')
+        elif status == 'testing':
+            queryset = queryset.filter(status='testing')
+        # If no status filter, show all recipes
+        
+        return queryset.order_by('-created_at')
 
 
 class RecipeCreateView(LoginRequiredMixin, CreateView):
@@ -244,7 +262,51 @@ class RecipeCreateView(LoginRequiredMixin, CreateView):
     template_name = 'production/recipe_form.html'
     success_url = reverse_lazy('production:recipe_list')
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['materials'] = Material.objects.filter(is_active=True).select_related('unit_of_measure').order_by('name')
+        return context
+    
     def form_valid(self, form):
+        # Process ingredients from AJAX data if present
+        import json
+        
+        if 'ingredients_data' in self.request.POST:
+            try:
+                ingredients_data = json.loads(self.request.POST['ingredients_data'])
+                
+                # Save the recipe first
+                response = super().form_valid(form)
+                recipe = form.instance
+                
+                # Clear existing items if updating
+                recipe.recipe_items.all().delete()
+                
+                # Create recipe items
+                created_items = []
+                for ingredient in ingredients_data:
+                    if ingredient.get('material') and ingredient.get('quantity'):
+                        from inventory.models import Material
+                        try:
+                            material = Material.objects.get(id=ingredient['material'])
+                            recipe_item = RecipeItem.objects.create(
+                                recipe=recipe,
+                                material=material,
+                                quantity=ingredient['quantity'],
+                                notes=ingredient.get('notes', '')
+                            )
+                            created_items.append(recipe_item)
+                        except Material.DoesNotExist:
+                            continue
+                        except Exception as e:
+                            continue
+                
+                messages.success(self.request, f'Receita "{recipe.name}" criada com sucesso com {len(ingredients_data)} ingredientes!')
+                return response
+                
+            except json.JSONDecodeError as e:
+                messages.error(self.request, 'Erro ao processar dados dos ingredientes.')
+        
         messages.success(self.request, f'Receita "{form.instance.name}" criada com sucesso!')
         return super().form_valid(form)
 
@@ -256,7 +318,46 @@ class RecipeUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'production/recipe_form.html'
     success_url = reverse_lazy('production:recipe_list')
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['materials'] = Material.objects.filter(is_active=True).select_related('unit_of_measure').order_by('name')
+        return context
+    
     def form_valid(self, form):
+        # Process ingredients from AJAX data if present
+        import json
+        if 'ingredients_data' in self.request.POST:
+            try:
+                ingredients_data = json.loads(self.request.POST['ingredients_data'])
+                
+                # Save the recipe first
+                response = super().form_valid(form)
+                recipe = form.instance
+                
+                # Clear existing items if updating
+                recipe.recipe_items.all().delete()
+                
+                # Create recipe items
+                for ingredient in ingredients_data:
+                    if ingredient.get('material') and ingredient.get('quantity'):
+                        from inventory.models import Material
+                        try:
+                            material = Material.objects.get(id=ingredient['material'])
+                            RecipeItem.objects.create(
+                                recipe=recipe,
+                                material=material,
+                                quantity=ingredient['quantity'],
+                                notes=ingredient.get('notes', '')
+                            )
+                        except Material.DoesNotExist:
+                            continue
+                
+                messages.success(self.request, f'Receita "{recipe.name}" atualizada com sucesso com {len(ingredients_data)} ingredientes!')
+                return response
+                
+            except json.JSONDecodeError:
+                messages.error(self.request, 'Erro ao processar dados dos ingredientes.')
+        
         messages.success(self.request, f'Receita "{form.instance.name}" atualizada com sucesso!')
         return super().form_valid(form)
 

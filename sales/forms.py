@@ -166,8 +166,16 @@ class SalesOrderForm(forms.ModelForm):
         # Filter customers to only active ones
         self.fields['customer'].queryset = Customer.objects.filter(is_active=True)
         
-        # Make discount_percentage optional
+        # Make discount_percentage optional with default value
         self.fields['discount_percentage'].required = False
+        self.fields['discount_percentage'].initial = 0
+        
+        # Make order_number optional for auto-generation
+        self.fields['order_number'].required = False
+        
+        # Make payment fields optional
+        self.fields['payment_method'].required = False
+        self.fields['payment_terms'].required = False
     
     def clean(self):
         cleaned_data = super().clean()
@@ -436,21 +444,10 @@ class SalesReportForm(forms.Form):
             'class': 'form-select'
         })
     )
-    sales_representative = forms.ModelChoiceField(
-        queryset=None,  # Will be set in __init__
-        required=False,
-        widget=forms.Select(attrs={
-            'class': 'form-select'
-        })
-    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from accounts.models import Employee
-        self.fields['sales_representative'].queryset = Employee.objects.filter(
-            is_active=True, department='sales'
-        )
-
+        
     def clean(self):
         cleaned_data = super().clean()
         start_date = cleaned_data.get('start_date')

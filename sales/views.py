@@ -96,8 +96,8 @@ class SalesOrderListView(LoginRequiredMixin, ListView):
     
     def get_queryset(self):
         queryset = SalesOrder.objects.select_related(
-            'customer', 'sales_representative'
-        ).prefetch_related('items', 'items__product').all()
+            'customer'
+        ).prefetch_related('order_items', 'order_items__product').all()
         
         # Search filter
         search = self.request.GET.get('search')
@@ -118,11 +118,6 @@ class SalesOrderListView(LoginRequiredMixin, ListView):
         customer = self.request.GET.get('customer')
         if customer:
             queryset = queryset.filter(customer_id=customer)
-        
-        # Sales representative filter
-        representative = self.request.GET.get('representative')
-        if representative:
-            queryset = queryset.filter(sales_representative_id=representative)
         
         # Date range filter
         start_date = self.request.GET.get('start_date')

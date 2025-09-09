@@ -7,17 +7,43 @@
 <style>
     .category-card {
         transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        border: 1px solid rgba(139, 69, 19, 0.2);
+        display: flex;
+        flex-direction: column;
+        height: fit-content;
+        min-height: 300px;
     }
     .category-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 20px 40px -8px rgba(139, 69, 19, 0.3);
+        border-color: rgba(139, 69, 19, 0.4);
     }
-    .category-icon {
-        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+    .category-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+    }
+    .category-content {
+        flex-grow: 1;
+        margin-bottom: 0.75rem;
+    }
+    .category-actions {
+        margin-top: auto;
+    }
+    .category-avatar {
         transition: transform 0.3s ease;
     }
-    .category-card:hover .category-icon {
-        transform: scale(1.1) rotate(5deg);
+    .category-card:hover .category-avatar {
+        transform: scale(1.1);
+    }
+    .status-badge {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
     }
     .filter-chip.active {
         background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%) !important;
@@ -112,6 +138,7 @@
                     class="p-2 rounded-md text-gray-400 hover:text-coffee-600 hover:bg-white dark:hover:bg-gray-600 transition-all duration-200">
                 <i class="fas fa-list"></i>
             </button>
+            </div>
         </div>
     </div>
 </div>
@@ -162,123 +189,108 @@
 <!-- Categories Grid -->
 <div id="categoriesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     {% for category in categories %}
-    <div class="category-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700 category-item hover:shadow-xl transition-all duration-300" 
+    <div class="category-card bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700 overflow-hidden category-item" 
          data-name="{{ category.name|lower }}" 
          data-type="{{ category.type|lower }}">
-        <div class="flex items-start justify-between mb-4">
-            <div class="category-icon w-12 h-12 rounded-lg flex items-center justify-center text-white">
-                {% if category.type == 'material' %}
-                    <i class="fas fa-cogs text-xl"></i>
-                {% else %}
-                    <i class="fas fa-box text-xl"></i>
-                {% endif %}
-            </div>
-            <div class="flex items-center space-x-2">
-                <!-- Status Badge -->
+        <!-- Category Header -->
+        <div class="bg-gradient-to-r from-coffee-500 to-coffee-600 p-4">
+            <div class="flex items-center space-x-3">
+                <div class="category-avatar flex-shrink-0 w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                    {% if category.type == 'material' %}
+                        <i class="fas fa-cogs text-coffee-600 text-lg"></i>
+                    {% else %}
+                        <i class="fas fa-box text-coffee-600 text-lg"></i>
+                    {% endif %}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-white truncate">{{ category.name }}</h3>
+                    <p class="text-coffee-100 text-sm truncate">
+                        {% if category.type == 'material' %}Material{% else %}Produto{% endif %}
+                    </p>
+                </div>
                 {% if category.is_active %}
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
-                        Ativa
-                    </span>
+                    <span class="status-badge inline-flex items-center justify-center w-3 h-3 bg-green-400 rounded-full"></span>
                 {% else %}
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">
-                        Inativa
-                    </span>
+                    <span class="inline-flex items-center justify-center w-3 h-3 bg-red-400 rounded-full"></span>
                 {% endif %}
             </div>
         </div>
-
-        <div class="mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                {{ category.name }}
-            </h3>
-            {% if category.description %}
-                <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                    {{ category.description }}
-                </p>
-            {% else %}
-                <p class="text-sm text-gray-500 dark:text-gray-500 italic">
-                    Sem descrição
-                </p>
-            {% endif %}
-        </div>
-
-        <!-- Category Stats -->
-        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4">
-            <div class="flex items-center justify-between text-sm">
-                <span class="text-gray-600 dark:text-gray-400">
-                    {% if category.type == 'material' %}
-                        Materiais:
-                    {% else %}
-                        Produtos:
+        
+        <!-- Category Details -->
+        <div class="category-details">
+            <div class="category-content">
+                <div class="space-y-3">
+                    {% if category.description %}
+                    <div class="flex items-start text-sm">
+                        <i class="fas fa-align-left text-coffee-500 w-5 mt-0.5"></i>
+                        <span class="text-gray-600 dark:text-gray-400 ml-2 line-clamp-2">{{ category.description }}</span>
+                    </div>
                     {% endif %}
-                </span>
-                <span class="font-medium text-gray-900 dark:text-white">
-                    {% if category.type == 'material' %}
-                        {{ category.materials.count|default:0 }}
-                    {% else %}
-                        {{ category.products.count|default:0 }}
-                    {% endif %}
-                </span>
-            </div>
-        </div>
-
-        <!-- Type Badge -->
-        <div class="flex items-center justify-between">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium 
-                   {% if category.type == 'material' %}
-                       bg-coffee-100 text-coffee-800 dark:bg-coffee-800 dark:text-coffee-100
-                   {% else %}
-                       bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
-                   {% endif %}">
-                {% if category.type == 'material' %}
-                    Material
-                {% else %}
-                    Produto
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-layer-group text-coffee-500 w-5"></i>
+                        <span class="text-gray-600 dark:text-gray-400 ml-2">
+                            {% if category.type == 'material' %}
+                                {{ category.materials.count|default:0 }} materiais
+                            {% else %}
+                                {{ category.products.count|default:0 }} produtos
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-calendar-alt text-coffee-500 w-5"></i>
+                        <span class="text-gray-600 dark:text-gray-400 ml-2">{{ category.created_at|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-info-circle text-coffee-500 w-5"></i>
+                        <span class="text-gray-600 dark:text-gray-400 ml-2">
+                            {% if category.is_active %}Categoria ativa{% else %}Categoria inativa{% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Activity Indicator -->
+                {% if not category.is_active %}
+                <div class="mt-3 p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-700">
+                    <div class="flex items-center text-xs text-yellow-700 dark:text-yellow-300">
+                        <i class="fas fa-pause-circle mr-2"></i>
+                        Categoria inativa
+                    </div>
+                </div>
                 {% endif %}
-            </span>
-
+            </div>
+            
             <!-- Action Buttons -->
-            <div class="flex items-center space-x-1">
-                <a href="{% url 'inventory:category_detail' category.pk %}" 
-                   class="bg-coffee-600 hover:bg-coffee-700 text-white p-2 rounded-lg text-sm transition-all duration-200 hover:scale-105">
-                    <i class="fas fa-eye"></i>
-                </a>
-                <a href="{% url 'inventory:category_update' category.pk %}" 
-                   class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg text-sm transition-all duration-200 hover:scale-105">
-                    <i class="fas fa-edit"></i>
-                </a>
-                <button onclick="confirmDelete('{{ category.name|escapejs }}', '{% url 'inventory:category_delete' category.pk %}')" 
-                        class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg text-sm transition-all duration-200 hover:scale-105">
-                    <i class="fas fa-trash"></i>
-                </button>
+            <div class="category-actions">
+                <div class="flex space-x-2">
+                    <a href="{% url 'inventory:category_detail' category.pk %}" 
+                       class="flex-1 bg-coffee-100 hover:bg-coffee-200 dark:bg-coffee-800 dark:hover:bg-coffee-700 text-coffee-700 dark:text-coffee-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 text-center">
+                        <i class="fas fa-eye mr-1"></i>
+                        Ver
+                    </a>
+                    <a href="{% url 'inventory:category_update' category.pk %}" 
+                       class="flex-1 bg-coffee-600 hover:bg-coffee-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 text-center">
+                        <i class="fas fa-edit mr-1"></i>
+                        Editar
+                    </a>
+                </div>
             </div>
-        </div>
-
-        <!-- Created Date -->
-        <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
-            <p class="text-xs text-gray-500 dark:text-gray-500 flex items-center">
-                <i class="fas fa-calendar-alt mr-1"></i>
-                Criada em {{ category.created_at|date:"d/m/Y" }}
-            </p>
         </div>
     </div>
     {% empty %}
     <!-- Empty State -->
-    <div class="col-span-full text-center py-12">
-        <div class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-            <i class="fas fa-tags text-gray-400 text-3xl"></i>
+    <div class="col-span-full">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-coffee-200 dark:border-coffee-700 p-12 text-center">
+            <div class="w-24 h-24 bg-coffee-100 dark:bg-coffee-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-tags text-coffee-600 dark:text-coffee-400 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Nenhuma categoria encontrada</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">Comece criando categorias para organizar seus materiais e produtos.</p>
+            <a href="{% url 'inventory:category_create' %}" 
+               class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-200 inline-flex items-center space-x-2">
+                <i class="fas fa-plus"></i>
+                <span>Criar Primeira Categoria</span>
+            </a>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Nenhuma categoria encontrada
-        </h3>
-        <p class="text-gray-600 dark:text-gray-400 mb-6">
-            Crie sua primeira categoria para organizar materiais e produtos.
-        </p>
-        <a href="{% url 'inventory:category_create' %}" 
-           class="action-button bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-lg text-sm font-medium inline-flex items-center space-x-2">
-            <i class="fas fa-plus"></i>
-            <span>Criar Categoria</span>
-        </a>
     </div>
     {% endfor %}
 </div>

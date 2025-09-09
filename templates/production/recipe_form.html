@@ -57,8 +57,11 @@
 
 <!-- Form Container -->
 <div x-data="recipeForm()" class="max-w-6xl mx-auto">
-    <form method="post" @submit.prevent="submitForm">
+    <form method="post" @submit="prepareSubmit">
         {% csrf_token %}
+        
+        <!-- Hidden field for ingredients data -->
+        <input type="hidden" name="ingredients_data" x-model="ingredientsDataJson">
         
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Main Form -->
@@ -323,38 +326,15 @@
                     </div>
                 </div>
                 
-                <!-- Instructions -->
+                <!-- Step Counter -->
                 <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-coffee-200 dark:border-coffee-700">
-                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                        <i class="fas fa-list-ol text-coffee-600 dark:text-coffee-400 mr-3"></i>
-                        Instruções de Preparo
-                    </h2>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label for="id_instructions" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Modo de Preparo
-                            </label>
-                            {{ form.instructions }}
-                            {% if form.instructions.errors %}
-                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                {{ form.instructions.errors.0 }}
+                    <div class="step-counter p-4 rounded-lg text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-lg font-semibold">Etapas Identificadas</p>
+                                <p class="text-sm opacity-90">Número de passos no preparo</p>
                             </div>
-                            {% endif %}
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                Descreva o passo a passo do preparo. Use uma linha para cada etapa.
-                            </p>
-                        </div>
-                        
-                        <!-- Step Counter -->
-                        <div class="step-counter p-4 rounded-lg text-white">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-lg font-semibold">Etapas Identificadas</p>
-                                    <p class="text-sm opacity-90">Número de passos no preparo</p>
-                                </div>
-                                <div class="text-3xl font-bold" id="step-count">0</div>
-                            </div>
+                            <div class="text-3xl font-bold" id="step-count">0</div>
                         </div>
                     </div>
                 </div>
@@ -463,6 +443,10 @@ function recipeForm() {
             quantities: false
         },
         
+        get ingredientsDataJson() {
+            return JSON.stringify(this.ingredients);
+        },
+        
         init() {
             this.loadExistingIngredients();
             this.setupFormWatchers();
@@ -531,17 +515,22 @@ function recipeForm() {
         
         updateIngredientInfo(index) {
             const ingredient = this.ingredients[index];
-            const materialSelect = document.querySelector(`select[x-model="ingredient.material"]`);
-            const selectedOption = materialSelect.querySelector(`option[value="${ingredient.material}"]`);
             
-            if (selectedOption) {
-                ingredient.name = selectedOption.dataset.name || '';
-                ingredient.unit = selectedOption.dataset.unit || '';
-                ingredient.cost = parseFloat(selectedOption.dataset.cost) || 0;
-                ingredient.stock = parseFloat(selectedOption.dataset.stock) || 0;
+            // Find the specific select element for this ingredient
+            const ingredientElements = document.querySelectorAll('.ingredient-item');
+            if (ingredientElements[index]) {
+                const materialSelect = ingredientElements[index].querySelector('select');
+                const selectedOption = materialSelect.querySelector(`option[value="${ingredient.material}"]`);
                 
-                this.calculateTotalCost();
-                this.validateForm();
+                if (selectedOption) {
+                    ingredient.name = selectedOption.dataset.name || '';
+                    ingredient.unit = selectedOption.dataset.unit || '';
+                    ingredient.cost = parseFloat(selectedOption.dataset.cost) || 0;
+                    ingredient.stock = parseFloat(selectedOption.dataset.stock) || 0;
+                    
+                    this.calculateTotalCost();
+                    this.validateForm();
+                }
             }
         },
         
@@ -579,40 +568,14 @@ function recipeForm() {
             );
         },
         
-        submitForm() {
-            // Prepare ingredients data
-            const formData = new FormData();
+        prepareSubmit(event) {
+            // This function runs before form submission to prepare data
+            this.validateForm();
             
-            // Add form fields
-            const formElements = document.querySelectorAll('input, select, textarea');
-            formElements.forEach(element => {
-                if (element.name && element.value) {
-                    formData.append(element.name, element.value);
-                }
-            });
+            // The ingredients data is automatically handled by the ingredientsDataJson getter
+            // which is bound to the hidden input field
             
-            // Add ingredients data
-            formData.append('ingredients_data', JSON.stringify(this.ingredients));
-            
-            // Add CSRF token
-            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-            
-            // Submit form
-            fetch(window.location.href, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.href = "{% url 'production:recipe_list' %}";
-                } else {
-                    alert('Erro ao salvar receita. Verifique os dados e tente novamente.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Erro de comunicação. Tente novamente.');
-            });
+            return true; // Allow form to submit normally
         }
     }
 }

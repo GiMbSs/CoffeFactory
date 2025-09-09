@@ -20,6 +20,7 @@ urlpatterns = [
     path('recipes/', views.RecipeListView.as_view(), name='recipe_list'),
     path('recipes/new/', views.RecipeCreateView.as_view(), name='recipe_create'),
     path('recipes/<uuid:pk>/', views.RecipeDetailView.as_view(), name='recipe_detail'),
+    path('recipes/<uuid:pk>/edit/', views.RecipeUpdateView.as_view(), name='recipe_update'),
     
     # AJAX endpoints
     path('api/orders/status-update/', views.ProductionOrderStatusUpdateView.as_view(), name='production_order_status_update'),

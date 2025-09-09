@@ -342,9 +342,9 @@
                 </label>
                 <input type="text" name="{{ form.order_number.name }}" id="{{ form.order_number.id_for_label }}" 
                        value="{{ form.order_number.value|default:'' }}"
-                       placeholder="Número do pedido (deixe vazio para gerar automaticamente)"
+                       placeholder="Será gerado automaticamente se vazio"
                        class="form-input {% if form.order_number.errors %}form-error{% endif %}">
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Número único do pedido</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Número único do pedido (opcional - gerado automaticamente)</p>
                 {% if form.order_number.errors %}
                 <div class="mt-1 text-sm text-red-600 dark:text-red-400">
                     {{ form.order_number.errors.0 }}
@@ -728,16 +728,6 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
         e.preventDefault();
         alert('Corrija os seguintes erros:\n\n' + errors.join('\n'));
     }
-});
-
-// Auto-generate order number if creating new order
-document.addEventListener('DOMContentLoaded', function() {
-    {% if not form.instance.pk %}
-    if (!document.getElementById('{{ form.order_number.id_for_label }}').value) {
-        const orderNumber = 'PV' + Date.now().toString().slice(-8);
-        document.getElementById('{{ form.order_number.id_for_label }}').value = orderNumber;
-    }
-    {% endif %}
 });
 </script>
 {% endblock %}

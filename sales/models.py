@@ -4,7 +4,7 @@ Models for customers, sales orders, and sales management.
 """
 
 from django.db import models
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.utils import timezone
 from decimal import Decimal
 from core.models import BaseModel, AuditModel
@@ -172,7 +172,7 @@ class Customer(BaseModel):
         max_digits=5,
         decimal_places=2,
         default=0,
-        validators=[MinValueValidator(Decimal('0')), MinValueValidator(Decimal('100'))],
+        validators=[MinValueValidator(Decimal('0')), MaxValueValidator(Decimal('100'))],
         help_text="Desconto padrão (%)"
     )
     
@@ -262,6 +262,7 @@ class SalesOrder(AuditModel):
     order_number = models.CharField(
         max_length=50,
         unique=True,
+        blank=True,
         help_text="Número único do pedido de venda"
     )
     customer = models.ForeignKey(
@@ -297,15 +298,6 @@ class SalesOrder(AuditModel):
         help_text="Data real de entrega"
     )
     
-    # Sales information
-    sales_representative = models.ForeignKey(
-        'accounts.Employee',
-        on_delete=models.PROTECT,
-        related_name='sales_orders',
-        limit_choices_to={'department': 'sales'},
-        help_text="Representante de vendas"
-    )
-    
     # Financial information
     subtotal = models.DecimalField(
         max_digits=12,
@@ -317,7 +309,7 @@ class SalesOrder(AuditModel):
         max_digits=5,
         decimal_places=2,
         default=0,
-        validators=[MinValueValidator(Decimal('0')), MinValueValidator(Decimal('100'))],
+        validators=[MinValueValidator(Decimal('0')), MaxValueValidator(Decimal('100'))],
         help_text="Desconto (%)"
     )
     discount_amount = models.DecimalField(
@@ -389,6 +381,25 @@ class SalesOrder(AuditModel):
 
     def __str__(self):
         return f"PV {self.order_number} - {self.customer.get_display_name()}"
+    
+    def save(self, *args, **kwargs):
+        """Override save to auto-generate order number if not provided."""
+        if not self.order_number:
+            # Generate order number based on current date and time
+            from django.utils import timezone
+            now = timezone.now()
+            base_number = f"PV{now.strftime('%Y%m%d')}{now.strftime('%H%M%S')}"
+            
+            # Ensure uniqueness
+            counter = 1
+            order_number = base_number
+            while SalesOrder.objects.filter(order_number=order_number).exists():
+                order_number = f"{base_number}_{counter}"
+                counter += 1
+            
+            self.order_number = order_number
+        
+        super().save(*args, **kwargs)
 
     @property
     def pending_amount(self):
@@ -498,7 +509,7 @@ class SalesOrderItem(BaseModel):
         max_digits=5,
         decimal_places=2,
         default=0,
-        validators=[MinValueValidator(Decimal('0')), MinValueValidator(Decimal('100'))],
+        validators=[MinValueValidator(Decimal('0')), MaxValueValidator(Decimal('100'))],
         help_text="Desconto item (%)"
     )
     discount_amount = models.DecimalField(

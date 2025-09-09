@@ -158,7 +158,7 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'name', 'code', 'description', 'category', 'sale_price',
+            'name', 'code', 'description', 'category', 'unit_of_measure', 'sale_price',
             'minimum_stock', 'maximum_stock', 'weight', 'dimensions',
             'status', 'notes', 'is_active'
         ]
@@ -177,6 +177,9 @@ class ProductForm(forms.ModelForm):
                 'placeholder': 'Descrição detalhada'
             }),
             'category': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'unit_of_measure': forms.Select(attrs={
                 'class': 'form-select'
             }),
             'sale_price': forms.NumberInput(attrs={
@@ -221,6 +224,10 @@ class ProductForm(forms.ModelForm):
         # Filter categories to only product categories
         self.fields['category'].queryset = Category.objects.filter(
             category_type='product', is_active=True
+        )
+        # Set queryset for unit_of_measure
+        self.fields['unit_of_measure'].queryset = UnitOfMeasure.objects.filter(
+            is_active=True
         )
     
     def clean(self):
